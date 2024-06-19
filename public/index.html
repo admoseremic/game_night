@@ -1,1 +1,441 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Game Night Stats</title>
+        <!-- Include Bootstrap CSS -->
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Include DataTables CSS -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+        <!-- Include Select2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2/dist/css/select2.min.css" rel="stylesheet">
+        <!-- Your custom styles -->
+        <style media="screen">
+          /* Custom styles */
+          body {
+            font-family: Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #ECEFF1;
+            color: #333;
+          }
+        
+          .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+        
+          h1 {
+            text-align: center;
+            color: #ffa100;
+          }
+        
+          /* Table styles */
+          #stats-table, #games-summary-table, #games-played-table{
+            width: 100%;
+            border-collapse: collapse;
+          }
+        
+          #stats-table th, #stats-table td, #games-summary-table th, #games-summary-table td, #games-played-table th, #games-played-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+          }
+        
+          #stats-table th, #games-summary-table th, #games-played-table th {
+            background-color: #ffa100;
+            color: white;
+          }
+        
+          /* Striping styles for DataTables */
+          table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
+            background-color: #f2f2f2;
+          }
+          table.dataTable.stripe tbody tr.even, table.dataTable.display tbody tr.even {
+            background-color: white;
+          }
+        
+          /* Add space below the date filter */
+          .date-filter {
+            margin-bottom: 20px; /* Adjust the space as you see fit */
+          }
 
+          /* Player entry styles */
+          .player-entry {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+          }
+        
+          .player-dropdown, .rank-input, .score-input {
+            flex-grow: 1;
+            margin-right: 10px;
+            width: 100%;
+            box-sizing: border-box;
+          }
+        
+          /* Override is-invalid class for player dropdowns */
+          .player-dropdown.is-invalid,
+          .rank-input.is-invalid,
+          .score-input.is-invalid {
+            border-color: #dc3545; /* Bootstrap's red border for invalid input */
+            padding-right: calc(1.5em + 0.75rem); /* Adjust padding to prevent width change */
+          }
+        
+          /* Button styles */
+          #add-player-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            margin-top: 0.375rem;
+            border-radius: 0.25rem;
+          }
+        
+          #add-player-button:hover {
+            background-color: #0056b3;
+            color: white;
+          }
+        
+          /* Select2 invalid styling */
+          .select2-invalid .select2-selection {
+            border-color: #dc3545; /* Bootstrap's invalid border color */
+          }
+        
+          /* Remove button styles */
+          .remove-player-entry {
+            flex-grow: 0;
+            margin-left: 5px;
+          }
+        
+          /* Utility class for invalid inputs */
+          .is-invalid {
+            border-color: #dc3545 !important; /* Ensure border color is consistent */
+          }
+
+          .custom-margin {
+              margin-left: 10px; /* You can adjust the value to your preference */
+          }
+
+          #randomPlayerName {
+            font-size: 24px; /* Adjust the font size as needed */
+            text-align: center;
+            width: 100%;
+            display: block;
+            margin-top: 10px; /* Adds a bit of space above the name */
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="text-center">Game Night Stats</h1>
+            <div class="row mb-3">
+                <!-- Add a bottom margin to the row for spacing -->
+                <div class="col">
+                    <div class="input-group">
+                        <select id="dateRange" class="form-control">
+                            <option value="currentMonth">Current Month</option>
+                            <option value="previousMonth">Previous Month</option>
+                            <option value="yearToDate">Year to Date</option>
+                            <!-- Add more options as needed -->
+                        </select>
+                        <div class="input-group-append m1-2">
+                            <button id="startPlayerButton" class="btn btn-primary custom-margin">Pick Starting Player</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section id="player-stats">
+                <table id="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="name">Player</th>
+                            <th class="sortable" data-sort="wins">Wins</th>
+                            <th class="sortable" data-sort="plays">Plays</th>
+                            <th class="sortable" data-sort="winPercentage">Win %</th>
+                            <th class="sortable" data-sort="playersDefeated">People Beat</th>
+                            <th class="sortable" data-sort="weightedWins">Weighted Wins</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="loadingIndicator">
+                            <td colspan="6" class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Data will be populated here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Button to trigger play entry modal -->
+            <div class="container d-flex justify-content-around">
+                <button
+                    type="button"
+                    class="btn btn-primary flex-fill mx-1"
+                    id="addPlayButton"
+                    data-toggle="modal"
+                    data-target="#addPlayModal"
+                >
+                    Add New Play
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary flex-fill mx-1"
+                    id="addPlayerButton"
+                    data-toggle="modal"
+                    data-target="#addPlayerModal"
+                >
+                    Add New Player
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary flex-fill mx-1"
+                    id="addGameButton"
+                    data-toggle="modal"
+                    data-target="#addGameModal"
+                >
+                    Add New Game
+                </button>
+            </div>
+            <!-- Top games played table-->
+            <div class="container">
+                <section id="games-played">
+                    <table id="games-played-table" class="table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="gamePlayedName">Game</th>
+                                <th class="sortable" data-sort="gamePlayedPlays">Plays</th>
+                                <th class="sortable" data-sort="gamePlayedWins">Player Wins</th>
+                                <th class="sortable" data-sort="gamePlayedBestScore">Best Ever</th>
+                            </tr>
+                            <tbody>
+                                <tr id="loadingIndicatorGames">
+                                    <td colspan="5" class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Data will be populated here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+            <!-- List of games played in the time period -->
+            <div class="container">
+                <section id="games-summary">
+                    <table id="games-summary-table" class="table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="gameDate">Date</th>
+                                <th class="sortable" data-sort="gameName">Game Name</th>
+                                <th class="sortable" data-sort="gameWinner">Winner/Loser</th>
+                                <th class="sortable" data-sort="gameWinningScore">Top Score</th>
+                                <th class="sortable" data-sort="gamePlayers">Players</th>
+                            </tr>
+                            <tbody>
+                                <tr id="loadingIndicatorGames">
+                                    <td colspan="5" class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Data will be populated here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+                <!-- The Add New Play Modal -->
+                <div class="modal" id="addPlayModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <!-- Modal Header -->
+                            <div class="modal-header">
+                                <h4 class="modal-title">Add New Play</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <!-- Modal body -->
+                            <div class="modal-body">
+                                <form id="newPlayForm">
+                                    <div class="form-group">
+                                        <label for="playDateTime">Date and Time:</label>
+                                        <input type="datetime-local" id="playDateTime" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="gameSelection">Game:</label>
+                                        <select id="gameSelection" class="form-control"></select>
+                                    </div>
+                                    <label>Players:</label>
+                                    <div id="player-entries-container">
+                                        <!-- Player entry form group -->
+                                        <div class="form-group player-entry d-flex align-items-end">
+                                            <!-- Player dropdown -->
+                                            <select class="form-control player-dropdown mr-2" name="player">
+                                                <option value="" selected>Player...</option>
+                                            </select>
+                                            <!-- Rank input -->
+                                            <input
+                                                type="number"
+                                                class="form-control rank-input mr-2"
+                                                name="rank"
+                                                placeholder="Rank"
+                                                value="1"
+                                                min="0"
+                                            >
+                                            <!-- Score input -->
+                                            <input
+                                                type="number"
+                                                class="form-control score-input mr-2"
+                                                name="score"
+                                                placeholder="Score"
+                                            >
+                                            <!-- Minus button -->
+                                            <button type="button" class="btn btn-danger remove-player-entry">-</button>
+                                        </div>
+                                    </div>
+                                    <!-- Button to add new player entry -->
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-primary" id="add-player-button">+</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-success" id="savePlay">Save Play</button>
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- The Add New Game Modal -->
+                <div class="modal" id="addGameModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <!-- Modal Header -->
+                            <div class="modal-header">
+                                <h4 class="modal-title">Add New Game</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <!-- Modal body -->
+                            <div class="modal-body">
+                                <form id="newGameForm">
+                                    <div class="form-group">
+                                        <label for="gameNameInput">Game Name:</label>
+                                        <input
+                                            type="text"
+                                            id="gameNameInput"
+                                            class="form-control"
+                                            placeholder="Enter game name"
+                                        >
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="gameTierSelect">Tier:</label>
+                                        <select id="gameTierSelect" class="form-control">
+                                            <option value="">Select tier...</option>
+                                            <option value="light">Light</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="heavy">Heavy</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="hiScoreWinsCheck">
+                                        <label class="form-check-label" for="hiScoreWinsCheck">High Score Wins</label>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-success" id="saveGame">Save Game</button>
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Start Player Modal -->
+                <div class="modal fade" id="startPlayerModal" tabindex="-1" role="dialog" aria-labelledby="startPlayerModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="startPlayerModalLabel">Pick Starting Player</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="playerCheckboxes" class="mb-3" style="display: flex; flex-wrap: wrap;">
+                                    <!-- Checkboxes will be dynamically populated here -->
+                                </div>
+                                <p id="randomPlayerName" style="font-size: 24px; text-align: center;"></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="pickAnotherPlayerButton">Pick Player</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Add New Player Modal -->
+                <div class="modal fade" id="addPlayerModal" tabindex="-1" role="dialog" aria-labelledby="addPlayerModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addPlayerModalLabel">Add New Player</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="newPlayerForm">
+                                    <div class="form-group">
+                                        <label for="playerNameInput">Player Name:</label>
+                                        <input type="text" id="playerNameInput" class="form-control" placeholder="Enter player name">
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="regularCheck">
+                                        <label class="form-check-label" for="regularCheck">Regular Attendee</label>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-success" id="savePlayerButton">Save Player</button>
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Include only one version of jQuery -->
+                <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+                <!-- Include DataTables JS -->
+                <script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+                <!-- Include Popper.js for Bootstrap tooltips -->
+                <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>
+                <!-- Include Bootstrap JS -->
+                <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+                <!-- Include SortableJS for drag-and-drop functionality -->
+                <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+                <!-- Firebase JS SDKs and initialization -->
+                <script src="/__/firebase/10.7.1/firebase-app-compat.js"></script>
+                <script src="/__/firebase/10.7.1/firebase-auth-compat.js"></script>
+                <script src="/__/firebase/10.7.1/firebase-database-compat.js"></script>
+                <script src="/__/firebase/10.7.1/firebase-firestore-compat.js"></script>
+                <script src="/__/firebase/10.7.1/firebase-functions-compat.js"></script>
+                <script src="/__/firebase/10.7.1/firebase-messaging-compat.js"></script>
+                <script src="/__/firebase/10.7.1/firebase-storage-compat.js"></script>
+                <script src="/__/firebase/10.7.1/firebase-analytics-compat.js"></script>
+                <script src="/__/firebase/10.7.1/firebase-remote-config-compat.js"></script>
+                <script src="/__/firebase/10.7.1/firebase-performance-compat.js"></script>
+                <script src="/__/firebase/init.js?useEmulator=true"></script>
+                <!-- Include Select2 JS -->
+                <script src="https://cdn.jsdelivr.net/npm/select2/dist/js/select2.min.js"></script>
+                <!-- My custom scripts for the app-->
+                <script src="scripts.js"></script>
+            </body>
+        </html>
