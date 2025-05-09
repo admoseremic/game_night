@@ -2,31 +2,25 @@ name: Firebase Hosting Deploy
 
 on:
   push:
-    branches:
-      - main  # This will trigger deployment when changes are pushed to the 'main' branch
+    branches: [main]          # deploy whenever you push/merge to main
 
 jobs:
   build-and-deploy:
-    name: Build and Deploy to Firebase Hosting
     runs-on: ubuntu-latest
+    permissions:              # lets the action create deployment statuses
+      contents: read
+      deployments: write
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      # 1 – Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4      # latest version  [oai_citation:0‡Julia Programming Language](https://discourse.julialang.org/t/how-do-i-update-github-actions-to-node-js-20/110536?utm_source=chatgpt.com)
 
-      # Step 2: Setup Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+      # 2 – Deploy to Firebase Hosting
+      - name: Deploy to Firebase Hosting (live)
+        uses: FirebaseExtended/action-hosting-deploy@v0   # official action  [oai_citation:2‡GitHub](https://github.com/FirebaseExtended/action-hosting-deploy?utm_source=chatgpt.com)
         with:
-          node-version: '18'  # Use the Node.js version required by your project
-
-      # Step 3: Install Firebase Tools
-      - name: Install Firebase Tools
-        run: npm install -g firebase-tools
-
-      # Step 4: Deploy to Firebase Hosting only
-      - name: Deploy to Firebase Hosting
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: firebase deploy --only hosting
+          repoToken:              ${{ secrets.GITHUB_TOKEN }}          # auto-provided
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId:              live                                # deploys to the live site
+          projectId:              my-firebase-project                 # <-- change this
