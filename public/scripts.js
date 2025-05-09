@@ -60,6 +60,10 @@ async function openAddPlayModal() {
     const playerSelect = document.querySelector(".player-dropdown"); // Ensure this selector matches your initial player dropdown
     if (playerSelect) {
       await populatePlayerDropdown(playerSelect); // Make sure this is awaited before showing the modal
+      if (playerSelect) {
+        playerSelect.addEventListener('change', updateAllPlayerDropdowns);
+        updateAllPlayerDropdowns();        // bring every list in sync right away
+      }
     }
 
     // Show the modal
@@ -402,67 +406,23 @@ async function addPlayerEntry() {
   );
   removeButton.onclick = function () {
     this.parentElement.remove();
+    updateAllPlayerDropdowns();     // refresh after deletion
   };
   newEntryDiv.appendChild(removeButton);
 
   // Append player entry to the main container
   playerEntriesContainer.appendChild(newEntryDiv);
 
-  // Populate the player dropdown
+    // Populate the dropdown
   await populatePlayerDropdown(playerSelect);
 
-  // Set the default value to the next row number
+  // ⬇️ fire the uniqueness logic for the new dropdown
+  playerSelect.addEventListener('change', updateAllPlayerDropdowns);
+  updateAllPlayerDropdowns();           // make sure it’s up-to-date
+
+  // Set defaults
   rankInput.value = numberOfEntries + 1;
-  // Clear the input values for score
   scoreInput.value = "";
-}
-
-// Function to get currently selected player IDs
-function getSelectedPlayerIds() {
-  const selectedIds = new Set();
-  document.querySelectorAll('.player-dropdown').forEach(dropdown => {
-    if (dropdown.value) {
-      selectedIds.add(dropdown.value);
-    }
-  });
-  return selectedIds;
-}
-
-// Function to update all player dropdowns
-async function updateAllPlayerDropdowns() {
-  const selectedIds = getSelectedPlayerIds();
-  const dropdowns = document.querySelectorAll('.player-dropdown');
-  
-  for (const dropdown of dropdowns) {
-    const currentValue = dropdown.value;
-    // Clear the dropdown
-    $(dropdown).empty().append(new Option("Player...", ""));
-    
-    try {
-      const playersSnapshot = await firebase
-        .firestore()
-        .collection("players")
-        .orderBy("name")
-        .get();
-      
-      playersSnapshot.forEach((doc) => {
-        const playerId = doc.id;
-        // Only add the player if they're not selected in another dropdown
-        // or if this is the dropdown where they're currently selected
-        if (!selectedIds.has(playerId) || playerId === currentValue) {
-          const option = new Option(doc.data().name, playerId);
-          $(dropdown).append(option);
-        }
-      });
-      
-      // Restore the current selection if it exists
-      if (currentValue) {
-        dropdown.value = currentValue;
-      }
-    } catch (error) {
-      console.error("Error fetching players: ", error);
-    }
-  }
 }
 
 // Function to populate player dropdown
@@ -497,6 +457,30 @@ async function populatePlayerDropdown(dropdownElement) {
   } catch (error) {
     console.error("Error fetching players: ", error);
   }
+}
+
+// Return a Set of all players already chosen in any dropdown
+function getSelectedPlayerIds() {
+  const ids = new Set();
+  document.querySelectorAll('.player-dropdown').forEach(dd => {
+    if (dd.value) ids.add(dd.value);
+  });
+  return ids;
+}
+
+// Disable (and hide) players that are already selected elsewhere
+function updateAllPlayerDropdowns() {
+  const taken = getSelectedPlayerIds();
+
+  document.querySelectorAll('.player-dropdown').forEach(dd => {
+    const current = dd.value;                           // keep its own choice enabled
+    Array.from(dd.options).forEach(opt => {
+      if (!opt.value) return;                           // skip “Player…”
+      const inUse = taken.has(opt.value) && opt.value !== current;
+      opt.disabled = inUse;
+      opt.hidden   = inUse;                             // keeps the list tidy
+    });
+  });
 }
 
 // Function to add event listeners to all remove buttons
