@@ -417,21 +417,83 @@ async function addPlayerEntry() {
   scoreInput.value = "";
 }
 
+// Function to get currently selected player IDs
+function getSelectedPlayerIds() {
+  const selectedIds = new Set();
+  document.querySelectorAll('.player-dropdown').forEach(dropdown => {
+    if (dropdown.value) {
+      selectedIds.add(dropdown.value);
+    }
+  });
+  return selectedIds;
+}
+
+// Function to update all player dropdowns
+async function updateAllPlayerDropdowns() {
+  const selectedIds = getSelectedPlayerIds();
+  const dropdowns = document.querySelectorAll('.player-dropdown');
+  
+  for (const dropdown of dropdowns) {
+    const currentValue = dropdown.value;
+    // Clear the dropdown
+    $(dropdown).empty().append(new Option("Player...", ""));
+    
+    try {
+      const playersSnapshot = await firebase
+        .firestore()
+        .collection("players")
+        .orderBy("name")
+        .get();
+      
+      playersSnapshot.forEach((doc) => {
+        const playerId = doc.id;
+        // Only add the player if they're not selected in another dropdown
+        // or if this is the dropdown where they're currently selected
+        if (!selectedIds.has(playerId) || playerId === currentValue) {
+          const option = new Option(doc.data().name, playerId);
+          $(dropdown).append(option);
+        }
+      });
+      
+      // Restore the current selection if it exists
+      if (currentValue) {
+        dropdown.value = currentValue;
+      }
+    } catch (error) {
+      console.error("Error fetching players: ", error);
+    }
+  }
+}
+
 // Function to populate player dropdown
 async function populatePlayerDropdown(dropdownElement) {
   // Clear the current options
   $(dropdownElement).empty().append(new Option("Player...", ""));
 
   try {
+    const selectedIds = getSelectedPlayerIds();
+    const currentValue = dropdownElement.value;
+    
     const playersSnapshot = await firebase
       .firestore()
       .collection("players")
       .orderBy("name")
       .get();
+    
     playersSnapshot.forEach((doc) => {
-      const option = new Option(doc.data().name, doc.id);
-      $(dropdownElement).append(option);
+      const playerId = doc.id;
+      // Only add the player if they're not selected in another dropdown
+      // or if this is the dropdown where they're currently selected
+      if (!selectedIds.has(playerId) || playerId === currentValue) {
+        const option = new Option(doc.data().name, playerId);
+        $(dropdownElement).append(option);
+      }
     });
+    
+    // Restore the current selection if it exists
+    if (currentValue) {
+      dropdownElement.value = currentValue;
+    }
   } catch (error) {
     console.error("Error fetching players: ", error);
   }
@@ -651,18 +713,12 @@ document.getElementById("playDateTime").addEventListener("change", function () {
   this.classList.remove(invalidInputClass);
 });
 
-// Listener for player dropdown changes
-document.querySelectorAll(".player-dropdown").forEach((dropdown) => {
-  dropdown.addEventListener("change", function () {
-    this.classList.remove(invalidInputClass);
-  });
-});
-
-// Listener for rank input changes
-document.querySelectorAll(".rank-input").forEach((input) => {
-  input.addEventListener("input", function () {
-    this.classList.remove(invalidInputClass);
-  });
+// Update the event listener for player dropdown changes
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('player-dropdown')) {
+    e.target.classList.remove(invalidInputClass);
+    updateAllPlayerDropdowns();
+  }
 });
 
 // "Save New Game" Modal button listener
