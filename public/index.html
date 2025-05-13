@@ -138,15 +138,24 @@
                 <!-- Add a bottom margin to the row for spacing -->
                 <div class="col">
                     <div class="input-group">
-                        <select id="dateRange" class="form-control">
-                            <option value="currentMonth">Current Month</option>
-                            <option value="previousMonth">Previous Month</option>
-                            <option value="yearToDate">Year to Date</option>
-                            <!-- Add more options as needed -->
-                        </select>
-                        <div class="input-group-append m1-2">
-                            <button id="startPlayerButton" class="btn btn-primary custom-margin">Pick Starting Player</button>
-                        </div>
+                      <select id="dateRange" class="form-control">
+                          <option value="currentMonth">Current Month</option>
+                          <option value="previousMonth">Previous Month</option>
+                          <option value="yearToDate">Year to Date</option>
+                          <option value="custom">Custom Range…</option>
+                      </select>
+                    
+                      <!-- shows only when “Custom Range” is chosen -->
+                      <input id="customDateRange"
+                             type="text"
+                             class="form-control d-none"
+                             placeholder="Select date range" />
+                    
+                      <div class="input-group-append ml-2">
+                          <button id="startPlayerButton" class="btn btn-primary">
+                              Pick Starting Player
+                          </button>
+                      </div>
                     </div>
                 </div>
             </div>
@@ -436,6 +445,11 @@
                 <!-- Include Select2 JS -->
                 <script src="https://cdn.jsdelivr.net/npm/select2/dist/js/select2.min.js"></script>
                 <!-- My custom scripts for the app-->
+                <!-- Date-range-picker -->
+                <link  rel="stylesheet"
+                       href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.css">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"></script>
                 <script src="scripts.js"></script>
             </body>
         </html>
