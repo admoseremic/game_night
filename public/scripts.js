@@ -1,3 +1,21 @@
+// ─── Custom-range globals ──────────────────────────────
+let customStart = moment().startOf('month');  // initial default
+let customEnd   = moment();
+
+$('#customDateRange').daterangepicker(
+  {
+    opens  : 'right',
+    locale : { format: 'YYYY-MM-DD' },
+    startDate: customStart,
+    endDate  : customEnd
+  },
+  (start, end) => {
+    customStart = start.clone();
+    customEnd   = end.clone();
+    calculateStatsAndPopulateTable();   // refresh tables
+  }
+);
+
 // Function to open the modal and populate the dropdowns
 async function openAddPlayModal() {
   const gameSelect = document.getElementById("gameSelection");
@@ -95,7 +113,10 @@ async function calculateStatsAndPopulateTable() {
         startDate = new Date(now.getFullYear(), 0, 1);
         endDate = now;
         break;
-      // Add more cases as needed
+      case "custom":
+        startDate = customStart.toDate();
+        endDate   = customEnd.toDate();
+        break;
     }
 
     // Convert dates to Firestore timestamps
@@ -890,10 +911,15 @@ $(document).ready(function () {
 
   // Add this event listener inside your $(document).ready function for date range changes
   $("#dateRange").on("change", function () {
-    const selectedRange = $(this).val();
-    calculateStatsAndPopulateTable(selectedRange).catch((error) => {
-      console.error("Error updating the table: ", error);
-    });
+    const val = this.value;
+  
+    if (val === 'custom') {
+      $('#customDateRange').removeClass('d-none');
+      $('#customDateRange').trigger('click');   // open picker right away
+    } else {
+      $('#customDateRange').addClass('d-none');
+      calculateStatsAndPopulateTable();         // use preset
+    }
   });
 
   // Calculate stats and populate the table
