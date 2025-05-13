@@ -113,6 +113,11 @@ async function calculateStatsAndPopulateTable() {
         startDate = new Date(now.getFullYear(), 0, 1);
         endDate = now;
         break;
+      case "previousYear":
+        const lastYear = now.getFullYear() - 1;
+        startDate = new Date(lastYear, 0, 1);          // Jan 1 of last year
+        endDate = new Date(lastYear, 11, 31, 23, 59, 59, 999); // Dec 31 23:59:59
+        break;
       case "custom":
         startDate = customStart.toDate();
         endDate   = customEnd.toDate();
