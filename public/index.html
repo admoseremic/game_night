@@ -152,7 +152,7 @@
               font-size: 12px;
             }
             
-            /* Hide less critical columns on mobile */
+            /* Hide less critical columns on tablets */
             .hide-mobile {
               display: none !important;
             }
@@ -183,7 +183,7 @@
           }
 
           @media (max-width: 576px) {
-            /* Even smaller screens - hide players column too */
+            /* Even smaller screens - hide even more columns */
             .hide-small {
               display: none !important;
             }
@@ -204,7 +204,7 @@
             
             /* Make long text shorter on very small screens */
             .table-responsive td {
-              max-width: 80px;
+              max-width: 70px;
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
@@ -212,7 +212,13 @@
             
             /* But allow first column (names) to be a bit wider */
             .table-responsive td:first-child {
-              max-width: 100px;
+              max-width: 90px;
+            }
+            
+            /* Ensure delete column stays narrow */
+            .table-responsive td:last-child {
+              max-width: 40px;
+              text-align: center;
             }
           }
         </style>
@@ -260,13 +266,23 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr id="loadingIndicator">
-                                <td colspan="6" class="text-center">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                </td>
-                            </tr>
+                                                            <tr id="loadingIndicator">
+                                    <td colspan="6" class="text-center d-none d-md-table-cell">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                    <td colspan="4" class="text-center d-md-none d-sm-table-cell">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                    <td colspan="3" class="text-center d-sm-none">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
                             <!-- Data will be populated here by JavaScript -->
                         </tbody>
                     </table>
@@ -315,13 +331,18 @@
                                     <th class="sortable hide-small" data-sort="gamePlayedBestScore">Best Ever</th>
                                 </tr>
                                 <tbody>
-                                    <tr id="loadingIndicatorGames">
-                                        <td colspan="4" class="text-center">
-                                            <div class="spinner-border text-primary" role="status">
-                                                <span class="sr-only">Loading...</span>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                                                    <tr id="loadingIndicatorGames">
+                                    <td colspan="4" class="text-center d-none d-sm-table-cell">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                    <td colspan="2" class="text-center d-sm-none">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
                                     <!-- Data will be populated here by JavaScript -->
                                 </tbody>
                             </table>
@@ -343,13 +364,23 @@
                                     <th>Delete</th>
                                 </tr>
                                 <tbody>
-                                    <tr id="loadingIndicatorGames">
-                                        <td colspan="6" class="text-center">
-                                            <div class="spinner-border text-primary" role="status">
-                                                <span class="sr-only">Loading...</span>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                                                    <tr id="loadingIndicatorGames">
+                                    <td colspan="6" class="text-center d-none d-md-table-cell">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                    <td colspan="4" class="text-center d-md-none d-sm-table-cell">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                    <td colspan="3" class="text-center d-sm-none">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
                                     <!-- Data will be populated here by JavaScript -->
                                 </tbody>
                             </table>
