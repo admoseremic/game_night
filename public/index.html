@@ -129,6 +129,22 @@
             display: block;
             margin-top: 10px; /* Adds a bit of space above the name */
           }
+
+          /* Delete button styling */
+          .delete-play-btn {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+          }
+
+          .delete-play-btn:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+          }
         </style>
     </head>
     <body>
@@ -249,10 +265,11 @@
                                 <th class="sortable" data-sort="gameWinner">Winner/ Loser</th>
                                 <th class="sortable" data-sort="gameWinningScore">Top Score</th>
                                 <th class="sortable" data-sort="gamePlayers">Players</th>
+                                <th>Actions</th>
                             </tr>
                             <tbody>
                                 <tr id="loadingIndicatorGames">
-                                    <td colspan="5" class="text-center">
+                                    <td colspan="6" class="text-center">
                                         <div class="spinner-border text-primary" role="status">
                                             <span class="sr-only">Loading...</span>
                                         </div>

@@ -189,6 +189,8 @@ async function calculateStatsAndPopulateTable() {
       gameInfo["date"] = `${gameMonth} ${gameDay}`;
       gameInfo["name"] = gamesData[playData.game].name;
       gameInfo["players"] = [];
+      gameInfo["playDocId"] = playDoc.id; // Store the document ID for deletion
+      gameInfo["gameId"] = gameId; // Store the game ID for best score recalculation
 
       let maxRank = 0;
       let loserName = "";
@@ -320,6 +322,11 @@ function populateGamesSummaryTable(gamesData) {
       <td>${game.winner}</td>
       <td>${game.winningScore}</td>
       <td>${game.players.join(", ")}</td>
+      <td>
+        <button class="btn btn-danger btn-sm delete-play-btn" data-play-id="${game.playDocId}" data-game-id="${game.gameId}" title="Delete this play">
+          🗑️
+        </button>
+      </td>
     `;
     tableBody.appendChild(row);
   });
@@ -939,5 +946,103 @@ $(document).ready(function () {
 
   // Delegate the event for dynamically added 'add player entry' button
   $(document).on("click", "#add-player-entry", addPlayerEntry);
+});
+
+// Function to delete a play and refresh the data
+async function deletePlay(playDocId, gameId) {
+  // Confirm deletion with user
+  if (!confirm('Are you sure you want to delete this play? This action cannot be undone.')) {
+    return;
+  }
+
+  try {
+    // Get the play document before deleting to check if it had the best score
+    const playDoc = await firebase.firestore().collection("plays").doc(playDocId).get();
+    const playData = playDoc.data();
+    
+    // Delete the play document
+    await firebase.firestore().collection("plays").doc(playDocId).delete();
+    
+    console.log("Play deleted successfully");
+    
+    // Check if we need to recalculate the best score for this game
+    if (playData && gameId) {
+      await recalculateBestScore(gameId);
+    }
+    
+    // Refresh the tables to reflect the changes
+    await calculateStatsAndPopulateTable();
+    
+  } catch (error) {
+    console.error("Error deleting play: ", error);
+    alert("Failed to delete play. Please try again.");
+  }
+}
+
+// Function to recalculate the best score for a game after a play is deleted
+async function recalculateBestScore(gameId) {
+  try {
+    // Get the game document
+    const gameDoc = await firebase.firestore().collection("games").doc(gameId).get();
+    const gameData = gameDoc.data();
+    
+    if (!gameData) {
+      console.error("Game not found for ID:", gameId);
+      return;
+    }
+    
+    const hiScoreWins = gameData.hi_score_wins;
+    
+    // Get all remaining plays for this game
+    const playsSnapshot = await firebase.firestore()
+      .collection("plays")
+      .where("game", "==", gameId)
+      .get();
+    
+    let bestScore = null;
+    let bestScoreString = '';
+    
+    // Get player names for the best score string
+    const playerNames = {};
+    const playersSnapshot = await firebase.firestore().collection("players").get();
+    playersSnapshot.forEach((doc) => {
+      playerNames[doc.id] = doc.data().name;
+    });
+    
+    // Find the new best score
+    playsSnapshot.forEach((playDoc) => {
+      const playData = playDoc.data();
+      playData.players.forEach((player) => {
+        if (player.score !== null) {
+          if (
+            (hiScoreWins && (bestScore === null || player.score > bestScore)) ||
+            (!hiScoreWins && (bestScore === null || player.score < bestScore))
+          ) {
+            bestScore = player.score;
+            bestScoreString = `${playerNames[player.player]}:${player.score}`;
+          }
+        }
+      });
+    });
+    
+    // Update the game document with the new best score
+    await firebase.firestore().collection("games").doc(gameId).update({
+      best_score: bestScoreString || "N/A",
+    });
+    
+    console.log("Best score recalculated for game:", gameId);
+    
+  } catch (error) {
+    console.error("Error recalculating best score: ", error);
+  }
+}
+
+// Event listener for delete buttons
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('delete-play-btn')) {
+    const playId = e.target.getAttribute('data-play-id');
+    const gameId = e.target.getAttribute('data-game-id');
+    deletePlay(playId, gameId);
+  }
 });
 
