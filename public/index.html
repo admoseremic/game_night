@@ -149,76 +149,108 @@
           /* Mobile responsiveness for tables */
           @media (max-width: 768px) {
             .table-responsive {
-              font-size: 12px;
+              font-size: 10px;
             }
             
-            /* Hide less critical columns on tablets */
-            .hide-mobile {
-              display: none !important;
-            }
-            
-            /* Make delete buttons smaller on mobile */
-            .delete-play-btn {
-              font-size: 12px;
-              padding: 2px 6px;
-            }
-            
-            /* Reduce padding in table cells on mobile */
-            .table-responsive td, .table-responsive th {
-              padding: 4px 2px;
-              font-size: 12px;
-            }
-            
-            /* Make winner/loser column more compact */
-            .winner-info {
-              font-size: 11px;
-              line-height: 1.2;
-            }
-            
-            /* Ensure containers don't add extra margin on mobile */
-            .container {
-              padding-left: 10px;
-              padding-right: 10px;
-            }
-          }
-
-          @media (max-width: 576px) {
-            /* Even smaller screens - hide even more columns */
-            .hide-small {
-              display: none !important;
-            }
-            
-            .table-responsive {
-              font-size: 11px;
-            }
-            
+            /* Make delete buttons smaller on tablet */
             .delete-play-btn {
               font-size: 10px;
               padding: 1px 4px;
             }
             
+            /* Significantly reduce padding in table cells */
             .table-responsive td, .table-responsive th {
-              padding: 3px 1px;
-              font-size: 11px;
+              padding: 2px 1px;
+              font-size: 10px;
+              line-height: 1.1;
             }
             
-            /* Make long text shorter on very small screens */
+            /* Make winner/loser column more compact */
+            .winner-info {
+              font-size: 9px;
+              line-height: 1.1;
+            }
+            
+            /* Ensure containers don't add extra margin */
+            .container {
+              padding-left: 8px;
+              padding-right: 8px;
+            }
+            
+            /* Compact text in all cells */
             .table-responsive td {
-              max-width: 70px;
+              max-width: 50px;
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
             }
             
-            /* But allow first column (names) to be a bit wider */
+            /* Player names can be a bit wider */
             .table-responsive td:first-child {
-              max-width: 90px;
+              max-width: 70px;
             }
             
-            /* Ensure delete column stays narrow */
+            /* Delete column narrow but accessible */
             .table-responsive td:last-child {
-              max-width: 40px;
+              max-width: 35px;
               text-align: center;
+            }
+          }
+
+          @media (max-width: 576px) {
+            /* Very small screens - ultra compact */
+            .table-responsive {
+              font-size: 8px;
+            }
+            
+            .delete-play-btn {
+              font-size: 8px;
+              padding: 1px 2px;
+            }
+            
+            .table-responsive td, .table-responsive th {
+              padding: 1px;
+              font-size: 8px;
+              line-height: 1.0;
+            }
+            
+            /* Ultra compact text */
+            .table-responsive td {
+              max-width: 40px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+            
+            /* Player names still readable */
+            .table-responsive td:first-child {
+              max-width: 60px;
+            }
+            
+            /* Delete column very narrow */
+            .table-responsive td:last-child {
+              max-width: 25px;
+              text-align: center;
+            }
+            
+            /* Make headers ultra compact too */
+            .table-responsive th {
+              font-size: 7px;
+              line-height: 1.0;
+              padding: 1px;
+            }
+            
+            /* Compact winner/loser display on mobile */
+            .winner-info {
+              font-size: 7px;
+              line-height: 1.0;
+            }
+            
+            /* Make button more compact on very small screens */
+            .delete-play-btn {
+              width: 22px;
+              height: 18px;
+              font-size: 10px;
             }
           }
         </style>
@@ -261,23 +293,13 @@
                                 <th class="sortable" data-sort="wins">Wins</th>
                                 <th class="sortable" data-sort="plays">Plays</th>
                                 <th class="sortable" data-sort="winPercentage">Win %</th>
-                                <th class="sortable hide-mobile" data-sort="playersDefeated">People Beat</th>
-                                <th class="sortable hide-mobile" data-sort="weightedWins">Weighted Wins</th>
+                                <th class="sortable" data-sort="playersDefeated">Beat</th>
+                                <th class="sortable" data-sort="weightedWins">W.Wins</th>
                             </tr>
                         </thead>
                         <tbody>
                                                             <tr id="loadingIndicator">
-                                    <td colspan="6" class="text-center d-none d-md-table-cell">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="sr-only">Loading...</span>
-                                        </div>
-                                    </td>
-                                    <td colspan="4" class="text-center d-md-none d-sm-table-cell">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="sr-only">Loading...</span>
-                                        </div>
-                                    </td>
-                                    <td colspan="3" class="text-center d-sm-none">
+                                    <td colspan="6" class="text-center">
                                         <div class="spinner-border text-primary" role="status">
                                             <span class="sr-only">Loading...</span>
                                         </div>
@@ -327,17 +349,12 @@
                                 <tr>
                                     <th class="sortable" data-sort="gamePlayedName">Game</th>
                                     <th class="sortable" data-sort="gamePlayedPlays">Plays</th>
-                                    <th class="sortable hide-small" data-sort="gamePlayedWins">Player Wins</th>
-                                    <th class="sortable hide-small" data-sort="gamePlayedBestScore">Best Ever</th>
+                                    <th class="sortable" data-sort="gamePlayedWins">Wins</th>
+                                    <th class="sortable" data-sort="gamePlayedBestScore">Best</th>
                                 </tr>
                                 <tbody>
                                                                     <tr id="loadingIndicatorGames">
-                                    <td colspan="4" class="text-center d-none d-sm-table-cell">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="sr-only">Loading...</span>
-                                        </div>
-                                    </td>
-                                    <td colspan="2" class="text-center d-sm-none">
+                                    <td colspan="4" class="text-center">
                                         <div class="spinner-border text-primary" role="status">
                                             <span class="sr-only">Loading...</span>
                                         </div>
@@ -359,23 +376,13 @@
                                     <th class="sortable" data-sort="gameDate">Date</th>
                                     <th class="sortable" data-sort="gameName">Game</th>
                                     <th class="sortable" data-sort="gameWinner">Winner/<br>Loser</th>
-                                    <th class="sortable hide-mobile" data-sort="gameWinningScore">Score</th>
-                                    <th class="sortable hide-small" data-sort="gamePlayers">Players</th>
-                                    <th>Delete</th>
+                                    <th class="sortable" data-sort="gameWinningScore">Score</th>
+                                    <th class="sortable" data-sort="gamePlayers">Players</th>
+                                    <th>Del</th>
                                 </tr>
                                 <tbody>
                                                                     <tr id="loadingIndicatorGames">
-                                    <td colspan="6" class="text-center d-none d-md-table-cell">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="sr-only">Loading...</span>
-                                        </div>
-                                    </td>
-                                    <td colspan="4" class="text-center d-md-none d-sm-table-cell">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="sr-only">Loading...</span>
-                                        </div>
-                                    </td>
-                                    <td colspan="3" class="text-center d-sm-none">
+                                    <td colspan="6" class="text-center">
                                         <div class="spinner-border text-primary" role="status">
                                             <span class="sr-only">Loading...</span>
                                         </div>
