@@ -149,26 +149,26 @@
           /* Mobile responsiveness for tables */
           @media (max-width: 768px) {
             .table-responsive {
-              font-size: 10px;
+              font-size: 12px;
             }
             
             /* Make delete buttons smaller on tablet */
             .delete-play-btn {
-              font-size: 10px;
-              padding: 1px 4px;
+              font-size: 11px;
+              padding: 2px 6px;
             }
             
-            /* Significantly reduce padding in table cells */
+            /* Reduce padding in table cells but keep readable */
             .table-responsive td, .table-responsive th {
-              padding: 2px 1px;
-              font-size: 10px;
-              line-height: 1.1;
+              padding: 3px 2px;
+              font-size: 12px;
+              line-height: 1.2;
             }
             
             /* Make winner/loser column more compact */
             .winner-info {
-              font-size: 9px;
-              line-height: 1.1;
+              font-size: 11px;
+              line-height: 1.2;
             }
             
             /* Ensure containers don't add extra margin */
@@ -176,81 +176,44 @@
               padding-left: 8px;
               padding-right: 8px;
             }
-            
-            /* Compact text in all cells */
-            .table-responsive td {
-              max-width: 50px;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-            
-            /* Player names can be a bit wider */
-            .table-responsive td:first-child {
-              max-width: 70px;
-            }
-            
-            /* Delete column narrow but accessible */
-            .table-responsive td:last-child {
-              max-width: 35px;
-              text-align: center;
-            }
           }
 
           @media (max-width: 576px) {
-            /* Very small screens - ultra compact */
+            /* Small screens - compact but readable */
             .table-responsive {
-              font-size: 8px;
+              font-size: 10px;
             }
             
             .delete-play-btn {
-              font-size: 8px;
-              padding: 1px 2px;
+              font-size: 9px;
+              padding: 1px 3px;
             }
             
             .table-responsive td, .table-responsive th {
-              padding: 1px;
-              font-size: 8px;
-              line-height: 1.0;
+              padding: 2px 1px;
+              font-size: 10px;
+              line-height: 1.1;
+              word-wrap: break-word;
+              white-space: normal;
             }
             
-            /* Ultra compact text */
-            .table-responsive td {
-              max-width: 40px;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-            
-            /* Player names still readable */
-            .table-responsive td:first-child {
-              max-width: 60px;
-            }
-            
-            /* Delete column very narrow */
-            .table-responsive td:last-child {
-              max-width: 25px;
-              text-align: center;
-            }
-            
-            /* Make headers ultra compact too */
+            /* Make headers readable */
             .table-responsive th {
-              font-size: 7px;
-              line-height: 1.0;
-              padding: 1px;
+              font-size: 9px;
+              line-height: 1.1;
+              padding: 2px 1px;
             }
             
             /* Compact winner/loser display on mobile */
             .winner-info {
-              font-size: 7px;
-              line-height: 1.0;
+              font-size: 9px;
+              line-height: 1.1;
             }
             
-            /* Make button more compact on very small screens */
-            .delete-play-btn {
-              width: 22px;
-              height: 18px;
-              font-size: 10px;
+            /* Keep delete column narrow but accessible */
+            .table-responsive td:last-child {
+              text-align: center;
+              width: 30px;
             }
           }
         </style>

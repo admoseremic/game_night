@@ -277,14 +277,9 @@ function populateTable(playerStats) {
 
   // Populate the table body with new data
   Object.values(playerStats).forEach((player) => {
-    // Make player names more compact on mobile
-    const playerName = window.innerWidth <= 576 
-      ? truncateForMobile(player.name, 8) 
-      : player.name;
-    
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${playerName}</td>
+      <td>${player.name}</td>
       <td>${player.wins}</td>
       <td>${player.plays}</td>
       <td>${player.winPercentage}%</td>
@@ -320,23 +315,13 @@ function populateGamesSummaryTable(gamesData) {
   tableBody.innerHTML = "";
 
   gamesData.forEach((game) => {
-    // Make player list more compact on mobile
-    const playerList = window.innerWidth <= 576 
-      ? game.players.map(p => truncateForMobile(p, 6)).join(",") 
-      : game.players.join(", ");
-    
-    // Make game names more compact on mobile  
-    const gameName = window.innerWidth <= 576 
-      ? truncateForMobile(game.name, 8) 
-      : game.name;
-    
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${game.date}</td>  
-      <td>${gameName}</td>
+      <td>${game.name}</td>
       <td class="winner-info">${game.winner}</td>
       <td>${game.winningScore}</td>
-      <td>${playerList}</td>
+      <td>${formatPlayerList(game.players)}</td>
       <td>
         <button class="btn btn-danger btn-sm delete-play-btn" data-play-id="${game.playDocId}" data-game-id="${game.gameId}" title="Delete this play">
           🗑️
@@ -372,22 +357,12 @@ function populateGameStatsTable(gameStats, playerNames) {
         }
         return winsB - winsA;
       })
-      .map(([playerId, wins]) => {
-        const playerName = window.innerWidth <= 576 
-          ? truncateForMobile(playerNames[playerId], 5) 
-          : playerNames[playerId];
-        return `${playerName}:${wins}`;
-      })
-      .join(window.innerWidth <= 576 ? "," : ", ");
-
-    // Make game names more compact on mobile
-    const gameName = window.innerWidth <= 576 
-      ? truncateForMobile(game.name, 8) 
-      : game.name;
+      .map(([playerId, wins]) => `${playerNames[playerId]}: ${wins}`)
+      .join(", ");
 
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${gameName}</td>
+      <td>${game.name}</td>
       <td>${game.plays}</td>
       <td>${sortedPlayerWins}</td>
       <td>${game.bestScore}</td>
@@ -1071,20 +1046,12 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// Helper function to truncate long names on mobile
-function truncateForMobile(text, maxLength = 8) {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength - 1) + '…';
-}
-
-// Helper function to make winner/loser more compact on mobile
-function formatWinnerLoser(winner, loser) {
-  // Check if we're on mobile by window width
+// Helper function to format player lists more compactly on mobile
+function formatPlayerList(players) {
+  // On mobile, use slightly more compact formatting but don't truncate
   if (window.innerWidth <= 576) {
-    const winnerShort = truncateForMobile(winner, 6);
-    const loserShort = truncateForMobile(loser, 6);
-    return `${winnerShort}/${loserShort}`;
+    return players.join(", ");
   }
-  return `${winner}/${loser}`;
+  return players.join(", ");
 }
 
