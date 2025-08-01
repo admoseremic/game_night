@@ -283,8 +283,8 @@ function populateTable(playerStats) {
       <td>${player.wins}</td>
       <td>${player.plays}</td>
       <td>${player.winPercentage}%</td>
-      <td>${player.playersDefeated}</td>
-      <td>${player.weightedWins || 0}</td>
+      <td class="hide-mobile">${player.playersDefeated}</td>
+      <td class="hide-mobile">${player.weightedWins || 0}</td>
     `;
     playerStatsTableBody.appendChild(row);
   });
@@ -319,9 +319,9 @@ function populateGamesSummaryTable(gamesData) {
     row.innerHTML = `
       <td>${game.date}</td>  
       <td>${game.name}</td>
-      <td>${game.winner}</td>
-      <td>${game.winningScore}</td>
-      <td>${game.players.join(", ")}</td>
+      <td class="winner-info">${game.winner}</td>
+      <td class="hide-mobile">${game.winningScore}</td>
+      <td class="hide-small">${game.players.join(", ")}</td>
       <td>
         <button class="btn btn-danger btn-sm delete-play-btn" data-play-id="${game.playDocId}" data-game-id="${game.gameId}" title="Delete this play">
           🗑️
@@ -364,8 +364,8 @@ function populateGameStatsTable(gameStats, playerNames) {
     row.innerHTML = `
       <td>${game.name}</td>
       <td>${game.plays}</td>
-      <td>${sortedPlayerWins}</td>
-      <td>${game.bestScore}</td>
+      <td class="hide-small">${sortedPlayerWins}</td>
+      <td class="hide-small">${game.bestScore}</td>
     `;
     tableBody.appendChild(row);
   });
