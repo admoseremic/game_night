@@ -13,21 +13,28 @@
         <!-- Your custom styles -->
         <style media="screen">
           /* Custom styles */
+          * {
+            box-sizing: border-box; /* Ensure padding and borders are included in width */
+          }
+          
           body {
             font-family: Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
             background: #ECEFF1;
             color: #333;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
           }
         
-          .container {
-            max-width: 600px;
+          .container, .container-fluid {
+            width: 100%;
+            max-width: none;
             margin: 20px auto;
             padding: 20px;
             background: white;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-sizing: border-box; /* Include padding in width calculation */
           }
         
           h1 {
@@ -39,6 +46,14 @@
           #stats-table, #games-summary-table, #games-played-table{
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed; /* Helps prevent table overflow */
+          }
+
+          /* Ensure table containers don't overflow */
+          .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+            max-width: 100%;
           }
         
           #stats-table th, #stats-table td, #games-summary-table th, #games-summary-table td, #games-played-table th, #games-played-table td {
@@ -171,8 +186,8 @@
               line-height: 1.2;
             }
             
-            /* Ensure containers don't add extra margin */
-            .container {
+            /* Ensure containers don't add extra margin and use full width */
+            .container, .container-fluid {
               padding-left: 8px;
               padding-right: 8px;
             }
@@ -219,7 +234,7 @@
         </style>
     </head>
     <body>
-        <div class="container">
+        <div class="container-fluid">
             <h1 class="text-center">Game Night Stats</h1>
             <div class="row mb-3">
                 <!-- Add a bottom margin to the row for spacing -->
@@ -274,7 +289,7 @@
                 </div>
             </div>
             <!-- Button to trigger play entry modal -->
-            <div class="container d-flex justify-content-around">
+            <div class="container-fluid d-flex justify-content-around">
                 <button
                     type="button"
                     class="btn btn-primary flex-fill mx-1"
@@ -304,7 +319,7 @@
                 </button>
             </div>
             <!-- Top games played table-->
-            <div class="container">
+            <div class="container-fluid">
                 <section id="games-played">
                     <div class="table-responsive">
                         <table id="games-played-table" class="table table-striped table-sm">
@@ -330,7 +345,7 @@
                     </section>
                 </div>
             <!-- List of games played in the time period -->
-            <div class="container">
+            <div class="container-fluid">
                 <section id="games-summary">
                     <div class="table-responsive">
                         <table id="games-summary-table" class="table table-striped table-sm">
