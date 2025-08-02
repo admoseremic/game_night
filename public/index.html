@@ -71,7 +71,17 @@
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
-            font-size: 15px; /* Slightly larger default font size */
+          }
+
+          /* Larger font for main player stats table only */
+          #stats-table th, #stats-table td {
+            font-size: 15px;
+          }
+
+          /* Keep Games Summary and Play History tables more compact */
+          #games-summary-table th, #games-summary-table td,
+          #games-played-table th, #games-played-table td {
+            font-size: 13px;
           }
         
           #stats-table th, #games-summary-table th, #games-played-table th {
@@ -185,7 +195,12 @@
           /* Mobile responsiveness for tables */
           @media (max-width: 768px) {
             .table-responsive {
-              font-size: 13px; /* Increased from 12px */
+              font-size: 12px; /* Back to 12px for compact tables */
+            }
+
+            /* Keep main stats table larger */
+            #stats-table.table-responsive {
+              font-size: 13px;
             }
             
             /* Make delete buttons smaller on tablet */
@@ -197,8 +212,13 @@
             /* Reduce padding in table cells but keep readable */
             .table-responsive td, .table-responsive th {
               padding: 3px 2px;
-              font-size: 13px; /* Increased from 12px */
+              font-size: 12px; /* Back to 12px for compact tables */
               line-height: 1.2;
+            }
+
+            /* Keep main stats table larger on tablet */
+            #stats-table.table-responsive td, #stats-table.table-responsive th {
+              font-size: 13px;
             }
             
             /* Make winner/loser column more compact */
@@ -217,7 +237,12 @@
           @media (max-width: 576px) {
             /* Small screens - compact but readable */
             .table-responsive {
-              font-size: 11px; /* Increased from 10px */
+              font-size: 10px; /* Back to 10px for compact tables */
+            }
+
+            /* Keep main stats table larger */
+            #stats-table.table-responsive {
+              font-size: 11px;
             }
             
             .delete-play-btn {
@@ -227,7 +252,7 @@
             
             .table-responsive td, .table-responsive th {
               padding: 2px 1px;
-              font-size: 11px; /* Increased from 10px */
+              font-size: 10px; /* Back to 10px for compact tables */
               line-height: 1.1;
               word-wrap: break-word;
               white-space: normal;
@@ -235,9 +260,14 @@
             
             /* Make headers readable */
             .table-responsive th {
-              font-size: 10px; /* Increased from 9px */
+              font-size: 9px; /* Back to 9px for compact tables */
               line-height: 1.1;
               padding: 2px 1px;
+            }
+
+            /* Keep main stats table larger on mobile */
+            #stats-table.table-responsive td, #stats-table.table-responsive th {
+              font-size: 11px;
             }
             
             /* Compact winner/loser display on mobile */
