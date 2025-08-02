@@ -161,6 +161,15 @@
             border-color: #bd2130;
           }
 
+          /* Make delete column compact */
+          #games-summary-table th:last-child,
+          #games-summary-table td:last-child {
+            width: 50px;
+            max-width: 50px;
+            text-align: center;
+            padding: 4px 2px;
+          }
+
           /* Mobile responsiveness for tables */
           @media (max-width: 768px) {
             .table-responsive {
@@ -226,9 +235,12 @@
             }
             
             /* Keep delete column narrow but accessible */
-            .table-responsive td:last-child {
+            #games-summary-table th:last-child,
+            #games-summary-table td:last-child {
+              width: 35px;
+              max-width: 35px;
               text-align: center;
-              width: 30px;
+              padding: 2px 1px;
             }
           }
         </style>
