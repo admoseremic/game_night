@@ -10,6 +10,8 @@
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
         <!-- Include Select2 CSS -->
         <link href="https://cdn.jsdelivr.net/npm/select2/dist/css/select2.min.css" rel="stylesheet">
+        <!-- Include Font Awesome for icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <!-- Your custom styles -->
         <style media="screen">
           /* Custom styles */
@@ -169,27 +171,42 @@
 
           /* Delete button styling */
           .delete-play-btn {
-            background-color: #dc3545;
-            border-color: #dc3545;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
             color: white;
-            font-size: 14px;
-            padding: 4px 8px;
-            border-radius: 3px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
           }
 
           .delete-play-btn:hover {
-            background-color: #c82333;
-            border-color: #bd2130;
+            background: linear-gradient(135deg, #c82333, #bd2130);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+          }
+
+          .delete-play-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+          }
+
+          .delete-play-btn i {
+            font-size: 14px;
           }
 
           /* Make delete column compact */
           #games-summary-table th:last-child,
           #games-summary-table td:last-child {
-            width: 50px;
-            max-width: 50px;
+            width: 60px;
+            max-width: 60px;
             text-align: center;
-            padding: 4px 2px;
+            padding: 8px 4px;
           }
 
           /* Mobile responsiveness for tables */
@@ -205,8 +222,12 @@
             
             /* Make delete buttons smaller on tablet */
             .delete-play-btn {
-              font-size: 11px;
-              padding: 2px 6px;
+              width: 28px;
+              height: 28px;
+            }
+
+            .delete-play-btn i {
+              font-size: 12px;
             }
             
             /* Reduce padding in table cells but keep readable */
@@ -246,8 +267,12 @@
             }
             
             .delete-play-btn {
-              font-size: 9px;
-              padding: 1px 3px;
+              width: 24px;
+              height: 24px;
+            }
+
+            .delete-play-btn i {
+              font-size: 10px;
             }
             
             .table-responsive td, .table-responsive th {
@@ -279,10 +304,10 @@
             /* Keep delete column narrow but accessible */
             #games-summary-table th:last-child,
             #games-summary-table td:last-child {
-              width: 35px;
-              max-width: 35px;
+              width: 40px;
+              max-width: 40px;
               text-align: center;
-              padding: 2px 1px;
+              padding: 4px 2px;
             }
           }
         </style>

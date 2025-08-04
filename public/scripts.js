@@ -323,8 +323,8 @@ function populateGamesSummaryTable(gamesData) {
       <td>${game.winningScore}</td>
       <td>${formatPlayerList(game.players)}</td>
       <td>
-        <button class="btn btn-danger btn-sm delete-play-btn" data-play-id="${game.playDocId}" data-game-id="${game.gameId}" title="Delete this play">
-          🗑️
+        <button class="delete-play-btn" data-play-id="${game.playDocId}" data-game-id="${game.gameId}" title="Delete this play">
+          <i class="fas fa-trash-alt"></i>
         </button>
       </td>
     `;
