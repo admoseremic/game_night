@@ -4,6 +4,14 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Game Night Stats</title>
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="/manifest.json">
+        <!-- PWA Theme and Icons -->
+        <meta name="theme-color" content="#ffa100">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="Game Night">
+        <link rel="apple-touch-icon" href="/icon-192.png">
         <!-- Include Bootstrap CSS -->
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
         <!-- Include DataTables CSS -->
@@ -642,5 +650,18 @@
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"></script>
                 <script src="scripts.js"></script>
+                <!-- PWA Service Worker Registration -->
+                <script>
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', function() {
+                        navigator.serviceWorker.register('/sw.js')
+                            .then(function(registration) {
+                                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                            }, function(err) {
+                                console.log('ServiceWorker registration failed: ', err);
+                            });
+                    });
+                }
+                </script>
             </body>
         </html>
