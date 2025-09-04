@@ -68,10 +68,13 @@ async function openAddPlayModal() {
 
     // Set current date and time for the datetime input
     const now = new Date();
-    const timezoneOffset = now.getTimezoneOffset() * 60000;
-    const localDateTime = new Date(now - timezoneOffset)
-      .toISOString()
-      .slice(0, 16);
+    // Format datetime for the input without timezone manipulation
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
     document.getElementById("playDateTime").value = localDateTime;
 
     // Fetch and populate players dropdown
@@ -102,20 +105,21 @@ async function calculateStatsAndPopulateTable() {
     const now = new Date();
     switch (dateRange) {
       case "currentMonth":
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        // Create dates at start and end of month in local timezone
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
         break;
       case "previousMonth":
-        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
         break;
       case "yearToDate":
-        startDate = new Date(now.getFullYear(), 0, 1);
-        endDate = now;
+        startDate = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
         break;
       case "previousYear":
         const lastYear = now.getFullYear() - 1;
-        startDate = new Date(lastYear, 0, 1);          // Jan 1 of last year
+        startDate = new Date(lastYear, 0, 1, 0, 0, 0, 0);          // Jan 1 of last year
         endDate = new Date(lastYear, 11, 31, 23, 59, 59, 999); // Dec 31 23:59:59
         break;
       case "custom":
