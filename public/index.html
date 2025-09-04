@@ -25,6 +25,7 @@
           /* Custom styles */
           * {
             box-sizing: border-box; /* Ensure padding and borders are included in width */
+            max-width: 100%; /* Ensure all elements respect viewport */
           }
           
           body {
@@ -34,17 +35,25 @@
             background: #ECEFF1;
             color: #333;
             overflow-x: hidden; /* Prevent horizontal scrolling */
+            width: 100%;
+            max-width: 100vw;
           }
         
-          .container, .container-fluid {
+          .main-container {
             width: 100%;
-            max-width: none;
+            max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 15px;
             background: white;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            box-sizing: border-box; /* Include padding in width calculation */
+            box-sizing: border-box;
+          }
+          
+          .section-container {
+            width: 100%;
+            margin-bottom: 30px;
+            box-sizing: border-box;
           }
         
           h1 {
@@ -75,6 +84,48 @@
             overflow-x: auto;
             width: 100%;
             max-width: 100%;
+            margin-bottom: 1rem;
+          }
+          
+          /* Prevent tables from creating horizontal scroll */
+          .table-responsive table {
+            min-width: 100%;
+          }
+          
+          
+          /* Fix Bootstrap row overflow */
+          .row {
+            margin-left: 0;
+            margin-right: 0;
+            max-width: 100%;
+          }
+          
+          .col {
+            padding-left: 0;
+            padding-right: 0;
+          }
+          
+          /* Prevent button overflow */
+          .btn.flex-fill {
+            min-width: 0;
+            flex-basis: 0;
+          }
+          
+          /* Mobile-first responsive design */
+          @media (max-width: 576px) {
+            .main-container {
+              margin: 5px;
+              padding: 10px;
+            }
+            
+            .section-container {
+              padding: 0;
+            }
+            
+            /* Stack buttons vertically on very small screens if needed */
+            .d-flex.justify-content-around .btn.flex-fill {
+              margin-bottom: 5px;
+            }
           }
         
           #stats-table th, #stats-table td, #games-summary-table th, #games-summary-table td, #games-played-table th, #games-played-table td {
@@ -257,9 +308,17 @@
             }
             
             /* Ensure containers don't add extra margin and use full width */
-            .container, .container-fluid {
-              padding-left: 8px;
-              padding-right: 8px;
+            .main-container {
+              margin: 10px;
+              padding: 10px;
+            }
+            
+            /* Full width on mobile */
+            @media (max-width: 768px) {
+              .main-container {
+                margin: 5px;
+                padding: 8px;
+              }
             }
           }
 
@@ -321,7 +380,7 @@
         </style>
     </head>
     <body>
-        <div class="container-fluid">
+        <div class="main-container">
             <h1 class="text-center">Game Night Stats</h1>
             <div class="row mb-3">
                 <!-- Add a bottom margin to the row for spacing -->
@@ -374,9 +433,9 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            
             <!-- Button to trigger play entry modal -->
-            <div class="container-fluid d-flex justify-content-around">
+            <div class="section-container d-flex justify-content-around">
                 <button
                     type="button"
                     class="btn btn-primary flex-fill mx-1"
@@ -404,9 +463,9 @@
                 >
                     Add New Game
                 </button>
-            </div>
+            
             <!-- Top games played table-->
-            <div class="container-fluid">
+            <div class="section-container">
                 <h2 class="section-heading">Games Summary</h2>
                 <section id="games-played">
                     <div class="table-responsive">
@@ -431,9 +490,10 @@
                             </table>
                         </div>
                     </section>
-                </div>
+            </div>
+            
             <!-- List of games played in the time period -->
-            <div class="container-fluid">
+            <div class="section-container">
                 <h2 class="section-heading">Play History</h2>
                 <section id="games-summary">
                     <div class="table-responsive">
@@ -460,8 +520,10 @@
                             </table>
                         </div>
                     </section>
-                </div>
-                <!-- The Add New Play Modal -->
+            </div>
+        </div>
+        
+        <!-- The Add New Play Modal -->
                 <div class="modal" id="addPlayModal">
                     <div class="modal-dialog">
                         <div class="modal-content">
