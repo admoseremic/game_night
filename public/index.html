@@ -61,6 +61,21 @@
               -webkit-transform: translateZ(0);
             }
           }
+          
+          /* PWA standalone mode specific styles */
+          @media (display-mode: standalone) {
+            body {
+              overscroll-behavior: none; /* Prevent all overscroll in PWA mode */
+              -webkit-overflow-scrolling: touch;
+              user-select: text; /* Allow text selection in PWA */
+            }
+            
+            /* Add top padding for status bar on mobile PWA */
+            .main-container {
+              padding-top: max(15px, env(safe-area-inset-top));
+              padding-bottom: max(15px, env(safe-area-inset-bottom));
+            }
+          }
         
           .main-container {
             width: 100%;
