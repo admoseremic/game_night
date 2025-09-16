@@ -122,6 +122,11 @@ async function calculateStatsAndPopulateTable() {
         startDate = new Date(lastYear, 0, 1, 0, 0, 0, 0);          // Jan 1 of last year
         endDate = new Date(lastYear, 11, 31, 23, 59, 59, 999); // Dec 31 23:59:59
         break;
+      case "allTime":
+        // Set start date to earliest possible date (beginning of 2022 when historical data starts)
+        startDate = new Date(2022, 0, 1, 0, 0, 0, 0);             // Jan 1, 2022
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999); // Today
+        break;
       case "custom":
         startDate = customStart.toDate();
         endDate   = customEnd.toDate();
