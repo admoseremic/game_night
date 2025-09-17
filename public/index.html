@@ -257,6 +257,10 @@
           /* Fix Select2 dropdown visibility in modal */
           .select2-container--open .select2-dropdown {
             z-index: 9999 !important;
+            left: auto !important;
+            width: auto !important;
+            min-width: 300px !important;
+            max-width: 500px !important;
           }
           
           .select2-results__options {
@@ -267,11 +271,6 @@
           /* Keep Select2 container within modal bounds */
           #addPlayModal .select2-container {
             width: 100% !important;
-          }
-          
-          /* Remove the dropdown width override that was causing full screen width */
-          #addPlayModal .select2-dropdown {
-            width: 100% !important;  /* Match parent width, not auto */
           }
 
           .custom-margin {

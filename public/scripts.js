@@ -102,17 +102,14 @@ async function openAddPlayModal() {
       $(gameSelect).select2('destroy');
     }
     
-    // Wait a moment for DOM to settle
+    // Initialize Select2 with simple settings
     setTimeout(() => {
-      // Re-initialize Select2 after populating options
       if ($.fn.select2 && gameSelect) {
         $(gameSelect).select2({
           placeholder: "Select a game...",
           allowClear: true,
-          width: '100%',
-          dropdownParent: $('#addPlayModal'),  // Ensure dropdown is within modal
-          minimumResultsForSearch: 0,  // Always show search box
-          minimumInputLength: 0  // Show results immediately
+          width: 'resolve',  // Use the select element's width
+          dropdownParent: $('#addPlayModal')  // Keep dropdown in modal
         });
       }
     }, 100); // Small delay to ensure DOM is ready
