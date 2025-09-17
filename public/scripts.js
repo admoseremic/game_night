@@ -65,44 +65,122 @@ async function openAddPlayModal() {
     } else {
       console.log(`Found ${gamesSnapshot.size} games`);
       
-      let gamesArray = gamesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        name: doc.data().name,
-      }));
+      // Check for problematic games
+      const problematicGames = [];
+      let gamesArray = gamesSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        const game = {
+          id: doc.id,
+          name: data.name,
+          originalData: data
+        };
+        
+        // Check for problematic names
+        if (!data.name || data.name === undefined || data.name === null) {
+          problematicGames.push({id: doc.id, issue: 'Missing name', data: data});
+          game.name = `[Unnamed Game - ${doc.id}]`; // Provide fallback name
+        } else if (typeof data.name !== 'string') {
+          problematicGames.push({id: doc.id, issue: 'Name is not a string', name: data.name, type: typeof data.name});
+          game.name = String(data.name); // Convert to string
+        } else if (data.name.trim() === '') {
+          problematicGames.push({id: doc.id, issue: 'Empty name', data: data});
+          game.name = `[Empty Name - ${doc.id}]`; // Provide fallback name
+        }
+        
+        return game;
+      });
+      
+      // Log problematic games if any
+      if (problematicGames.length > 0) {
+        console.error("Found problematic games:", problematicGames);
+        alert(`Warning: Found ${problematicGames.length} games with invalid names. Check console for details.`);
+      }
 
-      // Sort games by name
-      gamesArray.sort((a, b) => a.name.localeCompare(b.name));
+      // Sort games by name (with fallbacks for undefined)
+      gamesArray.sort((a, b) => {
+        const nameA = (a.name || '').toString().toLowerCase();
+        const nameB = (b.name || '').toString().toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
 
       // Clear and repopulate
       gameSelect.innerHTML = '<option value="">Select a game...</option>';
       
       // Append sorted games to the select element
-      gamesArray.forEach((game) => {
-        let option = document.createElement("option");
-        option.value = game.id;
-        option.textContent = game.name;
-        gameSelect.appendChild(option);
+      gamesArray.forEach((game, index) => {
+        try {
+          let option = document.createElement("option");
+          option.value = game.id;
+          // Sanitize the name for HTML
+          option.textContent = (game.name || `Game ${index}`).toString();
+          gameSelect.appendChild(option);
+        } catch (error) {
+          console.error(`Error adding game option for game ${game.id}:`, error, game);
+        }
       });
+      
+      // Log the actual HTML to verify options are there
+      console.log("Game select HTML after populating:", gameSelect.innerHTML);
+      console.log("Number of options in select element:", gameSelect.options.length);
     }
 
     // Initialize Select2 for game selection
     // Make sure to destroy any existing instance first
     if ($(gameSelect).data('select2')) {
+      console.log("Destroying existing Select2 instance");
       $(gameSelect).select2('destroy');
     }
     
-    // Re-initialize Select2 after populating options
-    if ($.fn.select2 && gameSelect) {
-      console.log("Initializing Select2 with", gameSelect.options.length - 1, "games");
-      $(gameSelect).select2({
-        placeholder: "Select a game...",
-        allowClear: true,
-        width: '100%',
-        dropdownParent: $('#addPlayModal')  // Ensure dropdown is within modal
-      });
-      
-      // Force a refresh of Select2
-      $(gameSelect).trigger('change.select2');
+    // ADD DEBUGGING: Check if Select2 is even loaded
+    console.log("Is Select2 available?", typeof $.fn.select2);
+    
+    // Try without Select2 first to see if the raw select works
+    const useSelect2 = true; // Set to false to test without Select2
+    
+    if (useSelect2) {
+      // Wait a moment for DOM to settle
+      setTimeout(() => {
+        // Re-initialize Select2 after populating options
+        if ($.fn.select2 && gameSelect) {
+          console.log("About to initialize Select2 with", gameSelect.options.length - 1, "games");
+          
+          // Log the first few game options to verify they exist
+          for (let i = 0; i < Math.min(5, gameSelect.options.length); i++) {
+            console.log(`Option ${i}: value="${gameSelect.options[i].value}", text="${gameSelect.options[i].text}"`);
+          }
+          
+          try {
+            $(gameSelect).select2({
+              placeholder: "Select a game...",
+              allowClear: true,
+              width: '100%',
+              dropdownParent: $('#addPlayModal'),  // Ensure dropdown is within modal
+              minimumResultsForSearch: 0,  // Always show search box
+              debug: true  // Enable debug mode
+            });
+            
+            // Force a refresh of Select2
+            $(gameSelect).trigger('change.select2');
+            
+            // Check if Select2 initialized properly
+            console.log("Select2 initialized:", $(gameSelect).data('select2') !== undefined);
+            console.log("Select2 data:", $(gameSelect).select2('data'));
+            
+            // Check the Select2 container
+            const select2Container = $(gameSelect).next('.select2-container');
+            console.log("Select2 container found:", select2Container.length > 0);
+            console.log("Select2 container visibility:", select2Container.is(':visible'));
+            
+          } catch (error) {
+            console.error("Error initializing Select2:", error);
+            // Fall back to regular select
+            gameSelect.style.width = '100%';
+          }
+        }
+      }, 100); // Small delay to ensure DOM is ready
+    } else {
+      console.log("Testing WITHOUT Select2 - using native select");
+      gameSelect.style.width = '100%';
     }
 
     // Set current date and time for the datetime input
