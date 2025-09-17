@@ -1,0 +1,33 @@
+# Firebase credentials - NEVER commit these!
+service-account-key.json
+firebase-service-account.json
+serviceAccountKey.json
+*service-account*.json
+*firebase*.json
+
+# Python virtual environment
+firebase_env/
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated data files (optional - you may want to commit these)
+game_plays.jsonl
+game_plays_firebase.jsonl
+game_plays.csv
+
+# BGStats export
+BGStatsExport-*.json
+
+# Node modules if any
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo

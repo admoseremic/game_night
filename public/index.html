@@ -253,6 +253,25 @@
           .is-invalid {
             border-color: #dc3545 !important; /* Ensure border color is consistent */
           }
+          
+          /* Fix Select2 dropdown visibility in modal */
+          .select2-container--open .select2-dropdown {
+            z-index: 9999 !important;
+          }
+          
+          .select2-results__options {
+            max-height: 300px !important;
+            overflow-y: auto !important;
+          }
+          
+          #addPlayModal .select2-container {
+            width: 100% !important;
+          }
+          
+          #addPlayModal .select2-dropdown {
+            width: auto !important;
+            min-width: 100% !important;
+          }
 
           .custom-margin {
               margin-left: 10px; /* You can adjust the value to your preference */

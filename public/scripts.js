@@ -156,6 +156,8 @@ async function openAddPlayModal() {
               width: '100%',
               dropdownParent: $('#addPlayModal'),  // Ensure dropdown is within modal
               minimumResultsForSearch: 0,  // Always show search box
+              dropdownAutoWidth: true,  // Auto-adjust dropdown width
+              minimumInputLength: 0,  // Show results immediately
               debug: true  // Enable debug mode
             });
             
