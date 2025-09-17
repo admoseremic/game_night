@@ -264,13 +264,14 @@
             overflow-y: auto !important;
           }
           
+          /* Keep Select2 container within modal bounds */
           #addPlayModal .select2-container {
             width: 100% !important;
           }
           
+          /* Remove the dropdown width override that was causing full screen width */
           #addPlayModal .select2-dropdown {
-            width: auto !important;
-            min-width: 100% !important;
+            width: 100% !important;  /* Match parent width, not auto */
           }
 
           .custom-margin {
