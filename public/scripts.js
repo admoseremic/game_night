@@ -21,8 +21,15 @@ async function openAddPlayModal() {
   const gameSelect = document.getElementById("gameSelection");
 
   try {
+    // Check if Firebase is initialized
+    if (!firebase || !firebase.firestore) {
+      console.error("Firebase is not initialized!");
+      alert("Firebase is not initialized. Please refresh the page.");
+      return;
+    }
+    
     // Clear previous game selection and reset validation
-    gameSelect.innerHTML = '<option value="">Select a game...</option>';
+    gameSelect.innerHTML = '<option value="">Loading games...</option>';
     
     // Destroy existing Select2 instance if it exists
     if ($(gameSelect).data('select2')) {
@@ -48,6 +55,8 @@ async function openAddPlayModal() {
 
     // Fetch games and populate the dropdown
     console.log("Fetching games from Firestore...");
+    console.log("Firebase firestore instance:", firebase.firestore());
+    
     const gamesSnapshot = await firebase.firestore().collection("games").get();
     
     if (gamesSnapshot.empty) {
@@ -77,12 +86,23 @@ async function openAddPlayModal() {
     }
 
     // Initialize Select2 for game selection
+    // Make sure to destroy any existing instance first
+    if ($(gameSelect).data('select2')) {
+      $(gameSelect).select2('destroy');
+    }
+    
+    // Re-initialize Select2 after populating options
     if ($.fn.select2 && gameSelect) {
+      console.log("Initializing Select2 with", gameSelect.options.length - 1, "games");
       $(gameSelect).select2({
         placeholder: "Select a game...",
         allowClear: true,
-        width: '100%'
+        width: '100%',
+        dropdownParent: $('#addPlayModal')  // Ensure dropdown is within modal
       });
+      
+      // Force a refresh of Select2
+      $(gameSelect).trigger('change.select2');
     }
 
     // Set current date and time for the datetime input
@@ -414,13 +434,15 @@ function populateGameStatsTable(gameStats, playerNames) {
 }
 
 // Define a function to initialize Select2
-function initializeSelect2() {
+// NOTE: This function is no longer used - Select2 is initialized in openAddPlayModal
+// Keeping for reference but commented out to avoid confusion
+/* function initializeSelect2() {
   $("#gameSelection").select2({
     width: "100%", // This makes the dropdown match the width of its container
     placeholder: "Select a game...",
     allowClear: true,
   });
-}
+} */
 
 // Function to add new player entry form
 async function addPlayerEntry() {
@@ -954,8 +976,8 @@ $(document).ready(function () {
     addPlayButton.addEventListener("click", () => {
       openAddPlayModal()
         .then(() => {
-          // Initialize Select2 after opening the modal
-          initializeSelect2();
+          // DON'T re-initialize Select2 here - it's already done in openAddPlayModal
+          // initializeSelect2();  // REMOVED - this was wiping out the games!
         })
         .catch((error) => {
           console.error("Error opening modal: ", error);
