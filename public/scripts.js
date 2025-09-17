@@ -23,6 +23,12 @@ async function openAddPlayModal() {
   try {
     // Clear previous game selection and reset validation
     gameSelect.innerHTML = '<option value="">Select a game...</option>';
+    
+    // Destroy existing Select2 instance if it exists
+    if ($(gameSelect).data('select2')) {
+      $(gameSelect).select2('destroy');
+    }
+    
     $(gameSelect).next(".select2-container").removeClass("select2-invalid");
 
     function resetValidationStates() {
@@ -41,28 +47,41 @@ async function openAddPlayModal() {
     resetValidationStates();
 
     // Fetch games and populate the dropdown
+    console.log("Fetching games from Firestore...");
     const gamesSnapshot = await firebase.firestore().collection("games").get();
-    let gamesArray = gamesSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      name: doc.data().name,
-    }));
+    
+    if (gamesSnapshot.empty) {
+      console.warn("No games found in Firestore. Adding default option.");
+      gameSelect.innerHTML = '<option value="">No games available - Add a game first</option>';
+    } else {
+      console.log(`Found ${gamesSnapshot.size} games`);
+      
+      let gamesArray = gamesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name,
+      }));
 
-    // Sort games by name
-    gamesArray.sort((a, b) => a.name.localeCompare(b.name));
+      // Sort games by name
+      gamesArray.sort((a, b) => a.name.localeCompare(b.name));
 
-    // Append sorted games to the select element
-    gamesArray.forEach((game) => {
-      let option = document.createElement("option");
-      option.value = game.id;
-      option.textContent = game.name;
-      gameSelect.appendChild(option);
-    });
+      // Clear and repopulate
+      gameSelect.innerHTML = '<option value="">Select a game...</option>';
+      
+      // Append sorted games to the select element
+      gamesArray.forEach((game) => {
+        let option = document.createElement("option");
+        option.value = game.id;
+        option.textContent = game.name;
+        gameSelect.appendChild(option);
+      });
+    }
 
     // Initialize Select2 for game selection
     if ($.fn.select2 && gameSelect) {
       $(gameSelect).select2({
         placeholder: "Select a game...",
         allowClear: true,
+        width: '100%'
       });
     }
 
@@ -87,10 +106,24 @@ async function openAddPlayModal() {
       }
     }
 
-    // Show the modal
-    new bootstrap.Modal(document.getElementById("addPlayModal")).show();
+    // Show the modal (Bootstrap 4 way)
+    $('#addPlayModal').modal('show');
   } catch (error) {
     console.error("Error opening modal: ", error);
+    // Try to show the modal anyway with an error message
+    gameSelect.innerHTML = '<option value="">Error loading games - Please refresh</option>';
+    
+    // Still try to initialize Select2
+    if ($.fn.select2 && gameSelect) {
+      $(gameSelect).select2({
+        placeholder: "Error loading games",
+        allowClear: false,
+        width: '100%'
+      });
+    }
+    
+    // Show alert to user
+    alert("Error loading games. Please check your connection and try again. Error: " + error.message);
   }
 }
 
