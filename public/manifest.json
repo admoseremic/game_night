@@ -2,6 +2,7 @@
   "name": "Game Night Stats",
   "short_name": "GameNight",
   "description": "Track your board game statistics and play history",
+  "version": "3.0.1",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ECEFF1",
