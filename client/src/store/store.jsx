@@ -35,12 +35,12 @@ export function StoreProvider({ children }) {
     const prev = data;
     setData(d => mutate(d));
     try { await call(); await refetch(); }
-    catch (e) { console.error(e); setData(prev); }
+    catch (e) { console.error(e); setData(prev); refetch(); }
   }, [data, refetch]);
 
   const actions = {
     addPlay: (play) => optimistic(
-      d => ({ ...d, plays: [...d.plays, { ...play, id: 'tmp-' + Math.round(now.getTime()) }] }),
+      d => ({ ...d, plays: [...d.plays, { ...play, id: 'tmp-' + crypto.randomUUID() }] }),
       () => api.createPlay(play)),
     editPlay: (id, play) => optimistic(
       d => ({ ...d, plays: d.plays.map(p => p.id === id ? { ...p, ...play } : p) }),
@@ -49,9 +49,9 @@ export function StoreProvider({ children }) {
       d => ({ ...d, plays: d.plays.filter(p => p.id !== id) }),
       () => api.deletePlay(id)),
     addPlayer: (name, regular) => { const [c1, c2] = nextColor(data.players.length);
-      return optimistic(d => ({ ...d, players: [...d.players, { id: 'tmp', name, regular, c1, c2 }] }),
+      return optimistic(d => ({ ...d, players: [...d.players, { id: 'tmp-' + crypto.randomUUID(), name, regular, c1, c2 }] }),
         () => api.createPlayer({ name, regular, c1, c2 })); },
-    addGame: (g) => optimistic(d => ({ ...d, games: [...d.games, { ...g, id: 'tmp' }] }), () => api.createGame(g)),
+    addGame: (g) => optimistic(d => ({ ...d, games: [...d.games, { ...g, id: 'tmp-' + crypto.randomUUID() }] }), () => api.createGame(g)),
   };
 
   return <Ctx.Provider value={{ data, ui, setUi, now, refetch, actions }}>{children}</Ctx.Provider>;
