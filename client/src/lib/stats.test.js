@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { weight, leaderboard, recordFor, currentStreak, computePick, inPeriod } from './stats.js';
+import { it, expect } from 'vitest';
+import { weight, leaderboard, recordFor, currentStreak, computePick, inPeriod, periodPlays } from './stats.js';
 
 const data = {
   players: [
@@ -52,4 +52,43 @@ it('inPeriod month filter', () => {
   expect(inPeriod({ d: '2026-06-10T20:00' }, 'month', now)).toBe(true);
   expect(inPeriod({ d: '2026-05-10T20:00' }, 'month', now)).toBe(false);
   expect(inPeriod({ d: '2026-05-10T20:00' }, 'all', now)).toBe(true);
+});
+
+it('recordFor ignores null scores (excluded from records)', () => {
+  const d = {
+    players: [{ id: 'p1', name: 'Ann', c1: '#1', c2: '#2', regular: true }, { id: 'p2', name: 'Bob', c1: '#3', c2: '#4', regular: true }],
+    games: [{ id: 'g1', name: 'G', tier: 'Light', dir: 'high', icon: '🔷' }],
+    plays: [{ id: 'x1', g: 'g1', d: '2026-06-10T20:00', parts: [['p1', 1, null], ['p2', 2, 25]] }],
+  };
+  // p1 won but logged no score (null) — must be ignored; record is p2's 25
+  expect(recordFor(d, 'g1')).toMatchObject({ pid: 'p2', score: 25 });
+});
+
+it('leaderboard sorts by beat with wwins tiebreak', () => {
+  // p1 beat=2 wwins=0.5, p2 beat=2 wwins=1.5, p3 beat=0 — tie on beat broken by wwins desc
+  const lb = leaderboard(data, data.plays, 'beat', 'wwins');
+  expect(lb.map(e => e.pid)).toEqual(['p2', 'p1', 'p3']);
+});
+
+it('inPeriod prevMonth / ytd / lastYear / custom branches', () => {
+  const now = new Date('2026-06-24T20:00:00');
+  expect(inPeriod({ d: '2026-05-10T20:00' }, 'prevMonth', now)).toBe(true);
+  expect(inPeriod({ d: '2026-06-10T20:00' }, 'prevMonth', now)).toBe(false);
+  expect(inPeriod({ d: '2026-01-05T20:00' }, 'ytd', now)).toBe(true);
+  expect(inPeriod({ d: '2025-12-31T20:00' }, 'ytd', now)).toBe(false);
+  expect(inPeriod({ d: '2025-06-10T20:00' }, 'lastYear', now)).toBe(true);
+  expect(inPeriod({ d: '2026-03-15T20:00' }, 'custom', now, { start: '2026-03-01', end: '2026-03-31' })).toBe(true);
+  expect(inPeriod({ d: '2026-04-01T20:00' }, 'custom', now, { start: '2026-03-01', end: '2026-03-31' })).toBe(false);
+});
+
+it('inPeriod prevMonth handles January year-rollover', () => {
+  const now = new Date('2026-01-15T20:00:00');
+  expect(inPeriod({ d: '2025-12-20T20:00' }, 'prevMonth', now)).toBe(true);
+  expect(inPeriod({ d: '2026-01-10T20:00' }, 'prevMonth', now)).toBe(false);
+});
+
+it('periodPlays filters plays by period', () => {
+  const now = new Date('2026-06-24T20:00:00');
+  expect(periodPlays(data.plays, 'month', now).length).toBe(2);
+  expect(periodPlays(data.plays, 'lastYear', now).length).toBe(0);
 });
