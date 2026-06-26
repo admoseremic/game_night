@@ -18,8 +18,9 @@ export async function gameRoutes(app) {
     return { id: req.params.id, ...g };
   });
   app.delete('/api/games/:id', async (req) => {
-    app.db.prepare('DELETE FROM games WHERE id=?').run(req.params.id);
-    app.hub.broadcast('changed');
+    // Only broadcast if a row was actually deleted (avoid spurious no-op broadcasts)
+    const info = app.db.prepare('DELETE FROM games WHERE id=?').run(req.params.id);
+    if (info.changes > 0) app.hub.broadcast('changed');
     return { ok: true };
   });
 }

@@ -3,6 +3,7 @@ function validateParts(parts) {
   const ids = new Set();
   for (const p of parts) {
     if (!Array.isArray(p) || p.length !== 3) return 'each part is [playerId,rank,score]';
+    if (typeof p[1] !== 'number') return 'rank must be a number';
     if (ids.has(p[0])) return 'duplicate player in play';
     ids.add(p[0]);
   }
@@ -34,8 +35,9 @@ export async function playRoutes(app) {
     return { id: req.params.id, g, d, parts };
   });
   app.delete('/api/plays/:id', async (req) => {
-    app.db.prepare('DELETE FROM plays WHERE id=?').run(req.params.id);
-    app.hub.broadcast('changed');
+    // Only broadcast if a row was actually deleted (avoid spurious no-op broadcasts)
+    const info = app.db.prepare('DELETE FROM plays WHERE id=?').run(req.params.id);
+    if (info.changes > 0) app.hub.broadcast('changed');
     return { ok: true };
   });
 }

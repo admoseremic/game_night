@@ -65,3 +65,23 @@ test('rejects play with duplicate player', async () => {
     payload: { g: game.id, d: '2026-06-01T20:00', parts: [['x', 1, 1], ['x', 2, 2]] } });
   assert.equal(res.statusCode, 400);
 });
+
+test('rejects play with a non-numeric (null) rank', async () => {
+  const { app } = freshApp();
+  await app.inject({ method: 'POST', url: '/api/games', payload: { name: 'G', tier: 'Light', dir: 'high', icon: '🎲' } });
+  const game = (await app.inject({ method: 'GET', url: '/api/state' })).json().games[0];
+  const res = await app.inject({ method: 'POST', url: '/api/plays',
+    payload: { g: game.id, d: '2026-06-01T20:00', parts: [['x', null, 1]] } });
+  assert.equal(res.statusCode, 400);
+});
+
+test('rejects PATCH play with duplicate player', async () => {
+  const { app } = freshApp();
+  await app.inject({ method: 'POST', url: '/api/games', payload: { name: 'G', tier: 'Light', dir: 'high', icon: '🎲' } });
+  const game = (await app.inject({ method: 'GET', url: '/api/state' })).json().games[0];
+  const play = (await app.inject({ method: 'POST', url: '/api/plays',
+    payload: { g: game.id, d: '2026-06-01T20:00', parts: [['x', 1, 1], ['y', 2, 2]] } })).json();
+  const res = await app.inject({ method: 'PATCH', url: `/api/plays/${play.id}`,
+    payload: { parts: [['x', 1, 1], ['x', 2, 2]] } });
+  assert.equal(res.statusCode, 400);
+});

@@ -18,8 +18,9 @@ export async function playerRoutes(app) {
     return { id: req.params.id, name, regular: !!regular, c1: cur.c1, c2: cur.c2 };
   });
   app.delete('/api/players/:id', async (req) => {
-    app.db.prepare('DELETE FROM players WHERE id=?').run(req.params.id);
-    app.hub.broadcast('changed');
+    // Only broadcast if a row was actually deleted (avoid spurious no-op broadcasts)
+    const info = app.db.prepare('DELETE FROM players WHERE id=?').run(req.params.id);
+    if (info.changes > 0) app.hub.broadcast('changed');
     return { ok: true };
   });
 }
