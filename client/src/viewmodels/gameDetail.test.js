@@ -30,5 +30,9 @@ it('low-score game: min score is the record', () => {
   expect(buildGameDetail(data, 'g2', now).record.score).toBe(10);
 });
 it('empty state for a never-played game', () => {
-  expect(buildGameDetail({ ...data, plays: [] }, 'g1', now).empty).toBe(true);
+  const vm = buildGameDetail({ ...data, plays: [] }, 'g1', now);
+  expect(vm.empty).toBe(true);
+  expect(vm.dirLabel).toBe('High score wins'); // g1 is dir:'high'
+  expect(vm.tierW).toBe('×0.5');               // g1 is Light
+  expect(vm.tierTx).toBeTruthy();
 });

@@ -20,7 +20,16 @@ export function buildGameDetail(data, gameId, now) {
 
   // Empty state: game has never been played
   if (ps.length === 0) {
-    return { empty: true, name: g.name, icon: g.icon, tier: g.tier };
+    return {
+      empty: true,
+      name: g.name,
+      icon: g.icon,
+      tier: g.tier,
+      tierBg: tierBg(g.tier),
+      tierTx: tierTx(g.tier),
+      tierW: g.tier === 'Heavy' ? '×1.5' : g.tier === 'Light' ? '×0.5' : '×1.0',
+      dirLabel: g.dir === 'high' ? 'High score wins' : 'Low score wins',
+    };
   }
 
   // ─── Top scores: all scored parts, direction-aware ───

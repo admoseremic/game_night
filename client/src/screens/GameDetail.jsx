@@ -123,7 +123,7 @@ function StatStrip({ plays, avgPlayers, lastRel, dirLabel, tierW }) {
 
 // ─── King of the game card ───
 // Ported from prototype lines 307–317.
-function KingCard({ name, c1, c2, initials, wins }) {
+function KingCard({ name, c1, c2, initials, wins, gameName }) {
   return (
     <div style={{
       display: 'flex',
@@ -144,7 +144,7 @@ function KingCard({ name, c1, c2, initials, wins }) {
           textTransform: 'uppercase',
           color: '#FF8A3D',
         }}>
-          King of the Game
+          King of {gameName}
         </div>
         <div style={{
           fontFamily: 'var(--font-display)',
@@ -509,6 +509,7 @@ export default function GameDetail() {
             c2={vm.kingC2}
             initials={vm.kingInitials}
             wins={vm.kingWins}
+            gameName={vm.name}
           />
           <HistChart histBars={vm.histBars} />
           <TopScores topScores={vm.topScores} />
