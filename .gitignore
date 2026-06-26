@@ -31,3 +31,11 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Monorepo build artifacts and runtime data
+node_modules/
+client/dist/
+server/data/
+*.db
+.env
+serviceAccount*.json
