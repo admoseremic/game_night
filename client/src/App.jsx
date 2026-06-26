@@ -1,10 +1,20 @@
 // App.jsx — Root component: wraps everything in StoreProvider, renders the Shell.
 // Shell renders the currently active screen from ui.screen (switches on nav tap)
 // and the floating BottomNav. Screens are registered as they are built in Tasks 12-17.
+//
+// Overlays rendered at this level (outside the scroll container):
+//   LogPlay    — full-screen two-step play-logging flow (ui.logOpen)
+//   Celebration — full-screen win/record overlay (ui.celebrate)
+//   AddGame    — bottom sheet for adding a game (ui.addGameOpen)
+//   AddPlayer  — bottom sheet for adding a player (ui.addPlayerOpen)
 
 import { StoreProvider, useStore } from './store/store.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import Board from './screens/Board.jsx';
+import LogPlay from './flows/LogPlay.jsx';
+import Celebration from './components/Celebration.jsx';
+import AddGame from './sheets/AddGame.jsx';
+import AddPlayer from './sheets/AddPlayer.jsx';
 
 // Screens are added in Tasks 12–17. Until a screen exists it renders a themed placeholder.
 function Placeholder({ name }) {
@@ -48,6 +58,14 @@ function Shell() {
         onNav={(s) => setUi({ screen: s })}
         onLog={() => setUi({ logOpen: true })}
       />
+
+      {/* Full-screen overlays — rendered outside the scroll container */}
+      {ui.logOpen && <LogPlay />}
+      {ui.celebrate && <Celebration />}
+
+      {/* Bottom sheet overlays — use fixed positioning via BottomSheet component */}
+      {ui.addGameOpen && <AddGame />}
+      {ui.addPlayerOpen && <AddPlayer />}
     </div>
   );
 }
