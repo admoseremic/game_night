@@ -30,7 +30,7 @@ export default function BottomNav({ screen, onNav, onLog }) {
 
   return (
     <div style={{
-      position: 'absolute',
+      position: 'fixed',
       left: 14,
       right: 14,
       bottom: 'max(env(safe-area-inset-bottom, 0px), 16px)',

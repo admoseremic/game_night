@@ -96,7 +96,7 @@ export function buildGameDetail(data, gameId, now) {
   const mn = Math.min(...vals);
   const mx = Math.max(...vals);
   const range = (mx - mn) || 1;
-  const histBars = hist.map(h => ({
+  const histBars = hist.slice(-40).map(h => ({
     h: 20 + Math.round((h.v - mn) / range * 72), // min 20px, max 92px
     v: h.v,
     label: fmtDate(h.date),

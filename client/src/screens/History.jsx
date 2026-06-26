@@ -128,6 +128,24 @@ export default function History() {
 
   return (
     <>
+      {/* ─── Back link — navigates to Leaderboard (board screen) ─── */}
+      <div
+        onClick={() => setUi({ screen: 'board' })}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+          marginBottom: 14,
+          fontSize: 13,
+          fontWeight: 700,
+          color: '#9D90B5',
+          cursor: 'pointer',
+          userSelect: 'none',
+        }}
+      >
+        <span style={{ fontSize: 16 }}>‹</span> Leaderboard
+      </div>
+
       {/* ─── Header ─── */}
       <div style={{ margin: '2px 2px 18px' }}>
         <span style={{

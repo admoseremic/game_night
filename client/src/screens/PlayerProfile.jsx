@@ -340,45 +340,6 @@ export default function PlayerProfile() {
             <StatChip value={vm.plays} label="Plays" />
           </div>
 
-          {/* ─── Current form dots + streak indicator ─── */}
-          {vm.hasForm && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              marginBottom: 20,
-              padding: '12px 16px',
-              borderRadius: 15,
-              background: 'rgba(255,255,255,0.04)',
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#9D90B5', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                Form
-              </div>
-              <div style={{ display: 'flex', gap: 6, flex: 1 }}>
-                {vm.formDots.map((dot, i) => (
-                  <div key={i} style={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    background: dot.bg,
-                  }} />
-                ))}
-              </div>
-              {vm.showStreak && (
-                <div style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  color: '#FF8A3D',
-                  background: 'rgba(255,138,61,0.16)',
-                  padding: '2px 9px',
-                  borderRadius: 7,
-                }}>
-                  🔥 {vm.streak} streak
-                </div>
-              )}
-            </div>
-          )}
-
           {/* ─── Favorite + Specialty game cards ─── */}
           {(vm.hasFav || vm.hasSpec) && (
             <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>

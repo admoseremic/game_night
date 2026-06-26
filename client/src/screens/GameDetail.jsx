@@ -200,6 +200,9 @@ function HistChart({ histBars }) {
         height: 108,
         padding: '0 4px',
         marginBottom: 24,
+        overflowX: 'auto',
+        maxWidth: '100%',
+        WebkitOverflowScrolling: 'touch',
       }}>
         {histBars.map((b, i) => (
           <div key={i} style={{
