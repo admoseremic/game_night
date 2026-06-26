@@ -14,6 +14,13 @@ test('mapGame derives dir from hi_score_wins and defaults tier/icon', () => {
   assert.equal(g.dir, 'high'); assert.equal(g.tier, 'Medium'); assert.equal(g.icon, '🎲');
 });
 
+test('mapGame normalizes tier to capitalized form', () => {
+  assert.equal(mapGame({ id: 'g', data: () => ({ name: 'X', tier: 'heavy', hi_score_wins: true }) }).tier, 'Heavy');
+  assert.equal(mapGame({ id: 'g', data: () => ({ name: 'X', tier: 'light', hi_score_wins: true }) }).tier, 'Light');
+  assert.equal(mapGame({ id: 'g', data: () => ({ name: 'X', tier: 'medium', hi_score_wins: true }) }).tier, 'Medium');
+  assert.equal(mapGame({ id: 'g', data: () => ({ name: 'X', hi_score_wins: true }) }).tier, 'Medium'); // missing -> Medium
+});
+
 test('mapPlay converts timestamp and builds parts, dropping players_beaten', () => {
   const doc = { id: 'p1', data: () => ({
     game: 'g1', dateTime: { toDate: () => new Date('2026-06-01T20:00:00Z') },

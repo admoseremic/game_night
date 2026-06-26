@@ -15,7 +15,9 @@ export function mapPlayer(doc, index, palette) {
 }
 export function mapGame(doc) {
   const d = doc.data();
-  return { id: doc.id, name: d.name, tier: d.tier || 'Medium',
+  const t = (d.tier || '').toLowerCase();
+  const tier = t === 'heavy' ? 'Heavy' : t === 'light' ? 'Light' : 'Medium';
+  return { id: doc.id, name: d.name, tier,
     dir: d.hi_score_wins === false ? 'low' : 'high', icon: d.icon || '🎲' };
 }
 export function mapPlay(doc) {
@@ -42,9 +44,22 @@ async function main() {
     players.forEach((doc, i) => insP.run(mapPlayer(doc, i, NEWPAL)));
     games.forEach(doc => insG.run(mapGame(doc)));
     plays.forEach(doc => insPl.run(mapPlay(doc)));
+    // Referential integrity: some old plays reference players removed from the players
+    // collection (one-off guests). Synthesize a neutral placeholder so the client never
+    // hits an unknown id — the participation/history is preserved, labeled "Guest".
+    const knownIds = new Set(players.map(d => d.id));
+    const orphanIds = new Set();
+    plays.forEach(doc => (doc.data().players || []).forEach(p => {
+      if (p.player && !knownIds.has(p.player)) orphanIds.add(p.player);
+    }));
+    orphanIds.forEach(id => insP.run({ id, name: 'Guest', regular: 0, c1: '#94A3B8', c2: '#64748B' }));
   })();
 
   console.log(`migrated: ${players.length} players, ${games.length} games, ${plays.length} plays`);
+  const known = new Set(players.map(d => d.id));
+  const guests = new Set();
+  plays.forEach(doc => (doc.data().players || []).forEach(p => { if (p.player && !known.has(p.player)) guests.add(p.player); }));
+  console.log(`  + ${guests.size} placeholder "Guest" player(s) for orphaned references`);
 }
 
 // Only run main() when executed directly (not when imported by tests).
