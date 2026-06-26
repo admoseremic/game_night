@@ -14,6 +14,9 @@ import Sort from '../sheets/Sort.jsx';
 import Explain from '../sheets/Explain.jsx';
 import Custom from '../sheets/Custom.jsx';
 
+// computePick is used to derive the pick holder name for the header pill
+import { computePick } from '../lib/stats.js';
+
 // Champion hero card at the top of the board.
 // Shows the #1 player's avatar, name, and their active sort stat.
 // onClick is passed from Board so tapping navigates to the champion's profile.
@@ -206,8 +209,106 @@ export default function Board() {
           </span>
         </div>
 
-        {/* Action buttons — ? opens Explain sheet */}
-        <div style={{ display: 'flex', gap: 8 }}>
+        {/* Action buttons — pick pill, history, picker, and explain */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* 🎯 Pick pill — shows current pick holder (or just "Pick" if no plays) */}
+          {(() => {
+            const pick = computePick(data, data.plays, ui.absent || {});
+            const pickHolder = pick?.pickPart
+              ? data.players.find(p => p.id === pick.pickPart[0])
+              : null;
+            return (
+              <div
+                onClick={() => setUi({ pickSheetOpen: true })}
+                style={{
+                  height: 34,
+                  borderRadius: 11,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '0 9px 0 6px',
+                  background: 'rgba(155,108,255,0.14)',
+                  border: '1px solid rgba(155,108,255,0.3)',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                }}
+              >
+                {/* Show avatar + "Pick" label when there's a current pick holder */}
+                {pickHolder ? (
+                  <>
+                    <div style={{
+                      width: 22,
+                      height: 22,
+                      flexShrink: 0,
+                      borderRadius: 7,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: 'var(--font-display)',
+                      fontWeight: 800,
+                      fontSize: 10,
+                      color: '#fff',
+                      background: `linear-gradient(135deg, ${pickHolder.c1}, ${pickHolder.c2})`,
+                    }}>
+                      {pickHolder.name[0].toUpperCase()}
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.3px', color: '#C9B8E8' }}>
+                      Pick
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ fontSize: 14 }}>🎯</span>
+                    <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.3px', color: '#C9B8E8' }}>
+                      Pick
+                    </span>
+                  </>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* 🕘 History button */}
+          <div
+            onClick={() => setUi({ screen: 'history' })}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 11,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(255,255,255,0.07)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              fontSize: 15,
+              cursor: 'pointer',
+              userSelect: 'none',
+            }}
+          >
+            🕘
+          </div>
+
+          {/* 🎲 Picker button */}
+          <div
+            onClick={() => setUi({ pickerOpen: true })}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 11,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(155,108,255,0.16)',
+              border: '1px solid rgba(155,108,255,0.32)',
+              fontSize: 16,
+              cursor: 'pointer',
+              userSelect: 'none',
+            }}
+          >
+            🎲
+          </div>
+
+          {/* ? Explain button */}
           <div
             onClick={() => setUi({ explainOpen: true })}
             style={{

@@ -16,11 +16,15 @@ import Games from './screens/Games.jsx';
 import GameDetail from './screens/GameDetail.jsx';
 import Players from './screens/Players.jsx';
 import PlayerProfile from './screens/PlayerProfile.jsx';
+import History from './screens/History.jsx';
 import LogPlay from './flows/LogPlay.jsx';
 import Celebration from './components/Celebration.jsx';
 import AddGame from './sheets/AddGame.jsx';
 import AddPlayer from './sheets/AddPlayer.jsx';
 import Hall from './screens/Hall.jsx';
+import DeleteConfirm from './sheets/DeleteConfirm.jsx';
+import Pick from './sheets/Pick.jsx';
+import Picker from './sheets/Picker.jsx';
 
 // Screens are added in Tasks 12–17. Until a screen exists it renders a themed placeholder.
 function Placeholder({ name }) {
@@ -45,7 +49,7 @@ function Shell() {
   useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [ui.screen, ui.gameId, ui.playerId]);
 
   // Task 12+ register real screens here: { board: Board, games: Games, ... }
-  const screens = { board: Board, games: Games, gameDetail: GameDetail, players: Players, playerDetail: PlayerProfile, hall: Hall };
+  const screens = { board: Board, games: Games, gameDetail: GameDetail, players: Players, playerDetail: PlayerProfile, hall: Hall, history: History };
   const Screen = screens[ui.screen];
 
   return (
@@ -76,6 +80,9 @@ function Shell() {
       {/* Bottom sheet overlays — use fixed positioning via BottomSheet component */}
       {ui.addGameOpen && <AddGame />}
       {ui.addPlayerOpen && <AddPlayer />}
+      {ui.deletePlayId && <DeleteConfirm />}
+      {ui.pickSheetOpen && <Pick />}
+      {ui.pickerOpen && <Picker />}
     </div>
   );
 }
