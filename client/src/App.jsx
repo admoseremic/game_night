@@ -62,7 +62,7 @@ function Shell() {
       overflow: 'hidden',
     }}>
       {/* Scrollable content area — bottom padding clears the floating nav (64px nav + 18px gap + buffer) */}
-      <div ref={scrollRef} style={{ height: '100%', overflowY: 'auto', padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 104px)' }}>
+      <div ref={scrollRef} style={{ height: '100%', overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 104px)' }}>
         {Screen ? <Screen /> : <Placeholder name={ui.screen || 'board'} />}
       </div>
 
