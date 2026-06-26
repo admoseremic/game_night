@@ -8,7 +8,8 @@ import { makeHub } from './events.js';
 import { buildApp } from './app.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const CLIENT_DIR = process.env.CLIENT_DIR || path.resolve(__dirname, '../../client/dist');
+// Resolve to absolute because @fastify/static requires an absolute root
+const CLIENT_DIR = path.resolve(process.env.CLIENT_DIR || path.resolve(__dirname, '../../client/dist'));
 const PORT = Number(process.env.PORT || 3000);
 
 const db = openDb();
