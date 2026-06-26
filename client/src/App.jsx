@@ -13,6 +13,8 @@ import BottomNav from './components/BottomNav.jsx';
 import Board from './screens/Board.jsx';
 import Games from './screens/Games.jsx';
 import GameDetail from './screens/GameDetail.jsx';
+import Players from './screens/Players.jsx';
+import PlayerProfile from './screens/PlayerProfile.jsx';
 import LogPlay from './flows/LogPlay.jsx';
 import Celebration from './components/Celebration.jsx';
 import AddGame from './sheets/AddGame.jsx';
@@ -37,7 +39,7 @@ function Shell() {
   const { ui, setUi } = useStore();
 
   // Task 12+ register real screens here: { board: Board, games: Games, ... }
-  const screens = { board: Board, games: Games, gameDetail: GameDetail };
+  const screens = { board: Board, games: Games, gameDetail: GameDetail, players: Players, playerDetail: PlayerProfile };
   const Screen = screens[ui.screen];
 
   return (
