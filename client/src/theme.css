@@ -31,6 +31,9 @@
 html, body, #root { height: 100%; }
 body {
   margin: 0; font-family: var(--font-body); color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   background:
     radial-gradient(120% 80% at 50% -10%, #36234D 0%, transparent 60%),
     var(--bg);
