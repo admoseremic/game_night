@@ -10,6 +10,13 @@ import { nextColor } from '../lib/colors.js';
 const Ctx = createContext(null);
 export const useStore = () => useContext(Ctx);
 
+// Unique id for optimistic temp records. crypto.randomUUID() requires a secure context
+// (HTTPS or localhost); fall back to a timestamp+random string so plain-HTTP LAN access works.
+const tmpId = () =>
+  'tmp-' + (globalThis.crypto && globalThis.crypto.randomUUID
+    ? globalThis.crypto.randomUUID()
+    : Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+
 export function StoreProvider({ children }) {
   const [data, setData] = useState({ players: [], games: [], plays: [] });
   const [ui, setUiState] = useState({ screen: 'board', period: 'month', sorts: ['wins'],
@@ -40,7 +47,7 @@ export function StoreProvider({ children }) {
 
   const actions = {
     addPlay: (play) => optimistic(
-      d => ({ ...d, plays: [...d.plays, { ...play, id: 'tmp-' + crypto.randomUUID() }] }),
+      d => ({ ...d, plays: [...d.plays, { ...play, id: tmpId() }] }),
       () => api.createPlay(play)),
     editPlay: (id, play) => optimistic(
       d => ({ ...d, plays: d.plays.map(p => p.id === id ? { ...p, ...play } : p) }),
@@ -49,9 +56,9 @@ export function StoreProvider({ children }) {
       d => ({ ...d, plays: d.plays.filter(p => p.id !== id) }),
       () => api.deletePlay(id)),
     addPlayer: (name, regular) => { const [c1, c2] = nextColor(data.players.length);
-      return optimistic(d => ({ ...d, players: [...d.players, { id: 'tmp-' + crypto.randomUUID(), name, regular, c1, c2 }] }),
+      return optimistic(d => ({ ...d, players: [...d.players, { id: tmpId(), name, regular, c1, c2 }] }),
         () => api.createPlayer({ name, regular, c1, c2 })); },
-    addGame: (g) => optimistic(d => ({ ...d, games: [...d.games, { ...g, id: 'tmp-' + crypto.randomUUID() }] }), () => api.createGame(g)),
+    addGame: (g) => optimistic(d => ({ ...d, games: [...d.games, { ...g, id: tmpId() }] }), () => api.createGame(g)),
   };
 
   return <Ctx.Provider value={{ data, ui, setUi, now, refetch, actions }}>{children}</Ctx.Provider>;
