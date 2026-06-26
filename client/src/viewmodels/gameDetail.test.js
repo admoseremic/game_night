@@ -29,6 +29,18 @@ it('high-score game: record + plays + top score', () => {
 it('low-score game: min score is the record', () => {
   expect(buildGameDetail(data, 'g2', now).record.score).toBe(10);
 });
+it('game played with no scores: not empty but record is null', () => {
+  const d = {
+    players: [{ id: 'p1', name: 'Ann', c1: '#1', c2: '#2', regular: true }, { id: 'p2', name: 'Bob', c1: '#3', c2: '#4', regular: true }],
+    games: [{ id: 'g1', name: 'G', tier: 'Medium', dir: 'high', icon: '🎲' }],
+    plays: [{ id: 'x1', g: 'g1', d: '2026-06-10T20:00', parts: [['p1', 1, null], ['p2', 2, null]] }],
+  };
+  const vm = buildGameDetail(d, 'g1', new Date('2026-06-24T20:00:00'));
+  expect(vm.empty).toBe(false);
+  expect(vm.record).toBe(null);
+  expect(vm.topScores.length).toBe(0);
+  expect(vm.winLB.length).toBe(2); // win leaderboard still works without scores
+});
 it('empty state for a never-played game', () => {
   const vm = buildGameDetail({ ...data, plays: [] }, 'g1', now);
   expect(vm.empty).toBe(true);

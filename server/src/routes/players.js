@@ -17,7 +17,11 @@ export async function playerRoutes(app) {
     app.hub.broadcast('changed');
     return { id: req.params.id, name, regular: !!regular, c1: cur.c1, c2: cur.c2 };
   });
-  app.delete('/api/players/:id', async (req) => {
+  app.delete('/api/players/:id', async (req, reply) => {
+    // Refuse to delete a player who is referenced in any play's parts JSON array.
+    const plays = app.db.prepare('SELECT parts FROM plays').all();
+    const referenced = plays.some(p => JSON.parse(p.parts).some(part => part[0] === req.params.id));
+    if (referenced) return reply.code(409).send({ error: 'player is referenced by plays; delete those plays first' });
     // Only broadcast if a row was actually deleted (avoid spurious no-op broadcasts)
     const info = app.db.prepare('DELETE FROM players WHERE id=?').run(req.params.id);
     if (info.changes > 0) app.hub.broadcast('changed');

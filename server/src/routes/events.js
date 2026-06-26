@@ -5,7 +5,9 @@ export async function eventRoutes(app) {
     reply.raw.setHeader('Cache-Control', 'no-cache');
     reply.raw.setHeader('Connection', 'keep-alive');
     reply.raw.setHeader('X-Accel-Buffering', 'no');
+    // Yield the raw socket to us; Fastify won't send its own response or timeout this connection.
+    reply.hijack();
     app.hub.add(reply);
-    // keep the request open; do not return.
+    // Socket stays open; hub manages it from here.
   });
 }

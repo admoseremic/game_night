@@ -495,7 +495,24 @@ export default function GameDetail() {
       {/* ─── Rich stats (only when game has been played) ─── */}
       {!vm.empty && (
         <>
-          <RecordHero record={vm.record} />
+          {/* Only render record hero when at least one scored play exists */}
+          {vm.record ? (
+            <RecordHero record={vm.record} />
+          ) : (
+            <div style={{
+              borderRadius: 18,
+              padding: '16px 20px',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              marginBottom: 14,
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#9D90B5',
+              textAlign: 'center',
+            }}>
+              No scores recorded for this game yet.
+            </div>
+          )}
           <StatStrip
             plays={vm.plays}
             avgPlayers={vm.avgPlayers}

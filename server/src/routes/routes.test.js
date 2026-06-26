@@ -75,6 +75,32 @@ test('rejects play with a non-numeric (null) rank', async () => {
   assert.equal(res.statusCode, 400);
 });
 
+test('refuses to delete a player referenced by a play (409)', async () => {
+  const { app } = freshApp();
+  const pl = (await app.inject({ method:'POST', url:'/api/players', payload:{name:'Ann',regular:true,c1:'#1',c2:'#2'} })).json();
+  await app.inject({ method:'POST', url:'/api/games', payload:{name:'G',tier:'Light',dir:'high',icon:'🎲'} });
+  const game = (await app.inject({ method:'GET', url:'/api/state' })).json().games[0];
+  await app.inject({ method:'POST', url:'/api/plays', payload:{ g:game.id, d:'2026-06-01T20:00', parts:[[pl.id,1,5]] } });
+  const res = await app.inject({ method:'DELETE', url:`/api/players/${pl.id}` });
+  assert.equal(res.statusCode, 409);
+  const state = (await app.inject({ method:'GET', url:'/api/state' })).json();
+  assert.equal(state.players.length, 1); // not deleted
+});
+test('refuses to delete a game referenced by a play (409)', async () => {
+  const { app } = freshApp();
+  await app.inject({ method:'POST', url:'/api/games', payload:{name:'G',tier:'Light',dir:'high',icon:'🎲'} });
+  const game = (await app.inject({ method:'GET', url:'/api/state' })).json().games[0];
+  await app.inject({ method:'POST', url:'/api/plays', payload:{ g:game.id, d:'2026-06-01T20:00', parts:[['x',1,5]] } });
+  const res = await app.inject({ method:'DELETE', url:`/api/games/${game.id}` });
+  assert.equal(res.statusCode, 409);
+});
+test('deletes an unreferenced player (ok)', async () => {
+  const { app } = freshApp();
+  const pl = (await app.inject({ method:'POST', url:'/api/players', payload:{name:'Solo',regular:true,c1:'#1',c2:'#2'} })).json();
+  const res = await app.inject({ method:'DELETE', url:`/api/players/${pl.id}` });
+  assert.equal(res.statusCode, 200);
+  assert.equal((await app.inject({ method:'GET', url:'/api/state' })).json().players.length, 0);
+});
 test('rejects PATCH play with duplicate player', async () => {
   const { app } = freshApp();
   await app.inject({ method: 'POST', url: '/api/games', payload: { name: 'G', tier: 'Light', dir: 'high', icon: '🎲' } });

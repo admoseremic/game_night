@@ -119,7 +119,7 @@ export function buildGameDetail(data, gameId, now) {
     plays: ps.length,
     lastRel: rel(ps[ps.length - 1].d, now),
     avgPlayers: Math.round(totalP / ps.length),
-    record: topScores[0], // direction-aware #1 score
+    record: topScores[0] || null, // direction-aware #1 score; null when no scored plays exist
     topScores,
     winLB,
     histBars,
