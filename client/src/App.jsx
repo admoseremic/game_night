@@ -8,6 +8,7 @@
 //   AddGame    — bottom sheet for adding a game (ui.addGameOpen)
 //   AddPlayer  — bottom sheet for adding a player (ui.addPlayerOpen)
 
+import { useEffect, useRef } from 'react';
 import { StoreProvider, useStore } from './store/store.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import Board from './screens/Board.jsx';
@@ -38,6 +39,10 @@ function Placeholder({ name }) {
 function Shell() {
   const { ui, setUi } = useStore();
 
+  // Scroll to top when screen or detail target (gameId/playerId) changes
+  const scrollRef = useRef(null);
+  useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [ui.screen, ui.gameId, ui.playerId]);
+
   // Task 12+ register real screens here: { board: Board, games: Games, ... }
   const screens = { board: Board, games: Games, gameDetail: GameDetail, players: Players, playerDetail: PlayerProfile };
   const Screen = screens[ui.screen];
@@ -52,7 +57,7 @@ function Shell() {
       overflow: 'hidden',
     }}>
       {/* Scrollable content area — bottom padding clears the floating nav (64px nav + 18px gap + buffer) */}
-      <div style={{ height: '100%', overflowY: 'auto', padding: '54px 18px 104px' }}>
+      <div ref={scrollRef} style={{ height: '100%', overflowY: 'auto', padding: '54px 18px 104px' }}>
         {Screen ? <Screen /> : <Placeholder name={ui.screen || 'board'} />}
       </div>
 
