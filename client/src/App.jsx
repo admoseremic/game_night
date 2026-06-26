@@ -4,6 +4,7 @@
 
 import { StoreProvider, useStore } from './store/store.jsx';
 import BottomNav from './components/BottomNav.jsx';
+import Board from './screens/Board.jsx';
 
 // Screens are added in Tasks 12–17. Until a screen exists it renders a themed placeholder.
 function Placeholder({ name }) {
@@ -24,7 +25,7 @@ function Shell() {
   const { ui, setUi } = useStore();
 
   // Task 12+ register real screens here: { board: Board, games: Games, ... }
-  const screens = {};
+  const screens = { board: Board };
   const Screen = screens[ui.screen];
 
   return (
