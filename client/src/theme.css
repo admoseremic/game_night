@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Surfaces */
+  --bg: #130E1B;
+  --card: rgba(255,255,255,0.035);
+  --card2-from: #241B33;
+  --card2-to: #181122;
+  --hairline: rgba(255,255,255,0.08);
+
+  /* Text */
+  --text-primary: #F4EEF8;
+  --text-secondary: #C9B8E8;
+  --text-muted: #9D90B5;
+  --text-faint: #6E6483;
+
+  /* Brand & accents */
+  --orange: #FF8A3D;
+  --gold: #FFC24B;
+  --green: #34D9A0;
+  --pink: #FF6FA5;
+  --purple: #9B6CFF;
+  --danger: #FF4D6D;
+
+  /* Typography */
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0; font-family: var(--font-body); color: var(--text-primary);
+  background:
+    radial-gradient(120% 80% at 50% -10%, #36234D 0%, transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  overscroll-behavior: none;
+}
