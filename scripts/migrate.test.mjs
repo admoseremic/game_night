@@ -17,10 +17,10 @@ test('mapGame derives dir from hi_score_wins and defaults tier/icon', () => {
 test('mapPlay converts timestamp and builds parts, dropping players_beaten', () => {
   const doc = { id: 'p1', data: () => ({
     game: 'g1', dateTime: { toDate: () => new Date('2026-06-01T20:00:00Z') },
-    players: [{ player: 'x', rank: 1, score: 42, players_beaten: 2 }, { player: 'y', rank: 2, score: null }],
+    players: [{ player: 'x', rank: 1, score: 42, players_beaten: 2 }, { player: 'y', rank: 2, score: null }, { player: 'z', rank: 3, score: 0 }],
   }) };
   const play = mapPlay(doc);
   assert.equal(play.game_id, 'g1');
   assert.equal(play.played_at, '2026-06-01T20:00:00.000Z');
-  assert.deepEqual(JSON.parse(play.parts), [['x', 1, 42], ['y', 2, null]]);
+  assert.deepEqual(JSON.parse(play.parts), [['x', 1, 42], ['y', 2, null], ['z', 3, 0]]);
 });
