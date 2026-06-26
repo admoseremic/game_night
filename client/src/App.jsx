@@ -20,6 +20,7 @@ import LogPlay from './flows/LogPlay.jsx';
 import Celebration from './components/Celebration.jsx';
 import AddGame from './sheets/AddGame.jsx';
 import AddPlayer from './sheets/AddPlayer.jsx';
+import Hall from './screens/Hall.jsx';
 
 // Screens are added in Tasks 12–17. Until a screen exists it renders a themed placeholder.
 function Placeholder({ name }) {
@@ -44,7 +45,7 @@ function Shell() {
   useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [ui.screen, ui.gameId, ui.playerId]);
 
   // Task 12+ register real screens here: { board: Board, games: Games, ... }
-  const screens = { board: Board, games: Games, gameDetail: GameDetail, players: Players, playerDetail: PlayerProfile };
+  const screens = { board: Board, games: Games, gameDetail: GameDetail, players: Players, playerDetail: PlayerProfile, hall: Hall };
   const Screen = screens[ui.screen];
 
   return (
