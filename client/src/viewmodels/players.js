@@ -40,5 +40,6 @@ export function buildPlayersRoster(data, now) {
       streak,
       onFire: streak >= 2,
     };
-  }).sort((a, b) => b.wins - a.wins || b.plays - a.plays);
+  // Sort alphabetically by name (case-insensitive)
+  }).sort((a, b) => a.name.localeCompare(b.name));
 }

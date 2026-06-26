@@ -14,8 +14,8 @@ import { useState } from 'react';
 import BottomSheet from '../components/BottomSheet.jsx';
 import { useStore } from '../store/store.jsx';
 
-// Curated emoji set matching the prototype's agIconChips
-const ICONS = ['🎲','🃏','🏰','🚀','🐉','🌋','🦖','🧩','⚔️','🛸','🏭','🌲'];
+// Expanded curated emoji set — quick-pick chips for common game themes
+const ICONS = ['🎲','🃏','🏰','🚀','🐉','🌋','🦖','🧩','⚔️','🛸','🏭','🌲','🐦','🌾','🚂','💎','🍣','♟️','🦊','🪐','🗺️','🏛️','🦠','👑','🕵️','🧪','🐈','🏜️','🏞️','⛵','🎯','🍷'];
 const TIERS = ['Light', 'Medium', 'Heavy'];
 const DIRS  = [['high', 'High wins'], ['low', 'Low wins']];
 
@@ -102,7 +102,8 @@ export default function AddGame() {
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.5px', color: '#6E6483', marginBottom: 8 }}>
         Icon
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      {/* Quick-pick chips — click to select a curated emoji */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
         {ICONS.map(ic => (
           <div
             key={ic}
@@ -115,6 +116,22 @@ export default function AddGame() {
             }}
           >{ic}</div>
         ))}
+      </div>
+      {/* Freeform emoji entry — type or paste any emoji directly */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <input
+          type="text"
+          value={icon}
+          onChange={e => setIcon(e.target.value)}
+          placeholder="🎲"
+          style={{
+            width: 64, padding: '10px 14px', borderRadius: 12,
+            border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)',
+            color: '#F4EEF8', fontSize: 20, fontFamily: 'inherit', outline: 'none',
+            textAlign: 'center', boxSizing: 'border-box',
+          }}
+        />
+        <span style={{ fontSize: 12, color: '#6E6483' }}>or type any emoji</span>
       </div>
 
       {/* Save button — disabled until name + tier filled */}

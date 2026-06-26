@@ -52,6 +52,6 @@ export function buildGamesList(data, query, now) {
   })
     // Live search filter — match game name (case-insensitive)
     .filter(g => !q || g.name.toLowerCase().includes(q))
-    // Sort by most played first
-    .sort((a, b) => b.plays - a.plays);
+    // Sort alphabetically by name (case-insensitive)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
