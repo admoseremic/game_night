@@ -126,8 +126,9 @@ export default function Custom() {
       </div>
 
       {/* Apply range button (ported from prototype line 1010) */}
+      {/* Also commits period:'custom' so the board switches even if no date was changed */}
       <div
-        onClick={() => setUi({ customOpen: false })}
+        onClick={() => setUi({ customOpen: false, period: 'custom' })}
         style={{
           marginTop: 18,
           textAlign: 'center',

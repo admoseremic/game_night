@@ -16,14 +16,15 @@ import Custom from '../sheets/Custom.jsx';
 
 // Champion hero card at the top of the board.
 // Shows the #1 player's avatar, name, and their active sort stat.
-function ChampHero({ champ }) {
+// onClick is passed from Board so tapping navigates to the champion's profile.
+function ChampHero({ champ, onClick }) {
   if (!champ) return null;
 
   // Build a player-like object for Avatar (needs .name, .c1, .c2)
   const player = { name: champ.name, c1: champ.c1, c2: champ.c2 };
 
   return (
-    <div style={{
+    <div onClick={onClick} style={{
       display: 'flex',
       alignItems: 'center',
       gap: 14,
@@ -33,6 +34,7 @@ function ChampHero({ champ }) {
       background: 'linear-gradient(120deg,rgba(255,194,75,0.18),rgba(255,138,61,0.08))',
       border: '1px solid rgba(255,194,75,0.35)',
       marginBottom: 10,
+      cursor: 'pointer',
     }}>
       {/* Medal chip (rank 1 = gold) */}
       <div style={{ width: 30, flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
@@ -281,7 +283,12 @@ export default function Board() {
       </div>
 
       {/* ─── Champion hero (rank 1 player, shown above the list) ─── */}
-      {!vm.empty && <ChampHero champ={vm.champ} />}
+      {!vm.empty && (
+        <ChampHero
+          champ={vm.champ}
+          onClick={() => setUi({ screen: 'playerDetail', playerId: vm.champ.pid, profileFrom: 'board' })}
+        />
+      )}
 
       {/* ─── Leaderboard rows (rank 2+) ─── */}
       {!vm.empty && (

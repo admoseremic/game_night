@@ -11,7 +11,8 @@ const periodLabels = {
   ytd: 'Year to Date',
   lastYear: 'Last Year',
   all: 'All Time',
-  custom: 'Custom Range',
+  // Note: 'custom' is intentionally omitted — the custom branch returns a formatted
+  // date-range string directly (e.g. "Jun 10–Jun 24") before this map is consulted.
 };
 
 const sortLabels = {
