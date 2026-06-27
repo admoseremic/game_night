@@ -11,9 +11,9 @@ import Avatar from '../components/Avatar.jsx';
 // --- Period chip bar ---
 // Three filter chips; active chip gets gold background, others stay subtle.
 const CHIPS = [
-  { key: 'all',      label: 'All Time' },
-  { key: 'last2',    label: 'Last 2 Years' },
   { key: 'thisYear', label: 'This Year' },
+  { key: 'last2',    label: 'Last 2 Years' },
+  { key: 'all',      label: 'All Time' },
 ];
 
 function PeriodChips({ active, onSelect }) {
@@ -233,8 +233,8 @@ function TrophyCard({ g }) {
 export default function Hall() {
   const { data, ui, setUi, now } = useStore();
 
-  // Defaults: hallPeriod → 'all', recordsExpanded → false
-  const period = ui.hallPeriod || 'all';
+  // Defaults: hallPeriod → 'thisYear', recordsExpanded → false
+  const period = ui.hallPeriod || 'thisYear';
   const expanded = ui.recordsExpanded || false;
 
   const vm = buildHall(data, period, now, expanded);
