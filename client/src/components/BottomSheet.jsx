@@ -30,7 +30,7 @@ export default function BottomSheet({ open, onClose, title, children }) {
           background: 'linear-gradient(180deg,#241B33,#181122)',
           borderRadius: '28px 28px 0 0',
           borderTop: '1px solid rgba(255,255,255,0.1)',
-          padding: '8px 20px 30px',
+          padding: '8px 20px calc(env(safe-area-inset-bottom, 0px) + 30px)',
           // Slide up animation — respects prefers-reduced-motion via the keyframe definition
           animation: 'gnRise 0.28s ease',
         }}

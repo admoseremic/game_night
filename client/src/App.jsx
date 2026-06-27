@@ -52,6 +52,10 @@ function Shell() {
   const screens = { board: Board, games: Games, gameDetail: GameDetail, players: Players, playerDetail: PlayerProfile, hall: Hall, history: History };
   const Screen = screens[ui.screen];
 
+  // Hide the bottom nav whenever any sheet or overlay is open so it can't overlap sheet options
+  const overlayOpen = ui.logOpen || ui.celebrate || ui.pickerOpen || ui.addGameOpen || ui.addPlayerOpen ||
+    ui.deletePlayId || ui.pickSheetOpen || ui.periodSheetOpen || ui.sortSheetOpen || ui.explainOpen || ui.customOpen;
+
   return (
     // Relative container so the absolutely-positioned BottomNav stays inside the 480px max-width column
     <div style={{
@@ -66,12 +70,12 @@ function Shell() {
         {Screen ? <Screen /> : <Placeholder name={ui.screen || 'board'} />}
       </div>
 
-      {/* Floating bottom nav — absolutely positioned so it overlays content */}
-      <BottomNav
+      {/* Floating bottom nav — hidden while any sheet/overlay is open to prevent covering bottom options */}
+      {!overlayOpen && <BottomNav
         screen={ui.screen}
         onNav={(s) => setUi({ screen: s })}
         onLog={() => setUi({ logOpen: true })}
-      />
+      />}
 
       {/* Full-screen overlays — rendered outside the scroll container */}
       {ui.logOpen && <LogPlay />}
