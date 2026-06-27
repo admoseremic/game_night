@@ -33,7 +33,7 @@ export default function BottomNav({ screen, onNav, onLog }) {
       position: 'fixed',
       left: 14,
       right: 14,
-      bottom: 'max(env(safe-area-inset-bottom, 0px), 16px)',
+      bottom: 'max(calc(env(safe-area-inset-bottom, 0px) - 16px), 10px)',
       height: 64,
       borderRadius: 24,
       display: 'flex',
