@@ -129,9 +129,10 @@ export default function LogPlay() {
   };
 
   // Computed derived values for rendering
-  const filteredGames = data.games.filter(g =>
-    g.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Filter games by search text, then sort alphabetically by name
+  const filteredGames = data.games
+    .filter(g => g.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name));
   const pool = data.players.filter(p => !order.includes(p.id));
   const selectedGame = data.games.find(g => g.id === gameId);
 
