@@ -26,13 +26,13 @@ import DeleteConfirm from './sheets/DeleteConfirm.jsx';
 import Pick from './sheets/Pick.jsx';
 import Picker from './sheets/Picker.jsx';
 
-// BUILD-10 diagnostic stamp — temporary overlay for iOS viewport debugging.
+// BUILD-11 diagnostic stamp — temporary overlay for iOS viewport debugging.
 // Shows key height metrics and standalone mode flag 250ms after mount.
 function BuildStamp() {
   const [s, setS] = useState('measuring…');
   useEffect(() => {
     const t = setTimeout(() => {
-      setS(`BUILD-10 iH:${window.innerHeight} bodyH:${Math.round(document.body.getBoundingClientRect().height)} rootH:${Math.round(document.getElementById('root').getBoundingClientRect().height)} scrH:${window.screen.height} docH:${document.documentElement.clientHeight} sa:${navigator.standalone === true}`);
+      setS(`BUILD-11 iH:${window.innerHeight} bodyH:${Math.round(document.body.getBoundingClientRect().height)} rootH:${Math.round(document.getElementById('root').getBoundingClientRect().height)} scrH:${window.screen.height} docH:${document.documentElement.clientHeight} sa:${navigator.standalone === true}`);
     }, 250);
     return () => clearTimeout(t);
   }, []);
@@ -107,6 +107,9 @@ export default function App() {
     <StoreProvider>
       <Shell />
       <BuildStamp />
+      {/* TEMP diagnostic markers: cyan = web-view TOP edge, lime = web-view BOTTOM edge */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 8, background: 'cyan', zIndex: 99999, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: 8, background: 'lime', zIndex: 99999, pointerEvents: 'none' }} />
     </StoreProvider>
   );
 }
