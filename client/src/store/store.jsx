@@ -59,6 +59,9 @@ export function StoreProvider({ children }) {
       return optimistic(d => ({ ...d, players: [...d.players, { id: tmpId(), name, regular, c1, c2 }] }),
         () => api.createPlayer({ name, regular, c1, c2 })); },
     addGame: (g) => optimistic(d => ({ ...d, games: [...d.games, { ...g, id: tmpId() }] }), () => api.createGame(g)),
+    updatePlayer: (id, patch) => optimistic(
+      d => ({ ...d, players: d.players.map(p => p.id === id ? { ...p, ...patch } : p) }),
+      () => api.updatePlayer(id, patch)),
   };
 
   return <Ctx.Provider value={{ data, ui, setUi, now, refetch, actions }}>{children}</Ctx.Provider>;

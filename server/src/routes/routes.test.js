@@ -101,6 +101,15 @@ test('deletes an unreferenced player (ok)', async () => {
   assert.equal(res.statusCode, 200);
   assert.equal((await app.inject({ method:'GET', url:'/api/state' })).json().players.length, 0);
 });
+test('PATCH player updates colors (c1/c2) and regular', async () => {
+  const { app } = freshApp();
+  const p = (await app.inject({ method: 'POST', url: '/api/players', payload: { name: 'Ann', regular: true, c1: '#111', c2: '#222' } })).json();
+  const res = await app.inject({ method: 'PATCH', url: `/api/players/${p.id}`, payload: { c1: '#ABC', c2: '#DEF', regular: false } });
+  assert.equal(res.statusCode, 200);
+  const state = (await app.inject({ method: 'GET', url: '/api/state' })).json();
+  const sp = state.players.find(x => x.id === p.id);
+  assert.equal(sp.c1, '#ABC'); assert.equal(sp.c2, '#DEF'); assert.equal(sp.regular, false);
+});
 test('rejects PATCH play with duplicate player', async () => {
   const { app } = freshApp();
   await app.inject({ method: 'POST', url: '/api/games', payload: { name: 'G', tier: 'Light', dir: 'high', icon: '🎲' } });

@@ -13,9 +13,11 @@ export async function playerRoutes(app) {
     if (!cur) return reply.code(404).send({ error: 'not found' });
     const name = req.body?.name ?? cur.name;
     const regular = req.body?.regular ?? !!cur.regular;
-    app.db.prepare('UPDATE players SET name=?, regular=? WHERE id=?').run(name, regular ? 1 : 0, req.params.id);
+    const c1 = req.body?.c1 ?? cur.c1;
+    const c2 = req.body?.c2 ?? cur.c2;
+    app.db.prepare('UPDATE players SET name=?, regular=?, c1=?, c2=? WHERE id=?').run(name, regular ? 1 : 0, c1, c2, req.params.id);
     app.hub.broadcast('changed');
-    return { id: req.params.id, name, regular: !!regular, c1: cur.c1, c2: cur.c2 };
+    return { id: req.params.id, name, regular: !!regular, c1, c2 };
   });
   app.delete('/api/players/:id', async (req, reply) => {
     // Refuse to delete a player who is referenced in any play's parts JSON array.
