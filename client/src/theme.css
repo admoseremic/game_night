@@ -28,8 +28,9 @@
 }
 
 * { box-sizing: border-box; }
-html, #root { height: 100%; }
-html, body, #root { overflow: hidden; }
+/* Full screen height in iOS standalone PWAs: 100dvh (NOT height:100%, which breaks
+   viewport-fit=cover and leaves a dark bar at the bottom). 100vh is the fallback. */
+html, body, #root { height: 100vh; height: 100dvh; overflow: hidden; }
 /* Background on <html> so it fills the ENTIRE screen — including the status-bar inset in
    iOS standalone (Add to Home Screen) mode, where a body-only background leaves a bare
    strip at the top. The var(--bg) base layer guarantees no black shows through. No
@@ -42,7 +43,7 @@ html {
   background-color: var(--bg);
 }
 body {
-  margin: 0; position: fixed; inset: 0;
+  margin: 0;
   font-family: var(--font-body); color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
