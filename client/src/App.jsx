@@ -8,7 +8,7 @@
 //   AddGame    — bottom sheet for adding a game (ui.addGameOpen)
 //   AddPlayer  — bottom sheet for adding a player (ui.addPlayerOpen)
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { StoreProvider, useStore } from './store/store.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import Board from './screens/Board.jsx';
@@ -25,6 +25,29 @@ import Hall from './screens/Hall.jsx';
 import DeleteConfirm from './sheets/DeleteConfirm.jsx';
 import Pick from './sheets/Pick.jsx';
 import Picker from './sheets/Picker.jsx';
+
+// TEMPORARY diagnostic stamp — shows build number, safe-area-inset-bottom, and
+// the bottom nav's computed CSS bottom + rendered pixel position. Remove after diagnosis.
+function BuildStamp() {
+  const [s, setS] = useState('measuring…');
+  useEffect(() => {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:env(safe-area-inset-bottom)';
+    document.body.appendChild(probe);
+    const sab = Math.round(probe.getBoundingClientRect().height);
+    probe.remove();
+    const nav = [...document.querySelectorAll('div')].find(d => {
+      const c = getComputedStyle(d);
+      return c.position === 'fixed' && c.backdropFilter !== 'none' && d.textContent.includes('Home') && d.textContent.includes('Hall');
+    });
+    const nb = nav ? Math.round(nav.getBoundingClientRect().bottom) : -1;
+    const cssBottom = nav ? getComputedStyle(nav).bottom : '?';
+    setS(`BUILD-8 sab:${sab} navBottomCSS:${cssBottom} navBottomPx:${nb} gap:${nb >= 0 ? window.innerHeight - nb : '?'} iH:${window.innerHeight}`);
+  }, []);
+  return (
+    <div style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top) + 2px)', left: 4, zIndex: 99999, background: 'rgba(0,110,0,0.92)', color: '#fff', font: '9px/1.3 monospace', padding: '2px 5px', borderRadius: 4, pointerEvents: 'none' }}>{s}</div>
+  );
+}
 
 // Screens are added in Tasks 12–17. Until a screen exists it renders a themed placeholder.
 function Placeholder({ name }) {
@@ -91,6 +114,7 @@ export default function App() {
   return (
     <StoreProvider>
       <Shell />
+      <BuildStamp />
     </StoreProvider>
   );
 }
