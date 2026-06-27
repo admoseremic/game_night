@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest';
-import { weight, leaderboard, recordFor, currentStreak, computePick, inPeriod, periodPlays } from './stats.js';
+import { weight, leaderboard, recordFor, recordFromPlays, currentStreak, computePick, inPeriod, periodPlays } from './stats.js';
 
 const data = {
   players: [
@@ -62,6 +62,14 @@ it('recordFor ignores null scores (excluded from records)', () => {
   };
   // p1 won but logged no score (null) — must be ignored; record is p2's 25
   expect(recordFor(d, 'g1')).toMatchObject({ pid: 'p2', score: 25 });
+});
+
+it('recordFromPlays computes the record over a given plays subset (direction-aware)', () => {
+  // data fixture is already defined at top of this file (g1 high, g2 low, plays x1/x2)
+  // x1: g1 high, p1=50,p2=40,p3=30 -> record 50. Restrict to empty subset -> null.
+  expect(recordFromPlays(data, 'g1', data.plays)).toMatchObject({ pid: 'p1', score: 50 });
+  expect(recordFromPlays(data, 'g1', [])).toBe(null);
+  expect(recordFromPlays(data, 'g2', data.plays)).toMatchObject({ pid: 'p2', score: 10 }); // low
 });
 
 it('leaderboard sorts by beat with wwins tiebreak', () => {

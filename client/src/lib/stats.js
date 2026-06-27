@@ -37,9 +37,9 @@ export function leaderboard(data, plays, sort, sort2) {
   return arr;
 }
 
-export function recordFor(data, gameId) {
+export function recordFromPlays(data, gameId, plays) {
   const g = game(data, gameId); let best = null;
-  for (const play of data.plays) {
+  for (const play of plays) {
     if (play.g !== gameId) continue;
     for (const [pid, , score] of play.parts) {
       if (score == null) continue;
@@ -47,6 +47,10 @@ export function recordFor(data, gameId) {
     }
   }
   return best;
+}
+
+export function recordFor(data, gameId) {
+  return recordFromPlays(data, gameId, data.plays);
 }
 
 export function currentStreak(plays, pid) {
