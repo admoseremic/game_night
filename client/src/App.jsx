@@ -8,7 +8,7 @@
 //   AddGame    — bottom sheet for adding a game (ui.addGameOpen)
 //   AddPlayer  — bottom sheet for adding a player (ui.addPlayerOpen)
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StoreProvider, useStore } from './store/store.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import Board from './screens/Board.jsx';
@@ -25,6 +25,21 @@ import Hall from './screens/Hall.jsx';
 import DeleteConfirm from './sheets/DeleteConfirm.jsx';
 import Pick from './sheets/Pick.jsx';
 import Picker from './sheets/Picker.jsx';
+
+// BUILD-10 diagnostic stamp — temporary overlay for iOS viewport debugging.
+// Shows key height metrics and standalone mode flag 250ms after mount.
+function BuildStamp() {
+  const [s, setS] = useState('measuring…');
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setS(`BUILD-10 iH:${window.innerHeight} bodyH:${Math.round(document.body.getBoundingClientRect().height)} rootH:${Math.round(document.getElementById('root').getBoundingClientRect().height)} scrH:${window.screen.height} docH:${document.documentElement.clientHeight} sa:${navigator.standalone === true}`);
+    }, 250);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top) + 2px)', left: 4, zIndex: 99999, background: 'rgba(0,110,0,0.94)', color: '#fff', font: '9px/1.3 monospace', padding: '2px 5px', borderRadius: 4, pointerEvents: 'none' }}>{s}</div>
+  );
+}
 
 // Screens are added in Tasks 12–17. Until a screen exists it renders a themed placeholder.
 function Placeholder({ name }) {
@@ -91,6 +106,7 @@ export default function App() {
   return (
     <StoreProvider>
       <Shell />
+      <BuildStamp />
     </StoreProvider>
   );
 }

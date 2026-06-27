@@ -22,11 +22,19 @@ await app.register(fastifyCompress, {
   customTypes: /^(?!text\/event-stream)(application\/json|text\/|application\/javascript)/,
 });
 
-await app.register(fastifyStatic, { root: CLIENT_DIR, wildcard: false });
+await app.register(fastifyStatic, {
+  root: CLIENT_DIR,
+  wildcard: false,
+  // Never cache HTML so iOS standalone always fetches a fresh index.html
+  // (which references the latest hashed JS/CSS bundles).
+  setHeaders: (res, path) => { if (path.endsWith('.html')) res.setHeader('Cache-Control', 'no-store'); },
+});
 
 // SPA fallback: anything not /api and not a real file -> index.html
 app.setNotFoundHandler((req, reply) => {
   if (req.raw.url.startsWith('/api')) return reply.code(404).send({ error: 'not found' });
+  // Ensure the SPA shell is never cached by iOS or any proxy.
+  reply.header('Cache-Control', 'no-store');
   return reply.sendFile('index.html');
 });
 
