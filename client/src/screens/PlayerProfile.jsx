@@ -5,6 +5,7 @@
 import { useStore } from '../store/store.jsx';
 import { buildPlayerDetail } from '../viewmodels/playerDetail.js';
 import Avatar from '../components/Avatar.jsx';
+import ColorPicker from '../sheets/ColorPicker.jsx';
 
 // ─── Stat chip (single metric display) ───
 function StatChip({ value, label }) {
@@ -261,7 +262,7 @@ function EmptyState({ vm }) {
 
 // ─── Main PlayerProfile screen ───
 export default function PlayerProfile() {
-  const { data, ui, setUi, now } = useStore();
+  const { data, ui, setUi, now, actions } = useStore();
 
   // Guard: need a playerId in ui state
   if (!ui.playerId) {
@@ -325,8 +326,95 @@ export default function PlayerProfile() {
         </div>
       </div>
 
+      {/* ─── Manage row: Regular toggle + Color picker (always visible) ─── */}
+      {/* Design ref: lines 447–460 of Game Night.dc.html */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+
+        {/* Regular toggle card */}
+        <div
+          onClick={() => actions.updatePlayer(ui.playerId, { regular: !vm.regular })}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '12px 13px',
+            borderRadius: 16,
+            background: 'rgba(255,255,255,0.035)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            cursor: 'pointer',
+            userSelect: 'none',
+          }}
+        >
+          {/* 42×25 pill switch */}
+          <div style={{
+            width: 42,
+            height: 25,
+            borderRadius: 13,
+            flexShrink: 0,
+            position: 'relative',
+            background: vm.regular
+              ? 'linear-gradient(135deg,#FF8A3D,#FF5E62)'
+              : 'rgba(255,255,255,0.14)',
+            transition: 'background .18s ease',
+          }}>
+            {/* Sliding knob */}
+            <div style={{
+              position: 'absolute',
+              top: 3,
+              left: vm.regular ? 20 : 3,
+              width: 19,
+              height: 19,
+              borderRadius: '50%',
+              background: '#fff',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              transition: 'left .18s ease',
+            }} />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, lineHeight: 1.1 }}>Regular</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9D90B5', marginTop: 1 }}>
+              {vm.regular ? 'Auto-picked' : 'Not auto-picked'}
+            </div>
+          </div>
+        </div>
+
+        {/* Color card */}
+        <div
+          onClick={() => setUi({ colorSheetOpen: true })}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '12px 13px',
+            borderRadius: 16,
+            background: 'rgba(255,255,255,0.035)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            cursor: 'pointer',
+            userSelect: 'none',
+          }}
+        >
+          {/* Avatar gradient swatch */}
+          <div style={{
+            width: 25,
+            height: 25,
+            flexShrink: 0,
+            borderRadius: 8,
+            background: `linear-gradient(135deg, ${vm.c1}, ${vm.c2})`,
+          }} />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, lineHeight: 1.1 }}>Color</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#9D90B5', marginTop: 1 }}>Change color</div>
+          </div>
+        </div>
+      </div>
+
       {/* ─── Empty/new player state ─── */}
       {vm.empty && <EmptyState vm={vm} />}
+
+      {/* ─── Color picker bottom sheet — rendered here so it has access to vm/actions ─── */}
+      <ColorPicker />
 
       {/* ─── Rich stats (only when player has plays) ─── */}
       {!vm.empty && (

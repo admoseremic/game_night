@@ -54,7 +54,8 @@ function Shell() {
 
   // Hide the bottom nav whenever any sheet or overlay is open so it can't overlap sheet options
   const overlayOpen = ui.logOpen || ui.celebrate || ui.pickerOpen || ui.addGameOpen || ui.addPlayerOpen ||
-    ui.deletePlayId || ui.pickSheetOpen || ui.periodSheetOpen || ui.sortSheetOpen || ui.explainOpen || ui.customOpen;
+    ui.deletePlayId || ui.pickSheetOpen || ui.periodSheetOpen || ui.sortSheetOpen || ui.explainOpen || ui.customOpen ||
+    ui.colorSheetOpen;
 
   return (
     // Relative container so the absolutely-positioned BottomNav stays inside the 480px max-width column
