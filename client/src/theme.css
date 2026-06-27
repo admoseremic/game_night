@@ -31,7 +31,11 @@
 /* iOS standalone gives a layout viewport ~status-bar-height too short at the bottom,
    leaving a black box. Stretching the document height by env(safe-area-inset-top)
    covers it. See PWA-on-iOS notes. 100vh fallback then 100dvh. */
-html, body, #root { height: calc(100vh + env(safe-area-inset-top, 0px)); height: calc(100dvh + env(safe-area-inset-top, 0px)); overflow: hidden; }
+/* iOS standalone: stretch html/body taller than the layout viewport so iOS settles to the
+   FULL screen (kills the bottom black box). #root is sized to the actual visible viewport
+   (100dvh) so content + the bottom nav anchor to the real screen bottom, not the overshoot. */
+html, body { height: calc(100vh + env(safe-area-inset-top, 0px)); height: calc(100dvh + env(safe-area-inset-top, 0px)); overflow: hidden; }
+#root { height: 100vh; height: 100dvh; overflow: hidden; }
 /* Background on <html> so it fills the ENTIRE screen — including the status-bar inset in
    iOS standalone (Add to Home Screen) mode, where a body-only background leaves a bare
    strip at the top. The var(--bg) base layer guarantees no black shows through. No

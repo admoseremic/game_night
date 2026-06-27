@@ -26,13 +26,14 @@ import DeleteConfirm from './sheets/DeleteConfirm.jsx';
 import Pick from './sheets/Pick.jsx';
 import Picker from './sheets/Picker.jsx';
 
-// BUILD-12 diagnostic stamp — temporary overlay for iOS viewport debugging.
+// BUILD-13 diagnostic stamp — temporary overlay for iOS viewport debugging.
 // Shows key height metrics and standalone mode flag 250ms after mount.
+// rootH should now be ~956 (screen height), not 1018 (overshoot).
 function BuildStamp() {
   const [s, setS] = useState('measuring…');
   useEffect(() => {
     const t = setTimeout(() => {
-      setS(`BUILD-12 iH:${window.innerHeight} bodyH:${Math.round(document.body.getBoundingClientRect().height)} rootH:${Math.round(document.getElementById('root').getBoundingClientRect().height)} scrH:${window.screen.height} docH:${document.documentElement.clientHeight} sa:${navigator.standalone === true}`);
+      setS(`BUILD-13 iH:${window.innerHeight} bodyH:${Math.round(document.body.getBoundingClientRect().height)} rootH:${Math.round(document.getElementById('root').getBoundingClientRect().height)} scrH:${window.screen.height} docH:${document.documentElement.clientHeight} sa:${navigator.standalone === true}`);
     }, 250);
     return () => clearTimeout(t);
   }, []);
