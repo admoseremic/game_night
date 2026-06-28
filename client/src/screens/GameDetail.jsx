@@ -211,7 +211,10 @@ function HistChart({ histBars }) {
         WebkitOverflowScrolling: 'touch',
       }}>
         {histBars.map((b, i) => (
-          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+          // minWidth floors every column at the same width when the chart overflows, so columns
+          // (and their bars) stay uniform instead of shrinking to each value label's own width
+          // ("57" vs "118"). With few bars, flex:1 still grows them to fill.
+          <div key={i} style={{ flex: 1, minWidth: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
             <div style={{ fontSize: 9, fontWeight: 700, color: '#9D90B5' }}>{b.v}</div>
             <div style={{
               width: '100%',
