@@ -106,6 +106,7 @@ export function buildPlayerDetail(data, pid, now, from, period) {
   const games = Object.values(byGame).map(e => {
     const g = gameOf(data, e.g);
     return {
+      id: e.g, // game id — lets the profile row link to the game's detail page
       name: g.name,
       icon: g.icon,
       plays: e.plays,
@@ -142,7 +143,7 @@ export function buildPlayerDetail(data, pid, now, from, period) {
     // `held` = how long the record has stood (since it was first set). recordFor returns the
     // date of the earliest play that reached the best score, mirroring the Hall's "longest-standing".
     return (r && r.pid === pid)
-      ? { name: g.name, icon: g.icon, score: r.score, plays: allTimePlaysByGame[g.id] || 0, held: durationSince(r.date, now) }
+      ? { id: g.id, name: g.name, icon: g.icon, score: r.score, plays: allTimePlaysByGame[g.id] || 0, held: durationSince(r.date, now) }
       : null;
   }).filter(Boolean).sort((a, b) => b.plays - a.plays);
 

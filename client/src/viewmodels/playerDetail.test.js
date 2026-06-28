@@ -26,6 +26,7 @@ it('player detail aggregates wins/plays/beat/wwins', () => {
   expect(vm.wins).toBe(1);
   expect(vm.beat).toBe(2); // x1: rank 1 → beat 2 players (p2,p3); x2: rank 2 → beat 0
   expect(vm.wwinsStr).toBe('0.5'); // 1 Light win = 0.5
+  expect(vm.games.every(g => g.id)).toBe(true); // each per-game row carries its game id (for detail linking)
 });
 
 it('new player with no plays returns isNew/empty', () => {
@@ -85,7 +86,7 @@ it('player detail: records held sorted by the player\'s all-time plays of that g
   };
   const vm = buildPlayerDetail(d, 'p1', now, 'players', 'all');
   expect(vm.records.map(r => r.name)).toEqual(['Often', 'Rare']); // g2 (3 plays) before g1 (1 play)
-  expect(vm.records[0]).toMatchObject({ name: 'Often', plays: 3 });
+  expect(vm.records[0]).toMatchObject({ id: 'g2', name: 'Often', plays: 3 }); // id present for game-detail linking
 });
 
 it('player detail: career plays but none in window → emptyWindow (not isNew)', () => {

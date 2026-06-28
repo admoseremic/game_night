@@ -158,7 +158,7 @@ function RivalryCard({ type, opp }) {
 }
 
 // ─── Per-game breakdown table ───
-function GamesTable({ games }) {
+function GamesTable({ games, onPick }) {
   return (
     <div style={{
       borderRadius: 18,
@@ -182,15 +182,17 @@ function GamesTable({ games }) {
         <span style={{ width: 46, textAlign: 'center' }}>Plays</span>
         <span style={{ width: 46, textAlign: 'center' }}>Wins</span>
         <span style={{ width: 46, textAlign: 'right' }}>Best</span>
+        <span style={{ width: 16 }} />{/* chevron column */}
       </div>
 
-      {/* Game rows */}
+      {/* Game rows — tap to open the game's detail page */}
       {games.map((g, i) => (
-        <div key={g.name + i} style={{
+        <div key={g.name + i} onClick={() => onPick(g.id)} style={{
           display: 'flex',
           alignItems: 'center',
           padding: '10px 14px',
           borderBottom: '1px solid rgba(255,255,255,0.04)',
+          cursor: 'pointer',
         }}>
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
             <span style={{ fontSize: 16 }}>{g.icon}</span>
@@ -213,6 +215,7 @@ function GamesTable({ games }) {
           <span style={{ width: 46, textAlign: 'right', fontWeight: 700, fontSize: 13, color: '#34D9A0' }}>
             {g.best}
           </span>
+          <span style={{ width: 16, textAlign: 'right', color: '#6E6483', fontSize: 16, flexShrink: 0 }}>›</span>
         </div>
       ))}
     </div>
@@ -302,6 +305,10 @@ export default function PlayerProfile() {
   // Time-window filter (defaults to This Year, like the Hall). Scopes all performance stats.
   const period = ui.profilePeriod || 'thisYear';
   const vm = buildPlayerDetail(data, ui.playerId, now, ui.profileFrom, period);
+
+  // Open a game's detail page from one of this profile's game lists. `gameFrom: 'playerDetail'`
+  // (plus the still-set playerId) lets Game Detail's back link return here to this same profile.
+  const openGame = (gid) => setUi({ screen: 'gameDetail', gameId: gid, gameFrom: 'playerDetail' });
 
   return (
     <>
@@ -525,7 +532,7 @@ export default function PlayerProfile() {
           {vm.games.length > 0 && (
             <div style={{ marginBottom: 22 }}>
               <SectionHeader>Per-game breakdown</SectionHeader>
-              <GamesTable games={showAllGames ? vm.games : vm.games.slice(0, LIST_CAP)} />
+              <GamesTable games={showAllGames ? vm.games : vm.games.slice(0, LIST_CAP)} onPick={openGame} />
               {vm.games.length > LIST_CAP && (
                 <ExpandToggle expanded={showAllGames} total={vm.games.length} onToggle={() => setShowAllGames(v => !v)} />
               )}
@@ -538,7 +545,7 @@ export default function PlayerProfile() {
               <SectionHeader>Records held 🏅</SectionHeader>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {(showAllRecords ? vm.records : vm.records.slice(0, LIST_CAP)).map((r, i) => (
-                  <div key={r.name + i} style={{
+                  <div key={r.name + i} onClick={() => openGame(r.id)} style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: 10,
@@ -546,6 +553,7 @@ export default function PlayerProfile() {
                     borderRadius: 14,
                     background: 'rgba(255,194,75,0.07)',
                     border: '1px solid rgba(255,194,75,0.18)',
+                    cursor: 'pointer',
                   }}>
                     <span style={{ fontSize: 18 }}>{r.icon}</span>
                     {/* Name + play count (drives the sort) + how long the record has stood */}
@@ -563,6 +571,7 @@ export default function PlayerProfile() {
                     }}>
                       {r.score}
                     </span>
+                    <span style={{ color: '#C9A24B', fontSize: 16, flexShrink: 0 }}>›</span>
                   </div>
                 ))}
               </div>

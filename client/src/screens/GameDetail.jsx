@@ -424,11 +424,17 @@ export default function GameDetail() {
 
   const vm = buildGameDetail(data, ui.gameId, now);
 
+  // Back navigation: when opened from a player profile (gameFrom='playerDetail'), return to that
+  // player (playerId is still set) and label the link with their name; otherwise the games list.
+  const fromPlayer = ui.gameFrom === 'playerDetail';
+  const backPlayer = fromPlayer ? data.players.find(p => p.id === ui.playerId) : null;
+  const backLabel = backPlayer ? backPlayer.name : 'All games';
+
   return (
     <>
       {/* ─── Back link ─── */}
       <div
-        onClick={() => setUi({ screen: 'games', gameId: null })}
+        onClick={() => setUi({ screen: fromPlayer ? 'playerDetail' : 'games', gameId: null, gameFrom: null })}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -441,7 +447,7 @@ export default function GameDetail() {
           userSelect: 'none',
         }}
       >
-        <span style={{ fontSize: 16 }}>‹</span> All games
+        <span style={{ fontSize: 16 }}>‹</span> {backLabel}
       </div>
 
       {/* ─── Game title header ─── */}

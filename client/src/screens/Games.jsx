@@ -181,7 +181,7 @@ export default function Games() {
             <GameRow
               key={g.id}
               g={g}
-              onClick={() => setUi({ screen: 'gameDetail', gameId: g.id })}
+              onClick={() => setUi({ screen: 'gameDetail', gameId: g.id, gameFrom: 'games' })}
             />
           ))}
         </div>
