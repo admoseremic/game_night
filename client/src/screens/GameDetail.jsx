@@ -197,7 +197,10 @@ function HistChart({ histBars }) {
         display: 'flex',
         alignItems: 'flex-end',
         gap: 6,
-        height: 108,
+        // Tall enough for the largest column: value label (~13) + 92px max bar + date label (~12)
+        // + two 5px gaps ≈ 127px. The old 108px clipped the value labels of the tallest bars
+        // (align-items:flex-end pins bars to the bottom, so overflow lands on top).
+        height: 134,
         padding: '0 4px',
         marginBottom: 24,
         overflowX: 'auto',
