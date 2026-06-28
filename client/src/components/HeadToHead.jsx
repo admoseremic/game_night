@@ -5,8 +5,13 @@
 // Ported from prototype template lines 677–773; all logic lives in viewmodels/headToHead.js.
 // Reads/writes ui.h2hA / ui.h2hB / ui.h2hSlot — pure UI/session state, not persisted server-side.
 
+import { useState, useEffect } from 'react';
 import { useStore } from '../store/store.jsx';
 import { buildHeadToHead } from '../viewmodels/headToHead.js';
+import ExpandToggle from './ExpandToggle.jsx';
+
+// Per-game breakdown collapses to this many rows, with a Show all / Show less expander.
+const GAMES_CAP = 6;
 
 // ─── Single slot: filled (avatar + name, solid active ring) or empty ("?" placeholder, dashed ring) ───
 function Slot({ card, ring, placeholder, onClick }) {
@@ -41,6 +46,10 @@ export default function HeadToHead() {
   // Same window as the rest of Hall (default 'thisYear', matching Hall.jsx)
   const period = ui.hallPeriod || 'thisYear';
   const vm = buildHeadToHead(data, period, now, { a: ui.h2hA, b: ui.h2hB, slot: ui.h2hSlot });
+
+  // Collapse the per-game breakdown to GAMES_CAP rows; reset when the matchup or window changes.
+  const [showAllGames, setShowAllGames] = useState(false);
+  useEffect(() => { setShowAllGames(false); }, [ui.h2hA, ui.h2hB, ui.hallPeriod]);
 
   // Tap a roster avatar → fill the active slot, then flip the active slot to the other one
   // (two taps from empty fills both). Picking someone already in the OTHER slot pulls them
@@ -116,10 +125,10 @@ export default function HeadToHead() {
             {vm.hasLast && (
               <div style={{ textAlign: 'center', fontSize: 10.5, fontWeight: 600, color: '#9D90B5', marginTop: 3 }}>Latest · {vm.lastTxt}</div>
             )}
-            {/* Per-game breakdown */}
+            {/* Per-game breakdown (capped to GAMES_CAP rows; expander when longer) */}
             {vm.hasGames && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 14 }}>
-                {vm.games.map((g, i) => (
+                {(showAllGames ? vm.games : vm.games.slice(0, GAMES_CAP)).map((g, i) => (
                   <div key={g.name + i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 11px', borderRadius: 12, background: 'rgba(255,255,255,0.035)' }}>
                     <span style={{ fontSize: 16, flexShrink: 0 }}>{g.icon}</span>
                     <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.name}</span>
@@ -130,6 +139,14 @@ export default function HeadToHead() {
                     </div>
                   </div>
                 ))}
+                {vm.games.length > GAMES_CAP && (
+                  <ExpandToggle
+                    expanded={showAllGames}
+                    total={vm.games.length}
+                    onToggle={() => setShowAllGames(v => !v)}
+                    style={{ marginTop: 3, padding: '10px' }}
+                  />
+                )}
               </div>
             )}
           </div>

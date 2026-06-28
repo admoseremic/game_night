@@ -8,6 +8,7 @@ import { buildPlayerDetail } from '../viewmodels/playerDetail.js';
 import Avatar from '../components/Avatar.jsx';
 import ColorPicker from '../sheets/ColorPicker.jsx';
 import PeriodChips, { periodLabel } from '../components/PeriodChips.jsx';
+import ExpandToggle from '../components/ExpandToggle.jsx';
 
 // Long lists (per-game breakdown, records held) collapse to this many rows,
 // with a "Show all" expander — keeps a veteran player's profile scannable.
@@ -55,30 +56,6 @@ function SectionHeader({ children }) {
       margin: '0 2px 12px',
     }}>
       {children}
-    </div>
-  );
-}
-
-// ─── "Show all (N)" / "Show less" expander (matches the Hall trophy-case toggle) ───
-function ExpandToggle({ expanded, total, onToggle }) {
-  return (
-    <div
-      onClick={onToggle}
-      style={{
-        marginTop: 10,
-        textAlign: 'center',
-        padding: '12px',
-        borderRadius: 14,
-        fontSize: 13,
-        fontWeight: 700,
-        color: '#FFC24B',
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        cursor: 'pointer',
-        userSelect: 'none',
-      }}
-    >
-      {expanded ? 'Show less' : `Show all (${total})`}
     </div>
   );
 }
