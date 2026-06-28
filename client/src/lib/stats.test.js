@@ -58,6 +58,30 @@ it('computePick → anyone can pick (null) only when everyone in every game is a
   expect(computePick(data, data.plays, { p1: true, p2: true, p3: true }).pickPart).toBe(null);
 });
 
+it('computePick full chain: last → next-to-last within a game, then back to the previous game', () => {
+  const d = {
+    players: ['A', 'B', 'C', 'D', 'E', 'F'].map(id => ({ id, name: id, c1: '#1', c2: '#2', regular: true })),
+    games: [
+      { id: 'gA', name: 'A', tier: 'Light', dir: 'high', icon: '🎲' },
+      { id: 'gB', name: 'B', tier: 'Light', dir: 'high', icon: '🎲' },
+      { id: 'gC', name: 'C', tier: 'Light', dir: 'high', icon: '🎲' },
+    ],
+    plays: [
+      { id: 'pA', g: 'gA', d: '2026-03-03T20:00', parts: [['A', 1, 9], ['B', 2, 5], ['C', 3, 1]] }, // most recent
+      { id: 'pB', g: 'gB', d: '2026-02-02T20:00', parts: [['D', 1, 9], ['E', 2, 1]] },               // previous
+      { id: 'pC', g: 'gC', d: '2026-01-01T20:00', parts: [['F', 1, 9]] },                            // oldest
+    ],
+  };
+  const pick = (absent) => { const r = computePick(d, d.plays, absent); return r.pickPart ? r.pickPart[0] : null; };
+  expect(pick({})).toBe('C');                              // last place of the most recent game
+  expect(pick({ C: 1 })).toBe('B');                        // C not here → next-to-last
+  expect(pick({ C: 1, B: 1 })).toBe('A');                  // then the winner of that game
+  expect(pick({ C: 1, B: 1, A: 1 })).toBe('E');            // whole game gone → last of the previous game
+  expect(pick({ C: 1, B: 1, A: 1, E: 1 })).toBe('D');      // next-to-last of the previous game
+  expect(pick({ C: 1, B: 1, A: 1, E: 1, D: 1 })).toBe('F'); // → last of the oldest game
+  expect(pick({ C: 1, B: 1, A: 1, E: 1, D: 1, F: 1 })).toBe(null); // nobody left → anyone can pick
+});
+
 it('inPeriod month filter', () => {
   const now = new Date('2026-06-24T20:00:00');
   expect(inPeriod({ d: '2026-06-10T20:00' }, 'month', now)).toBe(true);
