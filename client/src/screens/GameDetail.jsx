@@ -193,39 +193,34 @@ function HistChart({ histBars }) {
       }}>
         Winning scores over time
       </div>
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-end',
-        gap: 6,
-        // Tall enough for the largest column: value label (~13) + 92px max bar + date label (~12)
-        // + two 5px gaps ≈ 127px. The old 108px clipped the value labels of the tallest bars
-        // (align-items:flex-end pins bars to the bottom, so overflow lands on top).
-        height: 134,
-        padding: '0 4px',
-        marginBottom: 24,
-        overflowX: 'auto',
-        maxWidth: '100%',
-        WebkitOverflowScrolling: 'touch',
-      }}>
-        {histBars.map((b, i) => (
-          <div key={i} style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 5,
-          }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: '#9D90B5' }}>{b.v}</div>
-            <div style={{
-              width: '100%',
-              maxWidth: 26,
-              height: b.h,
-              borderRadius: '7px 7px 3px 3px',
-              background: 'linear-gradient(180deg,#FF8A3D,#FF5E62)',
-            }} />
-            <div style={{ fontSize: 8, fontWeight: 600, color: '#6E6483' }}>{b.label}</div>
-          </div>
-        ))}
+      {/* Bars and the date axis are SEPARATE rows in one scroll container, so every bar shares a
+          common baseline no matter how the date labels wrap. (Previously bars + dates were one
+          flex-end column each, so a one-line date made that column shorter and dropped its bar
+          lower than neighbors whose dates wrapped to two lines.) Both rows use identical flex:1
+          columns + gap + padding, so bars and their dates stay aligned. */}
+      <div style={{ overflowX: 'auto', maxWidth: '100%', WebkitOverflowScrolling: 'touch', marginBottom: 24 }}>
+        {/* Bars — value label floats above each bar; flex-end gives them all the same baseline.
+            Height fits the tallest column: value label (~13) + 5px gap + 92px max bar. */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 114, padding: '0 4px' }}>
+          {histBars.map((b, i) => (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#9D90B5' }}>{b.v}</div>
+              <div style={{
+                width: '100%',
+                maxWidth: 26,
+                height: b.h,
+                borderRadius: '7px 7px 3px 3px',
+                background: 'linear-gradient(180deg,#FF8A3D,#FF5E62)',
+              }} />
+            </div>
+          ))}
+        </div>
+        {/* Date axis — its own row, so variable label wrapping can't shift the bars */}
+        <div style={{ display: 'flex', gap: 6, padding: '5px 4px 0' }}>
+          {histBars.map((b, i) => (
+            <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 8, fontWeight: 600, color: '#6E6483' }}>{b.label}</div>
+          ))}
+        </div>
       </div>
     </>
   );
