@@ -3,7 +3,7 @@
 // All stat math comes from stats.js and format.js — no re-computation here.
 
 import { weight, currentStreak, recordFor } from '../lib/stats.js';
-import { fmtDate, ordinal } from '../lib/format.js';
+import { fmtDate, ordinal, durationSince } from '../lib/format.js';
 
 // Common helpers for this module
 const player = (data, id) => data.players.find(x => x.id === id);
@@ -139,8 +139,10 @@ export function buildPlayerDetail(data, pid, now, from, period) {
   });
   const records = data.games.map(g => {
     const r = recordFor(data, g.id);
+    // `held` = how long the record has stood (since it was first set). recordFor returns the
+    // date of the earliest play that reached the best score, mirroring the Hall's "longest-standing".
     return (r && r.pid === pid)
-      ? { name: g.name, icon: g.icon, score: r.score, plays: allTimePlaysByGame[g.id] || 0 }
+      ? { name: g.name, icon: g.icon, score: r.score, plays: allTimePlaysByGame[g.id] || 0, held: durationSince(r.date, now) }
       : null;
   }).filter(Boolean).sort((a, b) => b.plays - a.plays);
 

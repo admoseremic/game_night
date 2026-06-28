@@ -7,6 +7,18 @@ export function rel(iso, now) {
   if (days < 30) return Math.floor(days / 7) + 'w ago'; if (days < 365) return Math.floor(days / 30) + 'mo ago'; return Math.floor(days / 365) + 'y ago';
 }
 export function ordinal(n) { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+// Compact, "ago"-less elapsed duration since `iso` (e.g. how long a record has been held):
+// 'today' / '1 day' / 'N days' / 'Nw' / 'Nmo' / 'Ny' / 'Ny Nmo'.
+export function durationSince(iso, now) {
+  const days = Math.floor((now - new Date(iso)) / 864e5);
+  if (days <= 0) return 'today';
+  if (days === 1) return '1 day';
+  if (days < 7) return days + ' days';
+  if (days < 30) return Math.floor(days / 7) + 'w';
+  if (days < 365) return Math.floor(days / 30) + 'mo';
+  const y = Math.floor(days / 365), mo = Math.round((days - y * 365) / 30);
+  return mo ? `${y}y ${mo}mo` : `${y}y`;
+}
 export function tierBg(t) { return t === 'Heavy' ? 'rgba(255,77,141,0.16)' : t === 'Light' ? 'rgba(52,217,160,0.16)' : 'rgba(255,138,61,0.16)'; }
 export function tierTx(t) { return t === 'Heavy' ? '#FF6FA5' : t === 'Light' ? '#34D9A0' : '#FF8A3D'; }
 export const MEDALS = [['#FFE08A','#F0A92E','#3A2A08'],['#E6ECF5','#AEB8C9','#222833'],['#F3B27A','#D9824A','#3A1E0C']];

@@ -61,8 +61,15 @@ export function currentStreak(plays, pid) {
 export function computePick(data, plays, absent = {}) {
   const sorted = [...plays].sort((a, b) => new Date(b.d) - new Date(a.d));
   if (!sorted.length) return null;
+  // Walk back through games, newest first. Within a game the worst finisher picks; if they're
+  // absent, cascade to the next-worst. If an ENTIRE game's roster is absent, fall back to the
+  // previous game's loser, and so on. Only when nobody from any game is present is it
+  // "anyone can pick" (pickPart null), shown against the most-recent game for context.
+  for (const play of sorted) {
+    const ordered = [...play.parts].sort((a, b) => b[1] - a[1]); // worst finisher first
+    const pickPart = ordered.find(p => !absent[p[0]]);
+    if (pickPart) return { game: game(data, play.g), date: play.d, ordered, pickPart };
+  }
   const last = sorted[0];
-  const ordered = [...last.parts].sort((a, b) => b[1] - a[1]); // worst finisher first
-  const pickPart = ordered.find(p => !absent[p[0]]) || null;
-  return { game: game(data, last.g), date: last.d, ordered, pickPart };
+  return { game: game(data, last.g), date: last.d, ordered: [...last.parts].sort((a, b) => b[1] - a[1]), pickPart: null };
 }

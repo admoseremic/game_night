@@ -101,12 +101,12 @@ export default function Pick() {
         );
       })()}
 
-      {/* Pick exists but everyone from last game is absent */}
+      {/* Pick exists but everyone from every recent game is absent */}
       {pick && !pick.pickPart && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '4px 0' }}>
           <span style={{ fontSize: 34 }}>🎲</span>
           <span style={{ fontSize: 15, fontWeight: 700, color: '#F4EEF8', lineHeight: 1.3 }}>
-            Nobody from the last game is here — anyone can pick!
+            Nobody from recent games is here — anyone can pick!
           </span>
         </div>
       )}
@@ -157,7 +157,7 @@ export default function Pick() {
         marginTop: 16,
         lineHeight: 1.4,
       }}>
-        Whoever lost the last game picks the next one. Not here? Pass it down to the next-worst finisher.
+        Whoever lost the last game picks the next one. Not here? Pass it down to the next-worst finisher — and if nobody from that game is around, back to the previous game's loser.
       </div>
     </BottomSheet>
   );

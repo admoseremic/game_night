@@ -47,6 +47,17 @@ it('computePick returns worst finisher of most-recent play, cascading on absent'
   expect(computePick(data, data.plays, { p1: true }).pickPart[0]).toBe('p2');
 });
 
+it('computePick falls back to a previous game when the last game roster is all absent', () => {
+  // x2 (most recent) is p1+p2; both absent → cascade to x1, whose worst finisher is p3.
+  const v = computePick(data, data.plays, { p1: true, p2: true });
+  expect(v.pickPart[0]).toBe('p3');
+  expect(v.game.id).toBe('g1'); // context is the previous game, not the most recent
+});
+
+it('computePick → anyone can pick (null) only when everyone in every game is absent', () => {
+  expect(computePick(data, data.plays, { p1: true, p2: true, p3: true }).pickPart).toBe(null);
+});
+
 it('inPeriod month filter', () => {
   const now = new Date('2026-06-24T20:00:00');
   expect(inPeriod({ d: '2026-06-10T20:00' }, 'month', now)).toBe(true);
