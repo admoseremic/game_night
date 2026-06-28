@@ -34,3 +34,49 @@ it('new player with no plays returns isNew/empty', () => {
   expect(vm.isNew).toBe(true);
   expect(vm.empty).toBe(true);
 });
+
+// ─── Period filter (This Year / Last 2 Years / All Time) ───
+const multiYear = {
+  players: [
+    { id: 'p1', name: 'Ann', c1: '#1', c2: '#2', regular: true },
+    { id: 'p2', name: 'Bob', c1: '#3', c2: '#4', regular: true },
+  ],
+  games: [{ id: 'g1', name: 'Catan', tier: 'Medium', dir: 'high', icon: '🎲' }],
+  plays: [
+    { id: 'o1', g: 'g1', d: '2024-05-01T20:00', parts: [['p1', 2, 30], ['p2', 1, 90]] }, // 2024: Bob wins, sets all-time record 90
+    { id: 'n1', g: 'g1', d: '2026-03-01T20:00', parts: [['p1', 1, 50], ['p2', 2, 40]] }, // 2026: Ann wins
+    { id: 'n2', g: 'g1', d: '2026-04-01T20:00', parts: [['p1', 1, 55], ['p2', 2, 45]] }, // 2026: Ann wins
+  ],
+};
+
+it('player detail: period filter scopes performance stats', () => {
+  const all = buildPlayerDetail(multiYear, 'p1', now, 'players', 'all');
+  expect(all.plays).toBe(3);
+  expect(all.wins).toBe(2);
+  const ty = buildPlayerDetail(multiYear, 'p1', now, 'players', 'thisYear');
+  expect(ty.plays).toBe(2);   // only the two 2026 plays
+  expect(ty.wins).toBe(2);
+  expect(ty.winPct).toBe(100);
+});
+
+it('player detail: Records held stays all-time regardless of period', () => {
+  // All-time g1 record is Bob's 90 (2024). Ann's 2026 best (55) is NOT an all-time record,
+  // so even in the This Year view she holds no records and Bob still does.
+  const annTY = buildPlayerDetail(multiYear, 'p1', now, 'players', 'thisYear');
+  expect(annTY.hasRecords).toBe(false); // would be true if records were window-scoped
+  const bobTY = buildPlayerDetail(multiYear, 'p2', now, 'players', 'thisYear');
+  expect(bobTY.hasRecords).toBe(true);
+  expect(bobTY.records[0]).toMatchObject({ name: 'Catan', score: 90 });
+});
+
+it('player detail: career plays but none in window → emptyWindow (not isNew)', () => {
+  const d = {
+    players: [{ id: 'pq', name: 'Quinn', c1: '#9', c2: '#0', regular: true }, { id: 'p2', name: 'Bob', c1: '#3', c2: '#4', regular: true }],
+    games: [{ id: 'g1', name: 'Catan', tier: 'Medium', dir: 'high', icon: '🎲' }],
+    plays: [{ id: 'old', g: 'g1', d: '2024-05-01T20:00', parts: [['pq', 1, 50], ['p2', 2, 40]] }],
+  };
+  const vm = buildPlayerDetail(d, 'pq', now, 'players', 'thisYear');
+  expect(vm.empty).toBe(true);
+  expect(vm.isNew).toBe(false);    // they have career plays, just none this year
+  expect(vm.emptyWindow).toBe(true);
+});

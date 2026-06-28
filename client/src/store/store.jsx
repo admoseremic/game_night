@@ -21,6 +21,8 @@ export function StoreProvider({ children }) {
   const [data, setData] = useState({ players: [], games: [], plays: [] });
   const [ui, setUiState] = useState({ screen: 'board', period: 'month', sorts: ['wins'],
     gameId: null, playerId: null, custom: { start: '2026-01-01', end: '2026-06-25' }, absent: {}, hallPeriod: 'thisYear',
+    // Player Profile time-window filter (This Year / Last 2 Years / All Time). Session-only.
+    profilePeriod: 'thisYear',
     // Head-to-Head picker (Hall): selected player ids + which slot the next roster tap fills. Session-only.
     h2hA: null, h2hB: null, h2hSlot: 'a' });
   const now = useRef(new Date()).current;

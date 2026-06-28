@@ -13,26 +13,42 @@ const initialsOf = (p) => (p.name || '?')[0].toUpperCase();
 /**
  * buildPlayerDetail(data, pid, now, from) → full player profile view-model.
  *
- * @param {object} data  - { players, games, plays }
- * @param {string} pid   - player id to profile
- * @param {Date}   now   - current date
- * @param {string} from  - navigation source: 'players' | 'board'
+ * @param {object} data   - { players, games, plays }
+ * @param {string} pid    - player id to profile
+ * @param {Date}   now    - current date
+ * @param {string} from   - navigation source: 'players' | 'board'
+ * @param {string} period - 'all' | 'last2' | 'thisYear' (undefined → 'all'). Scopes performance
+ *                          stats to a time window, exactly like the Hall of Fame filter. NOTE:
+ *                          "Records held" stays all-time (career trophies) regardless of period.
  */
-export function buildPlayerDetail(data, pid, now, from) {
+export function buildPlayerDetail(data, pid, now, from, period) {
   const p = player(data, pid);
-  // All plays involving this player, most recent first
+
+  // Period window (same year-based logic as buildHall / buildHeadToHead)
+  const hp = period || 'all';
+  const inWindow = (d) => {
+    const y = new Date(d).getFullYear();
+    if (hp === 'thisYear') return y === now.getFullYear();
+    if (hp === 'last2') return y >= now.getFullYear() - 1;
+    return true; // 'all'
+  };
+
+  // Career play count (all-time) is what distinguishes a brand-new player from one who simply
+  // has no plays in the selected window. `plays` below is the windowed subset, most recent first.
+  const careerCount = data.plays.filter(x => x.parts.some(pt => pt[0] === pid)).length;
   const plays = data.plays
-    .filter(x => x.parts.some(pt => pt[0] === pid))
+    .filter(x => x.parts.some(pt => pt[0] === pid) && inWindow(x.d))
     .sort((a, b) => new Date(b.d) - new Date(a.d));
 
   // Label for the back button based on where user navigated from
   const backLabel = from === 'board' ? 'Leaderboard' : 'Players';
 
-  // Empty/new player state — no plays recorded
+  // Empty state — either a brand-new player (no career plays) or no plays in this window.
   if (plays.length === 0) {
     return {
       empty: true,
-      isNew: true,
+      isNew: careerCount === 0,
+      emptyWindow: careerCount > 0, // has a career, just nothing in the selected period
       name: p.name,
       initials: initialsOf(p),
       c1: p.c1,
@@ -65,7 +81,8 @@ export function buildPlayerDetail(data, pid, now, from) {
   });
   const total = plays.length;
   const winPct = Math.round(wins / total * 100);
-  const streak = currentStreak(data.plays, pid);
+  // Streak scoped to the window (consistent with the form dots, which also use `plays`)
+  const streak = currentStreak(plays, pid);
 
   // ─── Form dots: last 5 plays (oldest → newest), colored by win/loss ───
   const formDots = plays.slice(0, 5)

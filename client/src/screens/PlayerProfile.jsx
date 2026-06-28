@@ -7,6 +7,7 @@ import { useStore } from '../store/store.jsx';
 import { buildPlayerDetail } from '../viewmodels/playerDetail.js';
 import Avatar from '../components/Avatar.jsx';
 import ColorPicker from '../sheets/ColorPicker.jsx';
+import PeriodChips, { periodLabel } from '../components/PeriodChips.jsx';
 
 // Long lists (per-game breakdown, records held) collapse to this many rows,
 // with a "Show all" expander — keeps a veteran player's profile scannable.
@@ -275,7 +276,9 @@ function RecentRow({ r }) {
 }
 
 // ─── Empty / new player state ───
-function EmptyState({ vm }) {
+// Two flavors: a brand-new player (no plays ever) vs. a player with a career but nothing in the
+// selected period (emptyWindow) — the latter nudges the user to widen the window instead.
+function EmptyState({ vm, periodName }) {
   return (
     <div style={{ textAlign: 'center', padding: '48px 20px', color: '#9D90B5' }}>
       {/* Large avatar */}
@@ -283,8 +286,17 @@ function EmptyState({ vm }) {
         <Avatar player={vm} size={72} />
       </div>
       <div style={{ fontWeight: 700, fontSize: 18, color: '#F4EEF8', marginBottom: 6 }}>{vm.name}</div>
-      <div style={{ fontSize: 13 }}>No games recorded yet.</div>
-      <div style={{ fontSize: 13, marginTop: 2 }}>Log a game night to see this player's stats.</div>
+      {vm.emptyWindow ? (
+        <>
+          <div style={{ fontSize: 13 }}>No games in {periodName}.</div>
+          <div style={{ fontSize: 13, marginTop: 2 }}>Try a wider window above.</div>
+        </>
+      ) : (
+        <>
+          <div style={{ fontSize: 13 }}>No games recorded yet.</div>
+          <div style={{ fontSize: 13, marginTop: 2 }}>Log a game night to see this player's stats.</div>
+        </>
+      )}
     </div>
   );
 }
@@ -298,7 +310,8 @@ export default function PlayerProfile() {
   // with the Hall's own recordsExpanded. Reset to collapsed when switching players.
   const [showAllGames, setShowAllGames] = useState(false);
   const [showAllRecords, setShowAllRecords] = useState(false);
-  useEffect(() => { setShowAllGames(false); setShowAllRecords(false); }, [ui.playerId]);
+  // Collapse the long lists when the player OR the time window changes (both reshape the lists).
+  useEffect(() => { setShowAllGames(false); setShowAllRecords(false); }, [ui.playerId, ui.profilePeriod]);
 
   // Guard: need a playerId in ui state
   if (!ui.playerId) {
@@ -309,7 +322,9 @@ export default function PlayerProfile() {
     );
   }
 
-  const vm = buildPlayerDetail(data, ui.playerId, now, ui.profileFrom);
+  // Time-window filter (defaults to This Year, like the Hall). Scopes all performance stats.
+  const period = ui.profilePeriod || 'thisYear';
+  const vm = buildPlayerDetail(data, ui.playerId, now, ui.profileFrom, period);
 
   return (
     <>
@@ -446,8 +461,15 @@ export default function PlayerProfile() {
         </div>
       </div>
 
+      {/* ─── Period filter (This Year / Last 2 Years / All Time) — below the manage row.
+            Hidden for a brand-new player (no career data in any window); shown for an
+            empty-window so they can widen the period. ─── */}
+      {!vm.isNew && (
+        <PeriodChips active={period} onSelect={k => setUi({ profilePeriod: k })} />
+      )}
+
       {/* ─── Empty/new player state ─── */}
-      {vm.empty && <EmptyState vm={vm} />}
+      {vm.empty && <EmptyState vm={vm} periodName={periodLabel(period)} />}
 
       {/* ─── Color picker bottom sheet — rendered here so it has access to vm/actions ─── */}
       <ColorPicker />

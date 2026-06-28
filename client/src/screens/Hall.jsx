@@ -8,44 +8,7 @@ import { useStore } from '../store/store.jsx';
 import { buildHall } from '../viewmodels/hall.js';
 import Avatar from '../components/Avatar.jsx';
 import HeadToHead from '../components/HeadToHead.jsx';
-
-// --- Period chip bar ---
-// Three filter chips; active chip gets gold background, others stay subtle.
-const CHIPS = [
-  { key: 'thisYear', label: 'This Year' },
-  { key: 'last2',    label: 'Last 2 Years' },
-  { key: 'all',      label: 'All Time' },
-];
-
-function PeriodChips({ active, onSelect }) {
-  return (
-    <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-      {CHIPS.map(c => {
-        const isActive = c.key === active;
-        return (
-          <div
-            key={c.key}
-            onClick={() => onSelect(c.key)}
-            style={{
-              flex: 1,
-              textAlign: 'center',
-              padding: '9px 4px',
-              borderRadius: 12,
-              fontSize: 12.5,
-              fontWeight: 700,
-              cursor: 'pointer',
-              color: isActive ? '#150F1F' : '#9D90B5',
-              background: isActive ? '#FFC24B' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${isActive ? '#FFC24B' : 'rgba(255,255,255,0.08)'}`,
-            }}
-          >
-            {c.label}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+import PeriodChips, { periodLabel } from '../components/PeriodChips.jsx';
 
 // --- Prize cards (Most Wins + Best Win%) side by side ---
 
@@ -241,13 +204,13 @@ export default function Hall() {
   const vm = buildHall(data, period, now, expanded);
 
   // Period chip label for the kicker text
-  const periodLabel = period === 'thisYear' ? 'This Year' : period === 'last2' ? 'Last 2 Years' : 'All Time';
+  const kicker = periodLabel(period);
 
   return (
     <div style={{ padding: '0 18px' }}>
       {/* Header kicker + title */}
       <div style={{ margin: '4px 2px 14px' }}>
-        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#FFC24B' }}>{periodLabel}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#FFC24B' }}>{kicker}</span>
         <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 25, lineHeight: 1, marginTop: 1 }}>Hall of Fame</div>
       </div>
 
