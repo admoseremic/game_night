@@ -29,7 +29,29 @@ it('leaderboard aggregates wins, plays, beat, wwins, winPct', () => {
   expect(byId.p3).toMatchObject({ wins: 0, plays: 1, beat: 0, winPct: 0 });
   expect(byId.p1.wwinsStr).toBe('0.5'); // win in Light
   expect(byId.p2.wwinsStr).toBe('1.5'); // win in Heavy
+  expect(byId.p1.beatPerStr).toBe('1.0'); // 2 beaten / 2 plays
+  expect(byId.p3.beatPerStr).toBe('0.0'); // 0 beaten / 1 play
   expect(lb[0].rank).toBe(1);
+});
+
+it('leaderboard beatPer normalizes opponents beaten by games played', () => {
+  const fillers = ['f1', 'f2', 'f3', 'f4', 'f5'].map(id => ({ id, name: id, c1: '#5', c2: '#6', regular: true }));
+  const d = {
+    players: [{ id: 'X', name: 'X', c1: '#1', c2: '#2', regular: true }, { id: 'Y', name: 'Y', c1: '#3', c2: '#4', regular: true }, ...fillers],
+    games: [{ id: 'g', name: 'G', tier: 'Light', dir: 'high', icon: '🎲' }],
+    plays: [
+      // X wins one 6-player game → beats 5 in a single play
+      { id: 'a', g: 'g', d: '2026-01-01T20:00', parts: [['X', 1, 9], ['f1', 2, 8], ['f2', 3, 7], ['f3', 4, 6], ['f4', 5, 5], ['f5', 6, 4]] },
+      // Y wins five 2-player games → also 5 total, but spread over 5 plays
+      ...[1, 2, 3, 4, 5].map(n => ({ id: 'b' + n, g: 'g', d: `2026-02-0${n}T20:00`, parts: [['Y', 1, 9], ['f1', 2, 1]] })),
+    ],
+  };
+  const byId = Object.fromEntries(leaderboard(d, d.plays, 'beatPer').map(e => [e.pid, e]));
+  expect(byId.X.beat).toBe(5);          // same TOTAL beaten as Y ...
+  expect(byId.Y.beat).toBe(5);
+  expect(byId.X.beatPerStr).toBe('5.0'); // ... but 5.0/play
+  expect(byId.Y.beatPerStr).toBe('1.0'); // ... vs 1.0/play
+  expect(leaderboard(d, d.plays, 'beatPer')[0].pid).toBe('X'); // sorts X above Y
 });
 
 it('recordFor respects direction (high=max, low=min)', () => {

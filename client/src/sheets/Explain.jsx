@@ -23,6 +23,11 @@ const STATS = [
     desc: 'Everyone who finished below you, summed across all games. Beating a 6-player table counts more than a 2-player one.',
   },
   {
+    icon: '📊',
+    label: 'Beaten per Play',
+    desc: 'Players beaten ÷ games played — your average per night. Fair across people who’ve played more or fewer games.',
+  },
+  {
     icon: '⚖️',
     label: 'Weighted Wins',
     desc: 'Wins worth more for heavier games — Light ×0.5, Medium ×1, Heavy ×1.5. Rewards beating the brain-burners.',

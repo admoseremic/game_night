@@ -10,8 +10,9 @@ const SORT_DEFS = [
   ['wins',   'Wins',    '🥇', 'First-place finishes'],
   ['winPct', 'Win %',   '📈', 'Wins ÷ games played'],
   ['plays',  'Plays',   '🎲', 'Games played'],
-  ['beat',   'Beaten',  '⚔️', 'Opponents beaten, all games'],
-  ['wwins',  'W.Wins',  '⚖️', 'Wins weighted by game weight'],
+  ['beat',   'Beaten',     '⚔️', 'Opponents beaten, all games'],
+  ['beatPer', 'Beat/play', '📊', 'Opponents beaten ÷ games played'],
+  ['wwins',  'W.Wins',     '⚖️', 'Wins weighted by game weight'],
 ];
 
 export default function Sort() {

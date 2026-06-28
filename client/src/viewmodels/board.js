@@ -20,6 +20,7 @@ const sortLabels = {
   winPct: 'Win %',
   plays: 'Plays',
   beat: 'Beaten',
+  beatPer: 'Beat/play',
   wwins: 'W.Wins',
 };
 
@@ -28,6 +29,7 @@ function fmtVal(e, key) {
   if (key === 'wwins') return e.wwinsStr;
   if (key === 'winPct') return e.winPct + '%';
   if (key === 'beat') return e.beat;
+  if (key === 'beatPer') return e.beatPerStr;
   if (key === 'plays') return e.plays;
   return e.wins;
 }
