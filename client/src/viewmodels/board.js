@@ -18,6 +18,7 @@ const periodLabels = {
 const sortLabels = {
   wins: 'Wins',
   winPct: 'Win %',
+  losses: 'Losses',
   plays: 'Plays',
   beat: 'Beaten',
   beatPer: 'Beat/play',
@@ -30,6 +31,7 @@ function fmtVal(e, key) {
   if (key === 'winPct') return e.winPct + '%';
   if (key === 'beat') return e.beat;
   if (key === 'beatPer') return e.beatPerStr;
+  if (key === 'losses') return e.losses;
   if (key === 'plays') return e.plays;
   return e.wins;
 }

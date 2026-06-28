@@ -31,7 +31,25 @@ it('leaderboard aggregates wins, plays, beat, wwins, winPct', () => {
   expect(byId.p2.wwinsStr).toBe('1.5'); // win in Heavy
   expect(byId.p1.beatPerStr).toBe('1.0'); // 2 beaten / 2 plays
   expect(byId.p3.beatPerStr).toBe('0.0'); // 0 beaten / 1 play
+  expect(byId.p1.losses).toBe(1); // last in x2 (rank 2 of 2)
+  expect(byId.p2.losses).toBe(0);
+  expect(byId.p3.losses).toBe(1); // last in x1 (rank 3 of 3)
   expect(lb[0].rank).toBe(1);
+});
+
+it('leaderboard losses = last-place finishes (solo games excluded)', () => {
+  const d = {
+    players: [{ id: 'a', name: 'A', c1: '#1', c2: '#2', regular: true }, { id: 'b', name: 'B', c1: '#3', c2: '#4', regular: true }],
+    games: [{ id: 'g', name: 'G', tier: 'Light', dir: 'high', icon: '🎲' }],
+    plays: [
+      { id: 'p1', g: 'g', d: '2026-01-01T20:00', parts: [['a', 1, 9], ['b', 2, 1]] }, // B last
+      { id: 'p2', g: 'g', d: '2026-01-02T20:00', parts: [['a', 1, 9]] },               // solo A → not a loss
+    ],
+  };
+  const byId = Object.fromEntries(leaderboard(d, d.plays, 'losses').map(e => [e.pid, e]));
+  expect(byId.a.losses).toBe(0); // never last; solo game doesn't count
+  expect(byId.b.losses).toBe(1);
+  expect(leaderboard(d, d.plays, 'losses')[0].pid).toBe('b'); // sorts most losses first
 });
 
 it('leaderboard beatPer normalizes opponents beaten by games played', () => {

@@ -9,6 +9,7 @@ import { useStore } from '../store/store.jsx';
 const SORT_DEFS = [
   ['wins',   'Wins',    '🥇', 'First-place finishes'],
   ['winPct', 'Win %',   '📈', 'Wins ÷ games played'],
+  ['losses', 'Losses',  '💀', 'Last-place finishes'],
   ['plays',  'Plays',   '🎲', 'Games played'],
   ['beat',   'Beaten',     '⚔️', 'Opponents beaten, all games'],
   ['beatPer', 'Beat/play', '📊', 'Opponents beaten ÷ games played'],

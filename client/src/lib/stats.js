@@ -22,10 +22,13 @@ export function leaderboard(data, plays, sort, sort2) {
   const m = {};
   for (const play of plays) {
     const tw = weight(game(data, play.g).tier);
+    const maxRank = Math.max(...play.parts.map(x => x[1])); // worst finish in this play
+    const hasOpponents = play.parts.length > 1;             // "last place" only counts with opponents
     for (const [pid, rank] of play.parts) {
-      const e = m[pid] || (m[pid] = { pid, plays: 0, wins: 0, beat: 0, wwins: 0 });
+      const e = m[pid] || (m[pid] = { pid, plays: 0, wins: 0, losses: 0, beat: 0, wwins: 0 });
       e.plays++; e.beat += play.parts.filter(x => x[1] > rank).length;
       if (rank === 1) { e.wins++; e.wwins += tw; }
+      if (hasOpponents && rank === maxRank) e.losses++; // finished dead last
     }
   }
   let arr = Object.values(m).map(e => { const p = pl(data, e.pid); const beatPer = e.plays ? e.beat / e.plays : 0; return { ...e, name: p.name, c1: p.c1, c2: p.c2, initials: initials(p),
@@ -33,7 +36,7 @@ export function leaderboard(data, plays, sort, sort2) {
     // beatPer = opponents beaten ÷ games played — normalizes "Beaten" so it's fair across players
     // with different game counts. beatPerStr is the 1-decimal display form (like wwinsStr).
     beatPer, beatPerStr: (Math.round(beatPer * 10) / 10).toFixed(1) }; });
-  const keyVal = (e, key) => key === 'wins' ? e.wins : key === 'plays' ? e.plays : key === 'winPct' ? e.winPct : key === 'beat' ? e.beat : key === 'beatPer' ? e.beatPer : e.wwins;
+  const keyVal = (e, key) => key === 'wins' ? e.wins : key === 'losses' ? e.losses : key === 'plays' ? e.plays : key === 'winPct' ? e.winPct : key === 'beat' ? e.beat : key === 'beatPer' ? e.beatPer : e.wwins;
   const key = sort || 'wins';
   arr.sort((a, b) => (keyVal(b, key) - keyVal(a, key)) || (sort2 ? (keyVal(b, sort2) - keyVal(a, sort2)) : 0));
   arr.forEach((e, i) => e.rank = i + 1);

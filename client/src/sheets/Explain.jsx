@@ -18,6 +18,11 @@ const STATS = [
     desc: 'Wins ÷ games played, as a percentage.',
   },
   {
+    icon: '💀',
+    label: 'Losses',
+    desc: 'Last-place finishes — games where you came in dead last. Solo games don’t count.',
+  },
+  {
     icon: '⚔️',
     label: 'Players Beaten',
     desc: 'Everyone who finished below you, summed across all games. Beating a 6-player table counts more than a 2-player one.',
