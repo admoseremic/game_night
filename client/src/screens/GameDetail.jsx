@@ -193,34 +193,37 @@ function HistChart({ histBars }) {
       }}>
         Winning scores over time
       </div>
-      {/* Bars and the date axis are SEPARATE rows in one scroll container, so every bar shares a
-          common baseline no matter how the date labels wrap. (Previously bars + dates were one
-          flex-end column each, so a one-line date made that column shorter and dropped its bar
-          lower than neighbors whose dates wrapped to two lines.) Both rows use identical flex:1
-          columns + gap + padding, so bars and their dates stay aligned. */}
-      <div style={{ overflowX: 'auto', maxWidth: '100%', WebkitOverflowScrolling: 'touch', marginBottom: 24 }}>
-        {/* Bars — value label floats above each bar; flex-end gives them all the same baseline.
-            Height fits the tallest column: value label (~13) + 5px gap + 92px max bar. */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 114, padding: '0 4px' }}>
-          {histBars.map((b, i) => (
-            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#9D90B5' }}>{b.v}</div>
-              <div style={{
-                width: '100%',
-                maxWidth: 26,
-                height: b.h,
-                borderRadius: '7px 7px 3px 3px',
-                background: 'linear-gradient(180deg,#FF8A3D,#FF5E62)',
-              }} />
-            </div>
-          ))}
-        </div>
-        {/* Date axis — its own row, so variable label wrapping can't shift the bars */}
-        <div style={{ display: 'flex', gap: 6, padding: '5px 4px 0' }}>
-          {histBars.map((b, i) => (
-            <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 8, fontWeight: 600, color: '#6E6483' }}>{b.label}</div>
-          ))}
-        </div>
+      {/* One flex column PER data point keeps each bar and its date in the same column, so they can
+          never drift out of alignment when the chart is wide (40-bar games would otherwise have the
+          date axis run wider than the bars). The date label has a FIXED height so every column is the
+          same height below its bar → all bars share a baseline regardless of whether a date wraps to
+          one or two lines. Row height fits the tallest column: value (~13) + 92px max bar + 20px date
+          + two 5px gaps. */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: 6,
+        height: 138,
+        padding: '0 4px',
+        marginBottom: 24,
+        overflowX: 'auto',
+        maxWidth: '100%',
+        WebkitOverflowScrolling: 'touch',
+      }}>
+        {histBars.map((b, i) => (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: '#9D90B5' }}>{b.v}</div>
+            <div style={{
+              width: '100%',
+              maxWidth: 26,
+              height: b.h,
+              borderRadius: '7px 7px 3px 3px',
+              background: 'linear-gradient(180deg,#FF8A3D,#FF5E62)',
+            }} />
+            {/* Fixed height (fits up to 2 wrapped lines) keeps every column the same height → shared baseline */}
+            <div style={{ fontSize: 8, fontWeight: 600, color: '#6E6483', height: 20, lineHeight: 1.15, textAlign: 'center', width: '100%' }}>{b.label}</div>
+          </div>
+        ))}
       </div>
     </>
   );
