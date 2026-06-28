@@ -41,8 +41,23 @@ function Placeholder({ name }) {
   );
 }
 
+// Initial-load spinner — shown until the first /api/state fetch resolves, so a cold start
+// doesn't flash empty "no plays / no data" states before the data arrives.
+function Loading() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', gap: 16, color: '#9D90B5' }}>
+      <div style={{
+        width: 38, height: 38, borderRadius: '50%',
+        border: '3px solid rgba(255,255,255,0.12)', borderTopColor: '#FF8A3D',
+        animation: 'spin 0.8s linear infinite',
+      }} />
+      <div style={{ fontSize: 13, fontWeight: 700 }}>Loading…</div>
+    </div>
+  );
+}
+
 function Shell() {
-  const { ui, setUi } = useStore();
+  const { ui, setUi, loading } = useStore();
 
   // Scroll to top when screen or detail target (gameId/playerId) changes
   const scrollRef = useRef(null);
@@ -68,7 +83,7 @@ function Shell() {
     }}>
       {/* Scrollable content area — bottom padding clears the floating nav (64px nav + 18px gap + buffer) */}
       <div ref={scrollRef} style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 104px)' }}>
-        {Screen ? <Screen /> : <Placeholder name={ui.screen || 'board'} />}
+        {loading ? <Loading /> : Screen ? <Screen /> : <Placeholder name={ui.screen || 'board'} />}
       </div>
 
       {/* Floating bottom nav — hidden while any sheet/overlay is open to prevent covering bottom options */}

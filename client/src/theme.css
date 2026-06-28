@@ -28,6 +28,8 @@
 }
 
 * { box-sizing: border-box; }
+/* Loading spinner (initial app load) */
+@keyframes spin { to { transform: rotate(360deg); } }
 /* iOS standalone gives a layout viewport ~status-bar-height too short at the bottom,
    leaving a black box. Stretching the document height by env(safe-area-inset-top)
    covers it. See PWA-on-iOS notes. 100vh fallback then 100dvh. */

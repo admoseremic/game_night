@@ -28,7 +28,14 @@ export function StoreProvider({ children }) {
   const now = useRef(new Date()).current;
   const setUi = useCallback((patch) => setUiState(s => ({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) })), []);
 
-  const refetch = useCallback(async () => { try { setData(await api.getState()); } catch (e) { console.error(e); } }, []);
+  // True until the FIRST /api/state fetch resolves, so the app can show a loading state instead of
+  // flashing empty "no plays/no data" screens on cold start. Stays false through later refetches.
+  const [loading, setLoading] = useState(true);
+
+  const refetch = useCallback(async () => {
+    try { setData(await api.getState()); } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  }, []);
 
   useEffect(() => {
     refetch();
@@ -68,5 +75,5 @@ export function StoreProvider({ children }) {
       () => api.updatePlayer(id, patch)),
   };
 
-  return <Ctx.Provider value={{ data, ui, setUi, now, refetch, actions }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ data, ui, setUi, now, refetch, actions, loading }}>{children}</Ctx.Provider>;
 }
