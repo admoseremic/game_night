@@ -22,7 +22,7 @@ it('hall: most-wins champ, best win%, blowout, rivalry, trophy', () => {
   expect(vm.winPct).toMatchObject({ name:'Ann' });               // 80% win
   expect(vm.milestones.length).toBe(4);
   expect(vm.milestones[0]).toMatchObject({ label:'Biggest blowout' });
-  expect(vm.milestones[0].value).toMatch(/won by 40/);           // play c: 60 vs 20
+  expect(vm.milestones[0].value).toMatch(/won by 40 points/);    // play c: 60 vs 20 (67%, highest here)
   expect(vm.rivalries.length).toBe(1);                            // p1/p2 met 5
   expect(vm.records.length).toBe(1);
   expect(vm.recordsTotal).toBe(1);
@@ -30,4 +30,35 @@ it('hall: most-wins champ, best win%, blowout, rivalry, trophy', () => {
 
 it('hall: empty window', () => {
   expect(buildHall({ ...data, plays: [] }, 'all', now, false).hasData).toBe(false);
+});
+
+// Blowout is selected by PERCENTAGE margin (so low-scoring wipeouts aren't beaten by
+// high-scoring grinds), but DISPLAYED as the absolute point gap.
+it('hall: blowout ranks by percentage, displays absolute points', () => {
+  const pdata = {
+    players: [{ id:'p1', name:'Ann', c1:'#1', c2:'#2', regular:true }, { id:'p2', name:'Bob', c1:'#3', c2:'#4', regular:true }],
+    games: [{ id:'g1', name:'G', tier:'Medium', dir:'high', icon:'🎲' }],
+    plays: [
+      { id:'a', g:'g1', d:'2026-01-05T20:00', parts:[['p1',1,60],['p2',2,20]] }, // 40-pt gap, 67%
+      { id:'b', g:'g1', d:'2026-02-05T20:00', parts:[['p1',1,10],['p2',2,1]] },  //  9-pt gap, 90%
+    ],
+  };
+  const vm = buildHall(pdata, 'all', now, false);
+  expect(vm.milestones[0].value).toMatch(/won by 9 points/); // play b wins on % despite smaller gap
+  expect(vm.milestones[0].sub).toMatch(/10 to 1/);
+});
+
+// Low-direction (golf-style) games: winner has the smaller score; normalize by the
+// larger (losing) score so the percentage still makes sense.
+it('hall: blowout handles low-direction games', () => {
+  const pdata = {
+    players: [{ id:'p1', name:'Ann', c1:'#1', c2:'#2', regular:true }, { id:'p2', name:'Bob', c1:'#3', c2:'#4', regular:true }],
+    games: [{ id:'g1', name:'Golf', tier:'Medium', dir:'low', icon:'⛳' }],
+    plays: [
+      { id:'a', g:'g1', d:'2026-01-05T20:00', parts:[['p1',1,20],['p2',2,80]] }, // win=20, gap 60, 60/80=75%
+    ],
+  };
+  const vm = buildHall(pdata, 'all', now, false);
+  expect(vm.milestones[0].value).toMatch(/Ann won by 60 points/); // absolute gap, winner is low scorer
+  expect(vm.milestones[0].sub).toMatch(/20 to 80/);
 });

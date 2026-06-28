@@ -20,7 +20,9 @@ const tmpId = () =>
 export function StoreProvider({ children }) {
   const [data, setData] = useState({ players: [], games: [], plays: [] });
   const [ui, setUiState] = useState({ screen: 'board', period: 'month', sorts: ['wins'],
-    gameId: null, playerId: null, custom: { start: '2026-01-01', end: '2026-06-25' }, absent: {}, hallPeriod: 'thisYear' });
+    gameId: null, playerId: null, custom: { start: '2026-01-01', end: '2026-06-25' }, absent: {}, hallPeriod: 'thisYear',
+    // Head-to-Head picker (Hall): selected player ids + which slot the next roster tap fills. Session-only.
+    h2hA: null, h2hB: null, h2hSlot: 'a' });
   const now = useRef(new Date()).current;
   const setUi = useCallback((patch) => setUiState(s => ({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) })), []);
 

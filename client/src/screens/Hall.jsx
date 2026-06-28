@@ -7,6 +7,7 @@
 import { useStore } from '../store/store.jsx';
 import { buildHall } from '../viewmodels/hall.js';
 import Avatar from '../components/Avatar.jsx';
+import HeadToHead from '../components/HeadToHead.jsx';
 
 // --- Period chip bar ---
 // Three filter chips; active chip gets gold background, others stay subtle.
@@ -280,6 +281,9 @@ export default function Hall() {
               <MilestoneCard key={i} m={m} />
             ))}
           </div>
+
+          {/* Head to head — interactive pick-any-two matchup; sits above auto-surfaced Rivalries */}
+          <HeadToHead />
 
           {/* Rivalries — only shown when vm.hasRivalries */}
           {vm.hasRivalries && (

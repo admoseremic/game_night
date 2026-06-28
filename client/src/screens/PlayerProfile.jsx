@@ -2,10 +2,15 @@
 // Ported from prototype template region ~460–520.
 // Uses buildPlayerDetail() view-model; all stat math lives in viewmodels/playerDetail.js.
 
+import { useState, useEffect } from 'react';
 import { useStore } from '../store/store.jsx';
 import { buildPlayerDetail } from '../viewmodels/playerDetail.js';
 import Avatar from '../components/Avatar.jsx';
 import ColorPicker from '../sheets/ColorPicker.jsx';
+
+// Long lists (per-game breakdown, records held) collapse to this many rows,
+// with a "Show all" expander — keeps a veteran player's profile scannable.
+const LIST_CAP = 15;
 
 // ─── Stat chip (single metric display) ───
 function StatChip({ value, label }) {
@@ -49,6 +54,30 @@ function SectionHeader({ children }) {
       margin: '0 2px 12px',
     }}>
       {children}
+    </div>
+  );
+}
+
+// ─── "Show all (N)" / "Show less" expander (matches the Hall trophy-case toggle) ───
+function ExpandToggle({ expanded, total, onToggle }) {
+  return (
+    <div
+      onClick={onToggle}
+      style={{
+        marginTop: 10,
+        textAlign: 'center',
+        padding: '12px',
+        borderRadius: 14,
+        fontSize: 13,
+        fontWeight: 700,
+        color: '#FFC24B',
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        cursor: 'pointer',
+        userSelect: 'none',
+      }}
+    >
+      {expanded ? 'Show less' : `Show all (${total})`}
     </div>
   );
 }
@@ -263,6 +292,13 @@ function EmptyState({ vm }) {
 // ─── Main PlayerProfile screen ───
 export default function PlayerProfile() {
   const { data, ui, setUi, now, actions } = useStore();
+
+  // Local, presentational expand state for the two long lists. Kept out of the
+  // global store so it auto-resets when leaving the profile and never collides
+  // with the Hall's own recordsExpanded. Reset to collapsed when switching players.
+  const [showAllGames, setShowAllGames] = useState(false);
+  const [showAllRecords, setShowAllRecords] = useState(false);
+  useEffect(() => { setShowAllGames(false); setShowAllRecords(false); }, [ui.playerId]);
 
   // Guard: need a playerId in ui state
   if (!ui.playerId) {
@@ -486,20 +522,23 @@ export default function PlayerProfile() {
             </div>
           )}
 
-          {/* ─── Per-game breakdown table ─── */}
+          {/* ─── Per-game breakdown table (capped to LIST_CAP rows; expander when longer) ─── */}
           {vm.games.length > 0 && (
             <div style={{ marginBottom: 22 }}>
               <SectionHeader>Per-game breakdown</SectionHeader>
-              <GamesTable games={vm.games} />
+              <GamesTable games={showAllGames ? vm.games : vm.games.slice(0, LIST_CAP)} />
+              {vm.games.length > LIST_CAP && (
+                <ExpandToggle expanded={showAllGames} total={vm.games.length} onToggle={() => setShowAllGames(v => !v)} />
+              )}
             </div>
           )}
 
-          {/* ─── Records held ─── */}
+          {/* ─── Records held (capped to LIST_CAP rows; expander when longer) ─── */}
           {vm.hasRecords && (
             <div style={{ marginBottom: 22 }}>
               <SectionHeader>Records held 🏅</SectionHeader>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {vm.records.map((r, i) => (
+                {(showAllRecords ? vm.records : vm.records.slice(0, LIST_CAP)).map((r, i) => (
                   <div key={r.name + i} style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -522,6 +561,9 @@ export default function PlayerProfile() {
                   </div>
                 ))}
               </div>
+              {vm.records.length > LIST_CAP && (
+                <ExpandToggle expanded={showAllRecords} total={vm.records.length} onToggle={() => setShowAllRecords(v => !v)} />
+              )}
             </div>
           )}
 

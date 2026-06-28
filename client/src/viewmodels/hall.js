@@ -55,7 +55,13 @@ export function buildHall(data, hallPeriod, now, recordsExpanded) {
   const wpLb = lb.filter(e => e.plays >= 3).sort((a, b) => b.winPct - a.winPct || b.wins - a.wins);
   const wp = wpLb[0] || null;
 
-  // --- Biggest blowout: largest margin between 1st-place and 2nd-place, scored plays only ---
+  // --- Biggest blowout: most dominant win between 1st and 2nd place, scored plays only.
+  // Ranked by PERCENTAGE margin so low-scoring games aren't unfairly beaten by high-scoring
+  // ones (a 10–2 wipeout should outrank a 120–73 grind). We normalize the raw point gap by
+  // the larger score on the board: for high-dir games that's the winner, for low-dir golf
+  // games that's the loser — either way it's the natural 0..100% denominator and never
+  // divides by zero. The DISPLAYED value still uses the absolute point margin, since people
+  // relate to "won by 40 points" more than "won by 67%". ---
   let blow = null;
   all.forEach(p => {
     const g = gameOf(data, p.g);
@@ -64,7 +70,9 @@ export function buildHall(data, hallPeriod, now, recordsExpanded) {
     );
     if (sorted.length < 2) return;
     const margin = Math.abs(sorted[0][2] - sorted[1][2]);
-    if (!blow || margin > blow.margin) blow = { margin, pid: sorted[0][0], g: p.g, date: p.d, score: sorted[0][2], runner: sorted[1][2] };
+    const top = Math.max(sorted[0][2], sorted[1][2]); // larger raw score = the leading/top score
+    const pct = top > 0 ? margin / top : 0;           // bounded 0..1; guard divide-by-zero
+    if (!blow || pct > blow.pct) blow = { margin, pct, pid: sorted[0][0], g: p.g, date: p.d, score: sorted[0][2], runner: sorted[1][2] };
   });
 
   // --- Longest win streak in period ---
@@ -170,7 +178,7 @@ export function buildHall(data, hallPeriod, now, recordsExpanded) {
       icon: '💥',
       tint: '#FF6FA5',
       label: 'Biggest blowout',
-      value: bp.name + ' won by ' + blow.margin,
+      value: bp.name + ' won by ' + blow.margin + (blow.margin === 1 ? ' point' : ' points'),
       sub: bg.icon + ' ' + bg.name + ' · ' + blow.score + ' to ' + blow.runner,
     });
   }
