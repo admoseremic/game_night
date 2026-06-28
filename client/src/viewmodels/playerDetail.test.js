@@ -69,6 +69,25 @@ it('player detail: Records held stays all-time regardless of period', () => {
   expect(bobTY.records[0]).toMatchObject({ name: 'Catan', score: 90 });
 });
 
+it('player detail: records held sorted by the player\'s all-time plays of that game (desc)', () => {
+  const d = {
+    players: [{ id: 'p1', name: 'Ann', c1: '#1', c2: '#2', regular: true }],
+    games: [
+      { id: 'g1', name: 'Rare', tier: 'Medium', dir: 'high', icon: '🎲' },   // listed first, but played least
+      { id: 'g2', name: 'Often', tier: 'Medium', dir: 'high', icon: '🃏' },
+    ],
+    plays: [
+      { id: 'a', g: 'g1', d: '2026-01-01T20:00', parts: [['p1', 1, 10]] }, // Ann: 1 play of g1 (holds record)
+      { id: 'b', g: 'g2', d: '2026-01-02T20:00', parts: [['p1', 1, 20]] }, // Ann: 3 plays of g2 (holds record)
+      { id: 'c', g: 'g2', d: '2026-02-02T20:00', parts: [['p1', 1, 15]] },
+      { id: 'e', g: 'g2', d: '2026-03-02T20:00', parts: [['p1', 1, 5]] },
+    ],
+  };
+  const vm = buildPlayerDetail(d, 'p1', now, 'players', 'all');
+  expect(vm.records.map(r => r.name)).toEqual(['Often', 'Rare']); // g2 (3 plays) before g1 (1 play)
+  expect(vm.records[0]).toMatchObject({ name: 'Often', plays: 3 });
+});
+
 it('player detail: career plays but none in window → emptyWindow (not isNew)', () => {
   const d = {
     players: [{ id: 'pq', name: 'Quinn', c1: '#9', c2: '#0', regular: true }, { id: 'p2', name: 'Bob', c1: '#3', c2: '#4', regular: true }],

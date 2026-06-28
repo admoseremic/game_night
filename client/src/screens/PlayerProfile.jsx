@@ -571,7 +571,13 @@ export default function PlayerProfile() {
                     border: '1px solid rgba(255,194,75,0.18)',
                   }}>
                     <span style={{ fontSize: 18 }}>{r.icon}</span>
-                    <span style={{ flex: 1, fontWeight: 700, fontSize: 13.5 }}>{r.name}</span>
+                    {/* Name + the play count that drives the sort (most-played first) */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13.5 }}>{r.name}</div>
+                      <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9D90B5', marginTop: 1 }}>
+                        {r.plays} {r.plays === 1 ? 'play' : 'plays'}
+                      </div>
+                    </div>
                     <span style={{
                       fontFamily: 'var(--font-display)',
                       fontWeight: 800,

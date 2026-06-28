@@ -130,10 +130,19 @@ export function buildPlayerDetail(data, pid, now, from, period) {
   });
 
   // ─── Records held ───
+  // Records are all-time, so we sort them by the player's ALL-TIME plays of each game (most-played
+  // first, like the per-game breakdown and the Hall trophy case). Using the windowed count here
+  // would be incoherent — a record they hold in a game they didn't play this period would sink.
+  const allTimePlaysByGame = {};
+  data.plays.forEach(pl => {
+    if (pl.parts.some(x => x[0] === pid)) allTimePlaysByGame[pl.g] = (allTimePlaysByGame[pl.g] || 0) + 1;
+  });
   const records = data.games.map(g => {
     const r = recordFor(data, g.id);
-    return (r && r.pid === pid) ? { name: g.name, icon: g.icon, score: r.score } : null;
-  }).filter(Boolean);
+    return (r && r.pid === pid)
+      ? { name: g.name, icon: g.icon, score: r.score, plays: allTimePlaysByGame[g.id] || 0 }
+      : null;
+  }).filter(Boolean).sort((a, b) => b.plays - a.plays);
 
   // ─── Head-to-head rivalry ───
   const h2h = {};
