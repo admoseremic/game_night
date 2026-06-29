@@ -20,6 +20,8 @@ const tmpId = () =>
 export function StoreProvider({ children }) {
   const [data, setData] = useState({ players: [], games: [], plays: [] });
   const [ui, setUiState] = useState({ screen: 'board', period: 'month', sorts: ['wins'],
+    // Games tab view: 'summary' (period-scoped activity report, default) | 'all' (full catalog/shelf).
+    gamesMode: 'summary',
     gameId: null, playerId: null, custom: { start: '2026-01-01', end: '2026-06-25' }, absent: {}, hallPeriod: 'thisYear',
     // Player Profile time-window filter (This Year / Last 2 Years / All Time). Session-only.
     profilePeriod: 'thisYear',
