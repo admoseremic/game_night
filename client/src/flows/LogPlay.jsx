@@ -134,10 +134,32 @@ export default function LogPlay() {
     .filter(g => g.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));
   const pool = data.players.filter(p => !order.includes(p.id));
+  // Split the add-pool so regulars surface in their own section up top, the rest below
+  const poolRegulars = pool.filter(p => p.regular);
+  const poolOthers = pool.filter(p => !p.regular);
   const selectedGame = data.games.find(g => g.id === gameId);
 
   const canSave = order.length >= 1;
   const canAdvance = !!gameId; // for the step-0 "Next" button
+
+  // Render a tappable "add player" chip — shared by the Regulars and Everyone-else sections
+  const playerChip = (p) => (
+    <div
+      key={p.id}
+      onClick={() => toggleLogPlayer(p.id)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8, padding: '8px 13px 8px 8px',
+        borderRadius: 13, cursor: 'pointer',
+        background: 'rgba(255,255,255,0.04)',
+        // Regular players get a gold border to stand out
+        border: `1px solid ${p.regular ? 'rgba(255,194,75,0.3)' : 'rgba(255,255,255,0.08)'}`,
+      }}
+    >
+      <Avatar player={p} size={30} />
+      <span style={{ fontWeight: 700, fontSize: 13.5 }}>{p.name}</span>
+      <span style={{ fontSize: 15, color: '#FF8A3D', fontWeight: 700 }}>+</span>
+    </div>
+  );
 
   return (
     <div style={{
@@ -180,8 +202,8 @@ export default function LogPlay() {
         >✕</div>
       </div>
 
-      {/* Scrollable body */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 18px 20px' }}>
+      {/* Scrollable body — overflowX:hidden guards against any child (e.g. the date input) forcing horizontal page scroll */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 18px 20px' }}>
 
         {/* ── STEP 0: pick game ── */}
         {step === 0 && (
@@ -269,10 +291,13 @@ export default function LogPlay() {
               value={date}
               onChange={e => setDate(e.target.value)}
               style={{
-                width: '100%', padding: '12px 14px', borderRadius: 13,
+                width: '100%', maxWidth: '100%', minWidth: 0, padding: '12px 14px', borderRadius: 13,
                 border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)',
                 color: '#F4EEF8', fontSize: 14, fontFamily: 'inherit', outline: 'none',
                 marginBottom: 18, colorScheme: 'dark', boxSizing: 'border-box',
+                // WebKit/iOS date inputs have an intrinsic min-width that ignores width:100% and overflows
+                // the page horizontally; appearance:none lets our width constraints take effect (tap still opens the native picker)
+                WebkitAppearance: 'none', appearance: 'none',
               }}
             />
 
@@ -340,28 +365,24 @@ export default function LogPlay() {
               </>
             )}
 
-            {/* Player pool — players not yet in finish order */}
+            {/* Player pool — Regulars surfaced in their own section up top for quick selection */}
+            {poolRegulars.length > 0 && (
+              <>
+                <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.6px', color: '#FFC24B', margin: '0 2px 9px' }}>
+                  ★ Regulars
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                  {poolRegulars.map(playerChip)}
+                </div>
+              </>
+            )}
+
+            {/* Everyone else — the rest of the players (plus the add-player affordance) */}
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.6px', color: '#6E6483', margin: '0 2px 9px' }}>
-              Tap to add
+              {poolRegulars.length > 0 ? 'Everyone else' : 'Tap to add'}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {pool.map(p => (
-                <div
-                  key={p.id}
-                  onClick={() => toggleLogPlayer(p.id)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8, padding: '8px 13px 8px 8px',
-                    borderRadius: 13, cursor: 'pointer',
-                    background: 'rgba(255,255,255,0.04)',
-                    // Regular players get a gold border to stand out
-                    border: `1px solid ${p.regular ? 'rgba(255,194,75,0.3)' : 'rgba(255,255,255,0.08)'}`,
-                  }}
-                >
-                  <Avatar player={p} size={30} />
-                  <span style={{ fontWeight: 700, fontSize: 13.5 }}>{p.name}</span>
-                  <span style={{ fontSize: 15, color: '#FF8A3D', fontWeight: 700 }}>+</span>
-                </div>
-              ))}
+              {poolOthers.map(playerChip)}
 
               {/* Add player affordance — opens AddPlayer sheet (rendered by App) */}
               <div

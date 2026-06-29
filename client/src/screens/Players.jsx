@@ -8,7 +8,8 @@ import Avatar from '../components/Avatar.jsx';
 
 // ─── Single player row ───
 // Shows avatar, name, Regular badge, stat line, and fire badge when on streak.
-function PlayerRow({ p, onClick }) {
+// hideRegularBadge suppresses the "Regular" pill when the row already lives under a Regulars section.
+function PlayerRow({ p, onClick, hideRegularBadge }) {
   return (
     <div
       onClick={onClick}
@@ -42,7 +43,7 @@ function PlayerRow({ p, onClick }) {
           </span>
 
           {/* Regular player badge */}
-          {p.regular && (
+          {p.regular && !hideRegularBadge && (
             <span style={{
               fontSize: 9.5,
               fontWeight: 800,
@@ -89,6 +90,17 @@ function PlayerRow({ p, onClick }) {
 export default function Players() {
   const { data, ui, setUi, now } = useStore();
   const roster = buildPlayersRoster(data, now);
+
+  // Split the roster so regulars get their own section up top, the rest below
+  const regulars = roster.filter(p => p.regular);
+  const others = roster.filter(p => !p.regular);
+  const openProfile = (id) => setUi({ screen: 'playerDetail', playerId: id, profileFrom: 'players' });
+
+  // Shared uppercase section-header style (color overridden per section)
+  const sectionLabel = {
+    fontSize: 11, fontWeight: 800, letterSpacing: '.6px',
+    textTransform: 'uppercase', margin: '0 2px 9px',
+  };
 
   return (
     <>
@@ -139,16 +151,34 @@ export default function Players() {
         </div>
       </div>
 
-      {/* ─── Player rows — sorted by wins desc ─── */}
+      {/* ─── Player rows — Regulars section up top, everyone else below ─── */}
       {roster.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {roster.map(p => (
-            <PlayerRow
-              key={p.id}
-              p={p}
-              onClick={() => setUi({ screen: 'playerDetail', playerId: p.id, profileFrom: 'players' })}
-            />
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {/* Regulars section (only when there are regulars) */}
+          {regulars.length > 0 && (
+            <div>
+              <div style={{ ...sectionLabel, color: '#FFC24B' }}>★ Regulars</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {regulars.map(p => (
+                  <PlayerRow key={p.id} p={p} hideRegularBadge onClick={() => openProfile(p.id)} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Everyone else — header shown only when a Regulars section sits above it */}
+          {others.length > 0 && (
+            <div>
+              {regulars.length > 0 && (
+                <div style={{ ...sectionLabel, color: '#9D90B5' }}>Everyone else</div>
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {others.map(p => (
+                  <PlayerRow key={p.id} p={p} onClick={() => openProfile(p.id)} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         /* ─── Empty state ─── */
