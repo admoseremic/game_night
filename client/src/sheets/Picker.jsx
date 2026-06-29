@@ -70,6 +70,45 @@ export default function Picker() {
   const idle = !rolling && result === null;
   const resultPlayer = hasResult ? data.players.find(p => p.id === result) : null;
 
+  // Group players so regulars sit up top and the rest below (matches LogPlay / Players)
+  const regulars = data.players.filter(p => p.regular);
+  const others = data.players.filter(p => !p.regular);
+
+  // Render one selectable player chip — shared by both sections
+  const playerChip = (p) => {
+    const selected = !!sel[p.id];
+    return (
+      <div
+        key={p.id}
+        onClick={() => toggle(p.id)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 13px 8px 8px',
+          borderRadius: 13,
+          background: selected ? 'rgba(155,108,255,0.18)' : 'rgba(255,255,255,0.04)',
+          border: `1px solid ${selected ? 'rgba(155,108,255,0.4)' : 'rgba(255,255,255,0.08)'}`,
+          opacity: selected ? 1 : 0.5,
+          cursor: 'pointer',
+          userSelect: 'none',
+          transition: 'opacity 0.15s, background 0.15s, border-color 0.15s',
+        }}
+      >
+        <Avatar player={p} size={30} />
+        <span style={{ fontWeight: 700, fontSize: 13.5 }}>{p.name}</span>
+      </div>
+    );
+  };
+
+  // Small uppercase section header; shows the "{count} in" tally on the right when showCount
+  const sectionHeader = (title, color, showCount) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '6px 2px 10px' }}>
+      <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.6px', color }}>{title}</span>
+      {showCount && <span style={{ fontSize: 11, fontWeight: 700, color: '#6E6483' }}>{count} in</span>}
+    </div>
+  );
+
   return (
     // Full-screen overlay — fixed, high z-index, dark gradient background
     <div style={{
@@ -180,45 +219,27 @@ export default function Picker() {
         )}
       </div>
 
-      {/* ─── Player chips ─── */}
+      {/* ─── Player chips — regulars grouped up top, everyone else below ─── */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '8px 18px 12px' }}>
-        <div style={{
-          fontSize: 11,
-          fontWeight: 800,
-          textTransform: 'uppercase',
-          letterSpacing: '.6px',
-          color: '#6E6483',
-          margin: '6px 2px 10px',
-        }}>
-          Who's playing? · {count} in
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {data.players.map(p => {
-            const selected = !!sel[p.id];
-            return (
-              <div
-                key={p.id}
-                onClick={() => toggle(p.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '8px 13px 8px 8px',
-                  borderRadius: 13,
-                  background: selected ? 'rgba(155,108,255,0.18)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${selected ? 'rgba(155,108,255,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                  opacity: selected ? 1 : 0.5,
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                  transition: 'opacity 0.15s, background 0.15s, border-color 0.15s',
-                }}
-              >
-                <Avatar player={p} size={30} />
-                <span style={{ fontWeight: 700, fontSize: 13.5 }}>{p.name}</span>
-              </div>
-            );
-          })}
-        </div>
+        {/* Regulars surfaced up top for quick selection (carries the "{count} in" tally) */}
+        {regulars.length > 0 && (
+          <>
+            {sectionHeader('★ Regulars', '#FFC24B', true)}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+              {regulars.map(playerChip)}
+            </div>
+          </>
+        )}
+
+        {/* Everyone else — or all players when there are no regulars */}
+        {others.length > 0 && (
+          <>
+            {sectionHeader(regulars.length > 0 ? 'Everyone else' : "Who's playing?", '#6E6483', regulars.length === 0)}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {others.map(playerChip)}
+            </div>
+          </>
+        )}
       </div>
 
       {/* ─── Roll button ─── */}
