@@ -27,6 +27,7 @@ it('groups plays by night, reverse-chron, with winner/loser/score', () => {
   expect(days[0].games.length).toBe(1);
   expect(days[0].games[0].winner).toBe('Bob');   // 2026-06-12 most recent
   expect(days[0].games[0].loser).toBe('Ann');
-  expect(days[0].games[0].scoreStr).toBe(' · 10 pts');
+  expect(days[0].games[0].wScoreStr).toBe(' 10'); // winner score next to winner
+  expect(days[0].games[0].lScoreStr).toBe(' 20'); // loser score next to loser
   expect(days[1].games[0].winner).toBe('Ann');   // 2026-06-10
 });

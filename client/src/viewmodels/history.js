@@ -58,8 +58,9 @@ export function buildHistory(data, now) {
             wc2: wp.c2,
             loser: lp.name,
             players: pl.parts.length,
-            // Show winning score if present; otherwise empty string
-            scoreStr: w[2] != null ? (' · ' + w[2] + ' pts') : '',
+            // Each score sits next to its own player ('' when that score wasn't recorded)
+            wScoreStr: w[2] != null ? (' ' + w[2]) : '',
+            lScoreStr: l[2] != null ? (' ' + l[2]) : '',
           };
         }),
       };

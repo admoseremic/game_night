@@ -63,7 +63,8 @@ function GameRow({ row, onEdit, onDelete }) {
           overflow: 'hidden',
           textOverflow: 'ellipsis',
         }}>
-          🥇 {row.winner} · 🔻 {row.loser}{row.scoreStr}
+          🥇 {row.winner}{row.wScoreStr}
+          {row.players > 1 && <> · 🔻 {row.loser}{row.lScoreStr}</>}
         </div>
       </div>
 
