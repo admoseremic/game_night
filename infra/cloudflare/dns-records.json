@@ -1,0 +1,23 @@
+[
+  {"type":"A","name":"trevorwithdata.com","content":"216.198.79.1","ttl":1,"proxied":false},
+  {"type":"A","name":"chess.trevorwithdata.com","content":"64.32.60.10","ttl":1,"proxied":false},
+  {"type":"A","name":"gamenight.trevorwithdata.com","content":"64.32.60.10","ttl":1,"proxied":false},
+  {"type":"A","name":"home.trevorwithdata.com","content":"64.32.60.10","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"_1e317bb9fe5269fc405f277d83697a6e.trevorwithdata.com","content":"5249ED55FA83B88E4797431BB8EB91AE.56E7DC5C9131165515A10CA6308B430F.663f7bf606a6c.comodoca.com","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"_690ab41e82facb8ce1fa94a7e4c5e44b.trevorwithdata.com","content":"F8913D729406056D5306E37292C419D1.7F0AE3B2BAEFECB2A17DD6C58E704F61.663119a176fac.comodoca.com","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"_8af30dba66548cda0a4dc2bc896ce2ff.trevorwithdata.com","content":"a11c5797fa9edb00bdfb52e53277c3d6.4f8b323e41cb60a4bc6055b190addbfb.comodoca.com","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"_fdb365971b40b47936de0e4fc349fdc0.trevorwithdata.com","content":"4E6A240C158A99FB8A6FF8928DB9F460.B5C57AFE25C6045B95F724B666805F83.644d96cb76f69.comodoca.com","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"7ql7seayy4da.trevorwithdata.com","content":"gv-5gaoq2qpngj674.dv.googlehosted.com","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"ai.trevorwithdata.com","content":"580bd851859ebee0.vercel-dns-017.com","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"blog.trevorwithdata.com","content":"6eaf36a0b451d73c.vercel-dns-017.com","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"firebase1._domainkey.trevorwithdata.com","content":"mail-trevorwithdata-com.dkim1._domainkey.firebasemail.com","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"firebase2._domainkey.trevorwithdata.com","content":"mail-trevorwithdata-com.dkim2._domainkey.firebasemail.com","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"health.trevorwithdata.com","content":"health-tracker-4075c.web.app","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"metrics.trevorwithdata.com","content":"8f99160e571fc0427f000101.data.adobedc.net","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"pm.trevorwithdata.com","content":"pm-kanban.web.app","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"summit2025.trevorwithdata.com","content":"summit-games-a1f9f.web.app","ttl":1,"proxied":false},
+  {"type":"CNAME","name":"www.trevorwithdata.com","content":"85426a52a5fb3bfd.vercel-dns-017.com","ttl":1,"proxied":false},
+  {"type":"TXT","name":"trevorwithdata.com","content":"v=spf1 include:_spf.firebasemail.com ~all","ttl":1,"proxied":false},
+  {"type":"TXT","name":"trevorwithdata.com","content":"firebase=trevorlytics-54a04","ttl":1,"proxied":false},
+  {"type":"TXT","name":"_atproto.trevorwithdata.com","content":"did=did:plc:3ylanrz2myw2yr65vrr36qo4","ttl":1,"proxied":false}
+]
