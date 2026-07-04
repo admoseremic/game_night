@@ -39,3 +39,5 @@ server/data/
 *.db
 .env
 serviceAccount*.json
+# Namecheap/DNS screenshots (contain a DDNS password) - never commit
+screenshots/

@@ -22,10 +22,13 @@ Self-hosted PWA for board-game-night leaderboards, records, player stats, and a 
 - Deploy: `./deploy.sh` (git pull + `docker compose -f /home/trevor/docker/docker-compose.yml up -d --build game-night`).
 - **Infra lives OUTSIDE this repo** in `/home/trevor/docker/`: the compose `game-night` service, the Caddy block (`/home/trevor/docker/caddy/Caddyfile`), and the backup script (`/home/trevor/docker/game-night/backup-gamenight.sh`). SQLite DB is on a bind-mounted volume at `/home/trevor/docker/game-night/data/gamenight.db`.
 - Backups: weekly cron (Mon 3am) → consistent `VACUUM INTO` snapshot → Google Drive (`/mnt/gdrive/Trevor's Stuff/game_night_app/`), keeps last 12.
+- **DNS & Cloudflare (since 2026-07-04):** `trevorwithdata.com` DNS is hosted on Cloudflare (moved off Namecheap BasicDNS); `gamenight` is **proxied** (orange-cloud, SSL Full-strict) so same-ISP-subnet visitors don't blackhole — every other record is DNS-only. Zone manifest + scripts live in `infra/cloudflare/`; API token at `~/.cloudflare/token` (also used by the 15-min `update-ip.sh` cron that replaces Namecheap/Ubiquiti dynamic DNS — don't delete the token without re-pointing that cron).
 
 ## Gotchas (hard-won — don't relearn these)
 - **iOS standalone full-height:** use `height: 100dvh`, never `height: 100%` (it silently breaks `viewport-fit=cover` → dark bar at the screen bottom). html/body are stretched `calc(100dvh + env(safe-area-inset-top))` to force the full viewport; `#root` is `100dvh`; the bottom nav is `position: absolute` inside that container (not `fixed`).
 - **SSE must not be buffered:** the gamenight Caddy block has **no `encode gzip`** (gzip buffers the SSE stream); Fastify's compress plugin skips `text/event-stream`.
+- **SSE through Cloudflare:** CF severs idle connections at ~100s, so the hub writes `: ping` every 30s (`server/src/events.js`) — don't remove the heartbeat.
+- **Caddy cert renewals go through the Cloudflare proxy** now (HTTP-01 normally passes). If a gamenight renewal ever fails, put a 15-year Cloudflare Origin CA cert on the origin instead of debugging renewals.
 - **App-shell caching:** the server sends `Cache-Control: no-store` for `index.html` so the installed iOS PWA always gets fresh code (`max-age=0` isn't enough on iOS).
 - **Caddy config edits:** the Caddyfile is a single-file Docker bind mount — editing it changes the inode, so the running container keeps loading the old file. `caddy reload` is NOT enough; run `docker compose up -d --force-recreate caddy` (certs persist in the data volume; other sites stay up).
 - Bottom sheets: the nav is hidden while any sheet/overlay is open (`overlayOpen` in `App.jsx`) so options don't sit under it; sheets pad with `env(safe-area-inset-bottom)`.
