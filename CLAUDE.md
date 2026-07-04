@@ -6,6 +6,7 @@ Self-hosted PWA for board-game-night leaderboards, records, player stats, and a 
 - One repo, two packages: `client/` (React 18 + Vite 5 PWA — all UI **and** all stat math) and `server/` (Node 20 + Fastify 4 + better-sqlite3 — serves the built client + a JSON API + an SSE stream).
 - Client fetches the whole dataset once (`GET /api/state`) and computes every stat in-memory; **optimistic** UI updates; **SSE** (`GET /api/events`, named `changed` event) broadcasts on every mutation so all devices refetch and converge on the single SQLite source of truth.
 - Nothing derived is stored — records/streaks/leaderboards/rivalries all recompute on read.
+- MCP: read-only remote endpoint at `POST /mcp` (`server/src/routes/mcp.js` + `mcp-tools.js`, stateless Streamable HTTP; tools compute with client `stats.js` — see `docs/mcp.md`). **Never add mutating tools** — the endpoint is public by design.
 
 ## Critical: stat math
 - `client/src/lib/stats.js` is the correctness-critical core: PURE functions ported verbatim from the prototype `designs/design_handoff_game_night/Game Night.dc.html` (`class Component`). Changes here must match the prototype exactly. `client/src/viewmodels/*` compose these; `client/src/screens/*` are presentation only.

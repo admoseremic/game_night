@@ -13,6 +13,8 @@ COPY server/package.json server/package-lock.json* ./
 RUN npm install --omit=dev
 COPY server/ ./
 COPY --from=client /app/client/dist /app/client/dist
+# Client stat core is imported by the MCP tools at runtime (server/src/mcp-tools.js)
+COPY client/src/lib/stats.js /app/client/src/lib/stats.js
 ENV PORT=3000 DB_PATH=/data/gamenight.db CLIENT_DIR=/app/client/dist
 EXPOSE 3000
 CMD ["node", "src/index.js"]
