@@ -1,0 +1,11 @@
+// readState(db) — the whole dataset in the exact shape the client gets from
+// GET /api/state ({players, games, plays}). Shared by the state route and the
+// MCP tools (server/src/mcp-tools.js) so both are always identically shaped.
+export function readState(db) {
+  const players = db.prepare('SELECT id,name,regular,c1,c2 FROM players ORDER BY name')
+    .all().map(p => ({ ...p, regular: !!p.regular }));
+  const games = db.prepare('SELECT id,name,tier,dir,icon FROM games').all();
+  const plays = db.prepare('SELECT id,game_id,played_at,parts FROM plays ORDER BY played_at')
+    .all().map(r => ({ id: r.id, g: r.game_id, d: r.played_at, parts: JSON.parse(r.parts) }));
+  return { players, games, plays };
+}
