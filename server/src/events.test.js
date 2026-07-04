@@ -37,6 +37,31 @@ test('add removes a client when its stream closes', () => {
   assert.equal(hub.count(), 0);
 });
 
+test('heartbeat pings connected clients every 30s', (t) => {
+  t.mock.timers.enable({ apis: ['setInterval'] });
+  const hub = makeHub();
+  const a = fakeReply();
+  hub.add(a);
+  t.mock.timers.tick(30_000);
+  t.mock.timers.tick(30_000);
+  const pings = a._chunks.filter((c) => c.startsWith(': ping'));
+  assert.equal(pings.length, 2);
+});
+
+test('heartbeat stops when the last client leaves and resumes on re-add', (t) => {
+  t.mock.timers.enable({ apis: ['setInterval'] });
+  const hub = makeHub();
+  const a = fakeReply();
+  hub.add(a);
+  a.raw.emit('close');
+  t.mock.timers.tick(90_000);
+  assert.equal(a._chunks.filter((c) => c.startsWith(': ping')).length, 0);
+  const b = fakeReply();
+  hub.add(b);
+  t.mock.timers.tick(30_000);
+  assert.equal(b._chunks.filter((c) => c.startsWith(': ping')).length, 1);
+});
+
 test('broadcast drops a client whose write throws', () => {
   const hub = makeHub();
   let writeCount = 0;
