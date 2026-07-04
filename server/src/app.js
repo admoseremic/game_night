@@ -6,6 +6,7 @@ import { playerRoutes } from './routes/players.js';
 import { gameRoutes } from './routes/games.js';
 import { playRoutes } from './routes/plays.js';
 import { eventRoutes } from './routes/events.js';
+import { mcpRoutes } from './routes/mcp.js';
 
 export function buildApp({ db, hub }) {
   const app = Fastify({ logger: false });
@@ -17,5 +18,6 @@ export function buildApp({ db, hub }) {
   app.register(gameRoutes);
   app.register(playRoutes);
   app.register(eventRoutes);
+  app.register(mcpRoutes);
   return app;
 }
