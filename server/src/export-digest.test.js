@@ -1,8 +1,15 @@
+// TZ pinned BEFORE any Date use: months must bucket exactly like the app
+// (stats.js does new Date(play.d) + getMonth() in local time; the production
+// container runs TZ=America/Denver, same as the players).
+process.env.TZ = 'America/Denver';
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { renderDigest, prevMonthOf, MONTH_RE } from './export-digest.js';
 
-// Same fixture as mcp-tools.test.js: 3 players, 3 games (incl. dir:'low'), plays over two months.
+// Fixture mirrors mcp-tools.test.js plus x5, and uses production-shaped dates:
+// app-created plays are zoneless local ('...T20:00'); migrated plays are UTC
+// instants ('...T03:34:00.000Z') that can fall on the previous LOCAL day.
 const data = {
   players: [
     { id: 'p1', name: 'Trevor', regular: true, c1: '#a', c2: '#b' },
@@ -15,10 +22,12 @@ const data = {
     { id: 'g3', name: 'Golf', tier: 'Light', dir: 'low', icon: '⛳' },
   ],
   plays: [
-    { id: 'x1', g: 'g1', d: '2026-05-10', parts: [['p1', 1, 80], ['p2', 2, 70]] },
-    { id: 'x2', g: 'g2', d: '2026-06-02', parts: [['p2', 1, 120], ['p1', 2, 100], ['p3', 3, 90]] },
-    { id: 'x3', g: 'g3', d: '2026-06-20', parts: [['p1', 1, 12], ['p2', 2, 20]] },
-    { id: 'x4', g: 'g1', d: '2026-06-28', parts: [['p1', 1, 95], ['p3', 2, null]] },
+    { id: 'x1', g: 'g1', d: '2026-05-10T20:00', parts: [['p1', 1, 80], ['p2', 2, 70]] },
+    // Stored as June 1 UTC but played May 31 evening in Denver → belongs to MAY.
+    { id: 'x5', g: 'g1', d: '2026-06-01T03:34:00.000Z', parts: [['p2', 1, 60], ['p3', 2, 50]] },
+    { id: 'x2', g: 'g2', d: '2026-06-02T20:00', parts: [['p2', 1, 120], ['p1', 2, 100], ['p3', 3, 90]] },
+    { id: 'x3', g: 'g3', d: '2026-06-20T20:00', parts: [['p1', 1, 12], ['p2', 2, 20]] },
+    { id: 'x4', g: 'g1', d: '2026-06-28T20:00', parts: [['p1', 1, 95], ['p3', 2, null]] },
   ],
 };
 
@@ -74,6 +83,20 @@ test('current win streaks lists only streaks of 2+', () => {
   const md = renderDigest(data, { month: '2026-06' });
   assert.match(md, /- Trevor: 2 wins in a row/); // won x3+x4 after losing x2
   assert.ok(!/- Sam:/.test(md)); // Sam last played x3 with rank 2 → streak 0
+});
+
+test('UTC-stored evening play buckets into its LOCAL month, like the app', () => {
+  const june = renderDigest(data, { month: '2026-06' });
+  // x5 (June 1 03:34 UTC = May 31 evening Denver) must NOT appear in June...
+  assert.ok(!june.includes('1. Sam (60)'), 'x5 leaked into the June play log');
+  assert.match(june, /## June 2026 play log \(3 plays\)/);
+  // ...and must appear in May, displayed with its LOCAL date.
+  const may = renderDigest(data, { month: '2026-05' });
+  assert.match(may, /- 2026-05-31 — Wingspan: 1\. Sam \(60\) · 2\. Jo \(50\)/);
+  assert.match(may, /## May 2026 play log \(2 plays\)/);
+  // May leaderboard now counts Sam's x5 win alongside his x1 loss:
+  // 2 plays, 1 win (Medium → 1.0 weighted), 50%, 1 last place.
+  assert.match(may, /\| Sam \| 2 \| 1 \| 1\.0 \| 50% \| 1 \|/);
 });
 
 test('footer documents ?month and /api/state for the LLM', () => {
