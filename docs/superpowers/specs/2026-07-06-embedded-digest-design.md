@@ -32,6 +32,16 @@ variants) into the HTML it serves for `/`, inside a hidden, HTML-escaped
   the page or smuggle markup. The text is inert content.
 - **Fail-open:** if digest rendering throws, serve the plain shell unchanged —
   the app must never break because of the embedded digest.
+- **UA content negotiation (amended 2026-07-06 after live testing):** requests
+  to `/` whose User-Agent matches known AI fetchers
+  (`/claude|anthropic|gptbot|chatgpt|oai-search|openai|perplexity/i` — covers
+  Claude-User, claude-code, ClaudeBot, Claude-SearchBot per Anthropic's
+  published bot docs) get the digest as plain `text/markdown` instead of the
+  HTML shell. Rationale: consumer AI fetch pipelines run extraction heuristics
+  over HTML (and cache results), which proved flaky even with class-hidden
+  text; a markdown body needs no extraction. Human browser UAs never contain
+  these tokens. The embedded class-hidden div remains for unknown fetchers.
+  Same fail-open rule applies (error → plain shell path).
 - The existing static breadcrumb div in `client/index.html` stays (fallback if
   injection is ever bypassed) and gains one line: the current digest is
   embedded further down this page; for OTHER months fetch

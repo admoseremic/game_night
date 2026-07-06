@@ -8,7 +8,7 @@ import { openDb } from './db.js';
 import { makeHub } from './events.js';
 import { buildApp } from './app.js';
 import { readState } from './read-state.js';
-import { digestHtmlFragment } from './export-digest.js';
+import { digestHtmlFragment, renderDigest } from './export-digest.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Resolve to absolute because @fastify/static requires an absolute root
@@ -50,7 +50,23 @@ const sendShell = (reply) => {
   return reply.header('Cache-Control', 'no-store').type('text/html; charset=utf-8').send(html);
 };
 
-app.get('/', async (_req, reply) => sendShell(reply));
+// AI fetchers get the digest as PLAIN MARKDOWN at '/': consumer AI web-fetch
+// pipelines run flaky extraction heuristics over HTML (and cache the result),
+// but a text/markdown body needs no extraction. Tokens cover Anthropic's
+// documented agents (Claude-User, claude-code, ClaudeBot, Claude-SearchBot)
+// plus OpenAI/Perplexity; human browser UAs never contain any of these.
+const AI_UA = /claude|anthropic|gptbot|chatgpt|oai-search|openai|perplexity/i;
+app.get('/', async (req, reply) => {
+  if (AI_UA.test(req.headers['user-agent'] || '')) {
+    try {
+      return reply.header('Cache-Control', 'no-store')
+        .type('text/markdown; charset=utf-8').send(renderDigest(readState(db)));
+    } catch (e) {
+      console.error('digest for AI UA failed, serving shell:', e); // fail-open
+    }
+  }
+  return sendShell(reply);
+});
 
 // SPA fallback: anything not /api and not a real file -> the same shell.
 app.setNotFoundHandler((req, reply) => {
