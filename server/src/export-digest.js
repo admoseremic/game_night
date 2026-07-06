@@ -112,9 +112,14 @@ Full raw dataset as JSON: ${SITE}/api/state
 // The previous month's digest as an HTML-escaped hidden <div>, for embedding
 // in the served app shell (GET / in server/src/index.js): ONE fetch of the
 // main URL hands any AI the data without knowing /export. Escaping makes the
-// text inert — player/game names can never break the page. Spec:
-// docs/superpowers/specs/2026-07-06-embedded-digest-design.md
+// text inert — player/game names can never break the page.
+// HIDING MECHANISM MATTERS: readability-style extractors (claude.ai's consumer
+// web fetch, Mozilla Readability) DROP nodes with inline style="display:none"
+// or aria-hidden="true", but never apply stylesheets — so we hide via the
+// .ai-readable class declared in client/index.html's <style>. Invisible to
+// humans and screen readers, extractable by AI fetchers. Do not "fix" this
+// back to inline hiding. Spec: docs/superpowers/specs/2026-07-06-embedded-digest-design.md
 const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 export function digestHtmlFragment(data, { now = new Date() } = {}) {
-  return `<div style="display:none" aria-hidden="true">\n${escapeHtml(renderDigest(data, { now }))}\n</div>`;
+  return `<div class="ai-readable">\n${escapeHtml(renderDigest(data, { now }))}\n</div>`;
 }

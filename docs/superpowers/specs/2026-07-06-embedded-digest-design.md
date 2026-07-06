@@ -16,9 +16,16 @@ variants) into the HTML it serves for `/`, inside a hidden, HTML-escaped
 ## Behavior
 
 - `GET /` (and the SPA deep-link fallback for non-file, non-API paths) serve
-  `dist/index.html` with `<div style="display:none" aria-hidden="true">` +
-  escaped digest + `</div>` inserted immediately before `</body>`.
+  `dist/index.html` with `<div class="ai-readable">` + escaped digest +
+  `</div>` inserted immediately before `</body>`.
   `Cache-Control: no-store` (already the rule for served HTML).
+- **Hiding is via a CSS class (`.ai-readable{display:none}` in the shell's
+  `<style>`), NOT inline style or `aria-hidden`** — amended 2026-07-06 after
+  live testing: readability-style extractors (claude.ai's consumer web fetch,
+  Mozilla Readability's `isProbablyVisible`) strip inline-hidden and
+  aria-hidden nodes but never apply stylesheets. Class-hiding is invisible in
+  real browsers yet survives extraction. This applies to the static breadcrumb
+  div too.
 - Digest is rendered fresh per request from `readState(db)` — same source,
   same numbers as the app and `/export`.
 - HTML-escape `& < >` in the digest text so player/game names can never break

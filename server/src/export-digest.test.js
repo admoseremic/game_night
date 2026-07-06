@@ -125,7 +125,11 @@ test('digestHtmlFragment: hidden div, prevMonth content, HTML-escaped names', ()
     games: data.games.map(g => (g.id === 'g2' ? { ...g, name: 'Brass <& Sons>' } : g)),
   };
   const frag = digestHtmlFragment(spiky, { now: new Date('2026-07-06T12:00:00') });
-  assert.match(frag, /^<div style="display:none" aria-hidden="true">\n/);
+  // Hidden via CSS class ONLY: readability-style extractors (used by consumer
+  // AI fetchers) strip inline display:none and aria-hidden nodes, but don't
+  // apply stylesheets — class-hiding is invisible to humans yet extractable.
+  assert.match(frag, /^<div class="ai-readable">\n/);
+  assert.ok(!frag.includes('aria-hidden') && !frag.includes('display:none'), 'no extractor strip-triggers');
   assert.match(frag, /\n<\/div>$/);
   assert.match(frag, /Monthly Digest: June 2026/); // prevMonth of the fixed now
   assert.ok(frag.includes('Brass &lt;&amp; Sons&gt;'), 'markup in names is escaped');

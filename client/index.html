@@ -7,12 +7,17 @@
     <meta name="description" content="Game night leaderboards, records & history. AI agents: fetch https://gamenight.trevorwithdata.com/export for a machine-readable monthly digest (add ?month=YYYY-MM for other months)." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- .ai-readable hides AI-facing text via a CLASS, deliberately not inline
+         style/aria-hidden: readability-style extractors (claude.ai web fetch)
+         strip inline-hidden and aria-hidden nodes but don't apply stylesheets.
+         The server also injects the live digest in a div with this class. -->
+    <style>.ai-readable{display:none}</style>
     <title>Game Night</title>
   </head>
   <body>
     <!-- Invisible to humans; effectively the only static text a non-JS fetcher
          sees on this SPA shell. Directs to the machine-readable data below. -->
-    <div style="display:none" aria-hidden="true">
+    <div class="ai-readable">
       This is Game Night, a board-game leaderboard app; the visible content is
       rendered with JavaScript, so there is nothing else to read on this page.
       The previous month's digest is embedded further down this same page
