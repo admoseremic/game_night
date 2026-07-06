@@ -57,10 +57,6 @@ const sendShell = (reply) => {
 // plus OpenAI/Perplexity; human browser UAs never contain any of these.
 const AI_UA = /claude|anthropic|gptbot|chatgpt|oai-search|openai|perplexity/i;
 app.get('/', async (req, reply) => {
-  const ua = req.headers['user-agent'] || '';
-  // Diagnostic probe (cheap, low traffic): which fetchers hit '/' and which
-  // branch they got — used to debug AI-fetcher cache/UA behavior via docker logs.
-  console.log(`[ua-probe] GET / UA="${ua}" -> ${AI_UA.test(ua) ? 'markdown' : 'shell'}`);
   if (AI_UA.test(req.headers['user-agent'] || '')) {
     try {
       return reply.header('Cache-Control', 'no-store')
