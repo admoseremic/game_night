@@ -62,6 +62,13 @@ export function renderDigest(data, { month, now = new Date() } = {}) {
   const monthLog = getPlays({ ...data, plays: monthPlays }, { limit: 200 });
   const chrono = [...monthLog.plays].reverse();
 
+  // Year-to-date THROUGH the digest month (not through "now"), so historical
+  // months render the standings as that year stood at the time.
+  const ytdPlays = data.plays.filter(p => {
+    const ym = localYM(p.d);
+    return ym.slice(0, 4) === m.slice(0, 4) && ym <= m;
+  });
+
   return `# Game Night — Monthly Digest: ${label(m)}
 
 Generated ${localYMD(now)} from live data at ${SITE}.
@@ -87,9 +94,9 @@ ${newRecords.length
     ? newRecords.map(r => `- 🆕 **${r.game}**: ${r.score} by ${r.holder} on ${localYMD(r.date)}`).join('\n')
     : 'None.'}
 
-## All-time leaderboard
+## ${m.slice(0, 4)} year-to-date leaderboard (through ${MONTHS[Number(m.slice(5)) - 1]})
 
-${table(leaderboard(data, data.plays, 'wins'))}
+${ytdPlays.length ? table(leaderboard(data, ytdPlays, 'wins')) : `No plays recorded in ${m.slice(0, 4)} up to ${MONTHS[Number(m.slice(5)) - 1]}.`}
 
 ## Current win streaks
 

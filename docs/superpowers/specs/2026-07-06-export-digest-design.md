@@ -51,7 +51,10 @@ only formats; it computes no math of its own.
    (200 is far above any real month — current record months are ~50 plays.)
 4. **Records broken this month** — from `getRecords`: any all-time record
    whose date falls inside the month, flagged NEW. "None" line otherwise.
-5. **All-time leaderboard** — full table, all players.
+5. **Year-to-date leaderboard (through the digest month)** — replaced the
+   all-time leaderboard post-launch (2026-07-06, user request): plays from
+   Jan 1 of the digest month's year up to and including that month, so
+   historical months render the standings as the year stood at the time.
 6. ~~All-time records~~ — cut post-launch (2026-07-06): 161 games made the
    digest mostly a records dump; "records broken this month" covers the
    newsletter need.

@@ -22,6 +22,8 @@ const data = {
     { id: 'g3', name: 'Golf', tier: 'Light', dir: 'low', icon: '⛳' },
   ],
   plays: [
+    // Prior-year play: must appear in NO 2026 section (proves the YTD year cut).
+    { id: 'x0', g: 'g1', d: '2025-12-14T20:00', parts: [['p2', 1, 90], ['p3', 2, 40]] },
     { id: 'x1', g: 'g1', d: '2026-05-10T20:00', parts: [['p1', 1, 80], ['p2', 2, 70]] },
     // Stored as June 1 UTC but played May 31 evening in Denver → belongs to MAY.
     { id: 'x5', g: 'g1', d: '2026-06-01T03:34:00.000Z', parts: [['p2', 1, 60], ['p3', 2, 50]] },
@@ -74,10 +76,20 @@ test('records broken in the month are flagged NEW, absent otherwise', () => {
   assert.ok(!june.includes('## All-time records (best score per game)'));
 });
 
-test('empty month renders placeholder but keeps all-time sections', () => {
+test('YTD leaderboard covers Jan..month of the digest year, replacing all-time', () => {
+  const june = renderDigest(data, { month: '2026-06' });
+  assert.match(june, /## 2026 year-to-date leaderboard \(through June\)/);
+  // Sam YTD (x1 loss, x5 win, x2 win, x3 loss): the Dec-2025 x0 win must NOT
+  // count — with it he'd show 5 plays / 3 wins.
+  assert.match(june, /\| 2 \| Sam \| 4 \| 2 \| 2\.5 \| 50% \| 2 \|/);
+  assert.ok(!june.includes('## All-time leaderboard'));
+});
+
+test('empty month renders placeholders but keeps YTD section', () => {
   const md = renderDigest(data, { month: '2026-04' });
   assert.match(md, /No plays recorded in April 2026\./);
-  assert.match(md, /## All-time leaderboard/);
+  // No 2026 plays exist through April (May is the first) → YTD placeholder too.
+  assert.match(md, /## 2026 year-to-date leaderboard \(through April\)\n\nNo plays recorded in 2026 up to April\./);
 });
 
 test('current win streaks lists only streaks of 2+', () => {
