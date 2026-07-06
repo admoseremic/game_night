@@ -108,3 +108,13 @@ For a different month: ${SITE}/export?month=YYYY-MM (e.g. ?month=2026-05).
 Full raw dataset as JSON: ${SITE}/api/state
 `;
 }
+
+// The previous month's digest as an HTML-escaped hidden <div>, for embedding
+// in the served app shell (GET / in server/src/index.js): ONE fetch of the
+// main URL hands any AI the data without knowing /export. Escaping makes the
+// text inert — player/game names can never break the page. Spec:
+// docs/superpowers/specs/2026-07-06-embedded-digest-design.md
+const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+export function digestHtmlFragment(data, { now = new Date() } = {}) {
+  return `<div style="display:none" aria-hidden="true">\n${escapeHtml(renderDigest(data, { now }))}\n</div>`;
+}

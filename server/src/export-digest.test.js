@@ -5,7 +5,7 @@ process.env.TZ = 'America/Denver';
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { renderDigest, prevMonthOf, MONTH_RE } from './export-digest.js';
+import { renderDigest, prevMonthOf, MONTH_RE, digestHtmlFragment } from './export-digest.js';
 
 // Fixture mirrors mcp-tools.test.js plus x5, and uses production-shaped dates:
 // app-created plays are zoneless local ('...T20:00'); migrated plays are UTC
@@ -116,4 +116,20 @@ test('footer documents ?month and /api/state for the LLM', () => {
   const md = renderDigest(data, { month: '2026-06' });
   assert.match(md, /\/export\?month=YYYY-MM/);
   assert.match(md, /\/api\/state/);
+});
+
+test('digestHtmlFragment: hidden div, prevMonth content, HTML-escaped names', () => {
+  // A game name with markup characters must arrive escaped and inert.
+  const spiky = {
+    ...data,
+    games: data.games.map(g => (g.id === 'g2' ? { ...g, name: 'Brass <& Sons>' } : g)),
+  };
+  const frag = digestHtmlFragment(spiky, { now: new Date('2026-07-06T12:00:00') });
+  assert.match(frag, /^<div style="display:none" aria-hidden="true">\n/);
+  assert.match(frag, /\n<\/div>$/);
+  assert.match(frag, /Monthly Digest: June 2026/); // prevMonth of the fixed now
+  assert.ok(frag.includes('Brass &lt;&amp; Sons&gt;'), 'markup in names is escaped');
+  // Nothing between the wrapper tags may contain raw angle brackets.
+  const body = frag.replace(/^<div[^>]*>\n/, '').replace(/\n<\/div>$/, '');
+  assert.ok(!/[<>]/.test(body), 'fragment body is inert text');
 });
