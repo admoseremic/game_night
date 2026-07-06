@@ -70,13 +70,14 @@ test('records broken in the month are flagged NEW, absent otherwise', () => {
   assert.match(june, /🆕 \*\*Golf\*\*: 12 by Trevor on 2026-06-20/);
   const may = renderDigest(data, { month: '2026-05' });
   assert.match(may, /## All-time records broken in May 2026\n\nNone\./);
+  // No full per-game all-time records dump (161 games = noise; user cut it).
+  assert.ok(!june.includes('## All-time records (best score per game)'));
 });
 
 test('empty month renders placeholder but keeps all-time sections', () => {
   const md = renderDigest(data, { month: '2026-04' });
   assert.match(md, /No plays recorded in April 2026\./);
   assert.match(md, /## All-time leaderboard/);
-  assert.match(md, /\*\*Golf\*\* \(Light, lowest score wins\): 12 — Trevor, 2026-06-20/);
 });
 
 test('current win streaks lists only streaks of 2+', () => {

@@ -91,10 +91,6 @@ ${newRecords.length
 
 ${table(leaderboard(data, data.plays, 'wins'))}
 
-## All-time records (best score per game)
-
-${records.map(r => `- **${r.game}** (${r.tier}, ${r.direction === 'low' ? 'lowest' : 'highest'} score wins): ${r.score} — ${r.holder}, ${localYMD(r.date)}`).join('\n') || 'None yet.'}
-
 ## Current win streaks
 
 ${streaks.length ? streaks.map(s => `- ${s.name}: ${s.streak} wins in a row`).join('\n') : 'No active streaks of 2+ wins.'}

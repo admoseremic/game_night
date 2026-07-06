@@ -52,8 +52,9 @@ only formats; it computes no math of its own.
 4. **Records broken this month** — from `getRecords`: any all-time record
    whose date falls inside the month, flagged NEW. "None" line otherwise.
 5. **All-time leaderboard** — full table, all players.
-6. **All-time records** — best score per game with holder + date (games with
-   no scored plays are skipped, as `getRecords` already does).
+6. ~~All-time records~~ — cut post-launch (2026-07-06): 161 games made the
+   digest mostly a records dump; "records broken this month" covers the
+   newsletter need.
 7. **Current win streaks** — `currentStreak` per player, shown only when ≥ 2.
 8. **Footer (self-describing API)** — "For a different month: `/export?month=YYYY-MM`.
    Full raw dataset (JSON): `/api/state`." This lets the LLM discover the

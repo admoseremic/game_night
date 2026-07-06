@@ -6,8 +6,8 @@ everything it needs:
     https://gamenight.trevorwithdata.com/export
 
 It's a markdown digest of **last month** by default: monthly leaderboard,
-play-by-play log, records broken that month, all-time leaderboard + records,
-and current win streaks — computed with the app's own stat code, so the
+play-by-play log, records broken that month, all-time leaderboard, and
+current win streaks — computed with the app's own stat code, so the
 numbers always match. For any other month add `?month=YYYY-MM`.
 
 You don't even need to remember that path: the main page
