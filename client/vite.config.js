@@ -8,6 +8,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png'],
+      // Server-rendered paths: without this the SW navigation fallback serves
+      // the app shell for ANY navigated URL (masks /export and /api/state in a
+      // browser tab; Claude-style server-side fetchers are unaffected).
+      workbox: { navigateFallbackDenylist: [/^\/api\//, /^\/export/, /^\/mcp/, /^\/llms\.txt/] },
       manifest: {
         name: 'Game Night', short_name: 'GameNight',
         description: 'Game night leaderboards, records & history',
