@@ -22,3 +22,8 @@ Settings → Connectors → Add custom connector → `https://gamenight.trevorwi
 > monthly Game Night newsletter: standings, highlights, records broken, a "rivalry
 > corner", and one gentle roast of whoever finished last. Verify every number
 > against the tool output — never estimate stats.
+
+## No connectors allowed?
+
+If your Claude can't add MCP connectors (e.g. a managed work device), use the
+fetchable digest instead: see [export.md](export.md).
