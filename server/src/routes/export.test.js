@@ -53,7 +53,20 @@ test('GET /export/:month (path form) serves the digest — query-strip-proof', a
   assert.match(res.body, /# Game Night — Monthly Digest: June 2026/);
   const bad = await app.inject({ method: 'GET', url: '/export/junk' });
   assert.equal(bad.statusCode, 400);
-  assert.match(bad.body, /YYYY-MM/);
+  assert.match(bad.body, /\/export\/YYYY-MM/);
+  assert.match(bad.body, /\/export\/YYYY /); // 400 names the year form too
+});
+
+test('GET /export/:year serves the year summary; bare /export stays monthly', async () => {
+  const app = freshApp();
+  const y = await app.inject({ method: 'GET', url: '/export/2026' });
+  assert.equal(y.statusCode, 200);
+  assert.match(y.headers['content-type'], /text\/markdown/);
+  assert.equal(y.headers['cache-control'], 'no-store');
+  assert.match(y.body, /# Game Night — Year Summary: 2026/);
+  assert.match(y.body, /No plays recorded in 2026\./); // empty db
+  const def = await app.inject({ method: 'GET', url: '/export' });
+  assert.match(def.body, /# Game Night — Monthly Digest:/); // default unchanged
 });
 
 test('GET /llms.txt is plain text pointing at /export', async () => {

@@ -5,7 +5,7 @@ process.env.TZ = 'America/Denver';
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { renderDigest, prevMonthOf, MONTH_RE, digestHtmlFragment } from './export-digest.js';
+import { renderDigest, renderYearSummary, prevMonthOf, MONTH_RE, YEAR_RE } from './export-digest.js';
 
 // Fixture mirrors mcp-tools.test.js plus x5, and uses production-shaped dates:
 // app-created plays are zoneless local ('...T20:00'); migrated plays are UTC
@@ -24,6 +24,9 @@ const data = {
   plays: [
     // Prior-year play: must appear in NO 2026 section (proves the YTD year cut).
     { id: 'x0', g: 'g1', d: '2025-12-14T20:00', parts: [['p2', 1, 90], ['p3', 2, 40]] },
+    // Stored Jan 1 2026 UTC but Dec 31 2025 23:30 Denver → belongs to 2025.
+    // (Null scores so it can never disturb the record assertions.)
+    { id: 'x6', g: 'g1', d: '2026-01-01T05:30:00.000Z', parts: [['p3', 1, null], ['p1', 2, null]] },
     { id: 'x1', g: 'g1', d: '2026-05-10T20:00', parts: [['p1', 1, 80], ['p2', 2, 70]] },
     // Stored as June 1 UTC but played May 31 evening in Denver → belongs to MAY.
     { id: 'x5', g: 'g1', d: '2026-06-01T03:34:00.000Z', parts: [['p2', 1, 60], ['p3', 2, 50]] },
@@ -119,22 +122,60 @@ test('footer documents the path-form month URL and /api/state for the LLM', () =
   assert.match(md, /\/api\/state/);
 });
 
-test('digestHtmlFragment: hidden div, prevMonth content, HTML-escaped names', () => {
-  // A game name with markup characters must arrive escaped and inert.
-  const spiky = {
-    ...data,
-    games: data.games.map(g => (g.id === 'g2' ? { ...g, name: 'Brass <& Sons>' } : g)),
-  };
-  const frag = digestHtmlFragment(spiky, { now: new Date('2026-07-06T12:00:00') });
-  // Hidden via CSS class ONLY: readability-style extractors (used by consumer
-  // AI fetchers) strip inline display:none and aria-hidden nodes, but don't
-  // apply stylesheets — class-hiding is invisible to humans yet extractable.
-  assert.match(frag, /^<div class="ai-readable">\n/);
-  assert.ok(!frag.includes('aria-hidden') && !frag.includes('display:none'), 'no extractor strip-triggers');
-  assert.match(frag, /\n<\/div>$/);
-  assert.match(frag, /Monthly Digest: June 2026/); // prevMonth of the fixed now
-  assert.ok(frag.includes('Brass &lt;&amp; Sons&gt;'), 'markup in names is escaped');
-  // Nothing between the wrapper tags may contain raw angle brackets.
-  const body = frag.replace(/^<div[^>]*>\n/, '').replace(/\n<\/div>$/, '');
-  assert.ok(!/[<>]/.test(body), 'fragment body is inert text');
+test('YEAR_RE accepts YYYY only', () => {
+  assert.ok(YEAR_RE.test('2026'));
+  assert.ok(!YEAR_RE.test('2026-06'));
+  assert.ok(!YEAR_RE.test('26'));
+  assert.ok(!YEAR_RE.test('junk'));
+});
+
+test('renderYearSummary buckets the year by LOCAL time, like the app', () => {
+  const y2026 = renderYearSummary(data, { year: '2026' });
+  assert.match(y2026, /# Game Night — Year Summary: 2026/);
+  // x6 (Jan 1 2026 05:30 UTC = Dec 31 2025 Denver) must NOT count in 2026:
+  // Jo's 2026 = x5/x2/x4, all last places. With x6 she'd show 4 plays, 1 win.
+  assert.match(y2026, /\| Jo \| 3 \| 0 \| 0\.0 \| 0% \| 3 \|/);
+  // ...and MUST count in 2025: x0 loss + x6 win (Medium → 1.0 weighted).
+  const y2025 = renderYearSummary(data, { year: '2025' });
+  assert.match(y2025, /\| Jo \| 2 \| 1 \| 1\.0 \| 50% \| 1 \|/);
+});
+
+test('renderYearSummary: monthly champions table with tie join, empty months omitted', () => {
+  const y = renderYearSummary(data, { year: '2026' });
+  // May 2026: Trevor wins x1, Sam wins x5 → tied on wins, joined with &.
+  assert.match(y, /\| May \| Trevor & Sam \| 2 \|/);
+  // June 2026: Trevor 2 wins vs Sam 1 → sole champion, 3 plays.
+  assert.match(y, /\| June \| Trevor \| 3 \|/);
+  assert.ok(!y.includes('| January |'), 'months without plays are omitted');
+});
+
+test('renderYearSummary: most-played games ranked by plays, ties by name', () => {
+  const y = renderYearSummary(data, { year: '2026' });
+  const w = y.indexOf('| Wingspan | 3 |'); // x1, x5, x4 (x6 is 2025-local)
+  const b = y.indexOf('| Brass | 1 |');
+  const g = y.indexOf('| Golf | 1 |');
+  assert.ok(w > -1 && b > w && g > b, 'Wingspan first, then Brass/Golf alphabetical');
+});
+
+test('renderYearSummary: all-time records broken in that year', () => {
+  const y2026 = renderYearSummary(data, { year: '2026' });
+  assert.match(y2026, /🆕 \*\*Wingspan\*\*: 95 by Trevor on 2026-06-28/);
+  assert.match(y2026, /🆕 \*\*Brass\*\*: 120 by Sam on 2026-06-02/);
+  assert.match(y2026, /🆕 \*\*Golf\*\*: 12 by Trevor on 2026-06-20/);
+  // 2025's Wingspan 90 was later beaten → not a CURRENT record → None.
+  const y2025 = renderYearSummary(data, { year: '2025' });
+  assert.match(y2025, /## All-time records broken in 2025\n\nNone\./);
+});
+
+test('renderYearSummary: empty year renders placeholders', () => {
+  const y = renderYearSummary(data, { year: '2024' });
+  assert.match(y, /No plays recorded in 2024\./);
+});
+
+test('renderYearSummary: current streaks + footer with month/year/raw URLs', () => {
+  const y = renderYearSummary(data, { year: '2026' });
+  assert.match(y, /- Trevor: 2 wins in a row/); // same "current" semantics as digest
+  assert.match(y, /\/export\/YYYY-MM/);
+  assert.match(y, /\/export\/YYYY/);
+  assert.match(y, /\/api\/state/);
 });

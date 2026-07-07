@@ -80,3 +80,13 @@ variants) into the HTML it serves for `/`, inside a hidden, HTML-escaped
 - No `?month` variants on `/` (always previous month; other months via
   `/export?month=`).
 - No user-agent sniffing, no visible UI changes, no SW changes.
+
+## SUPERSEDED (2026-07-07)
+
+Removed by user decision — all AI export now happens at /export paths (see
+2026-07-07-year-summary-design.md). The UA content negotiation and the
+server-injected hidden digest at '/' are gone; index.js reverted to plain
+static serving. Root cause of the flakiness that motivated these layers was
+the consumer fetcher's stale per-URL cache of the pre-fix page, not our
+serving. The static class-hidden breadcrumb div in client/index.html (and the
+.ai-readable CSS-class hiding technique it documents) remains.

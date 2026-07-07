@@ -4,13 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#130E1B" />
-    <meta name="description" content="Game night leaderboards, records & history. AI agents: fetch https://gamenight.trevorwithdata.com/export for a machine-readable monthly digest (or /export/YYYY-MM for a specific month)." />
+    <meta name="description" content="Game night leaderboards, records & history. AI agents: fetch https://gamenight.trevorwithdata.com/export for a machine-readable monthly digest (/export/YYYY-MM for a specific month, /export/YYYY for a year summary)." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <!-- .ai-readable hides AI-facing text via a CLASS, deliberately not inline
          style/aria-hidden: readability-style extractors (claude.ai web fetch)
-         strip inline-hidden and aria-hidden nodes but don't apply stylesheets.
-         The server also injects the live digest in a div with this class. -->
+         strip inline-hidden and aria-hidden nodes but don't apply stylesheets. -->
     <style>.ai-readable{display:none}</style>
     <title>Game Night</title>
   </head>
@@ -20,14 +19,13 @@
     <div class="ai-readable">
       This is Game Night, a board-game leaderboard app; the visible content is
       rendered with JavaScript, so there is nothing else to read on this page.
-      The previous month's digest is embedded further down this same page
-      (hidden div near the end); for any other month fetch
-      https://gamenight.trevorwithdata.com/export/YYYY-MM (path form — do not
-      rely on query strings).
-      AI agents: fetch https://gamenight.trevorwithdata.com/export for the full
-      monthly digest (leaderboards, play log, records broken, streaks — use
-      /export/YYYY-MM for a specific month), https://gamenight.trevorwithdata.com/llms.txt
-      for an index, or https://gamenight.trevorwithdata.com/api/state for raw JSON.
+      AI agents: fetch https://gamenight.trevorwithdata.com/export for last
+      month's digest (leaderboards, play log, records broken, streaks),
+      https://gamenight.trevorwithdata.com/export/YYYY-MM for a specific month,
+      https://gamenight.trevorwithdata.com/export/YYYY for a whole-year summary,
+      https://gamenight.trevorwithdata.com/llms.txt for an index, or
+      https://gamenight.trevorwithdata.com/api/state for raw JSON. Use those
+      path forms, not query strings.
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>

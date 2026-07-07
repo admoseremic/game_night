@@ -7,6 +7,7 @@ import { leaderboard, currentStreak } from '../../client/src/lib/stats.js';
 import { getPlays, getRecords } from './mcp-tools.js';
 
 export const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
+export const YEAR_RE = /^\d{4}$/;
 
 const SITE = 'https://gamenight.trevorwithdata.com';
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -44,6 +45,23 @@ function table(rows) {
   return out.join('\n');
 }
 
+// Shared "how to read" preamble + current-streaks section (the streaks are
+// CURRENT as of now for both renderers, even on historical periods).
+const LEGEND = `How to read this data:
+
+- Each play lists players in finishing order; **rank 1 is the winner**.
+- **Weighted wins**: a win counts its game's tier weight — Light 0.5, Medium 1.0, Heavy 1.5.
+- Each game has a score direction: some count highest score as best, some lowest.
+- Scores are optional — plays without scores still count for wins; they just can't set records.`;
+
+const currentStreaks = (data) => data.players
+  .map(p => ({ name: p.name, streak: currentStreak(data.plays, p.id) }))
+  .filter(s => s.streak >= 2).sort((a, b) => b.streak - a.streak);
+
+const streaksSection = (streaks) => streaks.length
+  ? streaks.map(s => `- ${s.name}: ${s.streak} wins in a row`).join('\n')
+  : 'No active streaks of 2+ wins.';
+
 export function renderDigest(data, { month, now = new Date() } = {}) {
   const m = month || prevMonthOf(now);
   const monthPlays = data.plays.filter(p => localYM(p.d) === m);
@@ -51,9 +69,7 @@ export function renderDigest(data, { month, now = new Date() } = {}) {
   // "Broken this month" = the CURRENT all-time record was set inside the month.
   // (A record set and then re-broken later won't show in the earlier month.)
   const newRecords = records.filter(r => localYM(r.date) === m);
-  const streaks = data.players
-    .map(p => ({ name: p.name, streak: currentStreak(data.plays, p.id) }))
-    .filter(s => s.streak >= 2).sort((a, b) => b.streak - a.streak);
+  const streaks = currentStreaks(data);
   const none = `No plays recorded in ${label(m)}.`;
 
   // Feed getPlays the already-bucketed plays (its since/until args compare raw
@@ -73,12 +89,7 @@ export function renderDigest(data, { month, now = new Date() } = {}) {
 
 Generated ${localYMD(now)} from live data at ${SITE}.
 
-How to read this data:
-
-- Each play lists players in finishing order; **rank 1 is the winner**.
-- **Weighted wins**: a win counts its game's tier weight — Light 0.5, Medium 1.0, Heavy 1.5.
-- Each game has a score direction: some count highest score as best, some lowest.
-- Scores are optional — plays without scores still count for wins; they just can't set records.
+${LEGEND}
 
 ## ${label(m)} leaderboard
 
@@ -100,26 +111,79 @@ ${ytdPlays.length ? table(leaderboard(data, ytdPlays, 'wins')) : `No plays recor
 
 ## Current win streaks
 
-${streaks.length ? streaks.map(s => `- ${s.name}: ${s.streak} wins in a row`).join('\n') : 'No active streaks of 2+ wins.'}
+${streaksSection(streaks)}
 
 ---
 
 For a different month: ${SITE}/export/YYYY-MM (e.g. ${SITE}/export/2026-05).
+Whole-year summary: ${SITE}/export/YYYY (e.g. ${SITE}/export/${m.slice(0, 4)}).
 Full raw dataset as JSON: ${SITE}/api/state
 `;
 }
 
-// The previous month's digest as an HTML-escaped hidden <div>, for embedding
-// in the served app shell (GET / in server/src/index.js): ONE fetch of the
-// main URL hands any AI the data without knowing /export. Escaping makes the
-// text inert — player/game names can never break the page.
-// HIDING MECHANISM MATTERS: readability-style extractors (claude.ai's consumer
-// web fetch, Mozilla Readability) DROP nodes with inline style="display:none"
-// or aria-hidden="true", but never apply stylesheets — so we hide via the
-// .ai-readable class declared in client/index.html's <style>. Invisible to
-// humans and screen readers, extractable by AI fetchers. Do not "fix" this
-// back to inline hiding. Spec: docs/superpowers/specs/2026-07-06-embedded-digest-design.md
-const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-export function digestHtmlFragment(data, { now = new Date() } = {}) {
-  return `<div class="ai-readable">\n${escapeHtml(renderDigest(data, { now }))}\n</div>`;
+// Year summary for GET /export/YYYY — aggregates only, NO play-by-play log
+// (a full year is hundreds of plays; the monthly URLs carry the logs).
+// Same local-time bucketing (localYM) and same stats.js math as the digest.
+// Spec: docs/superpowers/specs/2026-07-07-year-summary-design.md
+export function renderYearSummary(data, { year, now = new Date() } = {}) {
+  const y = year || prevMonthOf(now).slice(0, 4);
+  const yearPlays = data.plays.filter(p => localYM(p.d).slice(0, 4) === y);
+  const newRecords = getRecords(data, {}).records.filter(r => localYMD(r.date).slice(0, 4) === y);
+  const none = `No plays recorded in ${y}.`;
+
+  // Monthly champions: per month with plays, everyone tied for most raw wins
+  // (leaderboard() ranks sequentially, so ties are detected by win count).
+  const champRows = [];
+  for (let i = 1; i <= 12; i++) {
+    const mPlays = yearPlays.filter(p => localYM(p.d) === `${y}-${pad(i)}`);
+    if (!mPlays.length) continue;
+    const rows = leaderboard(data, mPlays, 'wins');
+    const champs = rows.filter(r => r.wins === rows[0].wins).map(r => r.name).join(' & ');
+    champRows.push(`| ${MONTHS[i - 1]} | ${champs} | ${mPlays.length} |`);
+  }
+  const champTable = ['| Month | Champion | Plays |', '|-------|----------|-------|', ...champRows].join('\n');
+
+  // Most-played games, top 10; ties broken by name so output is deterministic.
+  const counts = {};
+  for (const p of yearPlays) counts[p.g] = (counts[p.g] || 0) + 1;
+  const mostPlayed = Object.entries(counts)
+    .map(([gid, n]) => ({ name: data.games.find(g => g.id === gid).name, n }))
+    .sort((a, b) => (b.n - a.n) || a.name.localeCompare(b.name))
+    .slice(0, 10);
+  const gamesTable = ['| Game | Plays |', '|------|-------|',
+    ...mostPlayed.map(g => `| ${g.name} | ${g.n} |`)].join('\n');
+
+  return `# Game Night — Year Summary: ${y}
+
+Generated ${localYMD(now)} from live data at ${SITE}.
+
+${LEGEND}
+
+## ${y} leaderboard
+
+${yearPlays.length ? table(leaderboard(data, yearPlays, 'wins')) : none}
+
+## Monthly champions
+
+${champRows.length ? champTable : none}
+
+## Most-played games
+
+${mostPlayed.length ? gamesTable : none}
+
+## All-time records broken in ${y}
+
+${newRecords.length
+    ? newRecords.map(r => `- 🆕 **${r.game}**: ${r.score} by ${r.holder} on ${localYMD(r.date)}`).join('\n')
+    : 'None.'}
+
+## Current win streaks
+
+${streaksSection(currentStreaks(data))}
+
+---
+
+Monthly detail (leaderboard + full play log): ${SITE}/export/YYYY-MM (e.g. ${SITE}/export/${y}-05).
+Other years: ${SITE}/export/YYYY. Full raw dataset as JSON: ${SITE}/api/state
+`;
 }
