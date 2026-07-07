@@ -104,7 +104,7 @@ ${streaks.length ? streaks.map(s => `- ${s.name}: ${s.streak} wins in a row`).jo
 
 ---
 
-For a different month: ${SITE}/export?month=YYYY-MM (e.g. ?month=2026-05).
+For a different month: ${SITE}/export/YYYY-MM (e.g. ${SITE}/export/2026-05).
 Full raw dataset as JSON: ${SITE}/api/state
 `;
 }

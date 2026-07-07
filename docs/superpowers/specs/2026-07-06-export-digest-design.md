@@ -112,3 +112,13 @@ either way — this fix is for humans eyeballing the URL in a browser.
 - No auth, no rate limiting (same exposure as existing public endpoints).
 - MCP endpoint stays as-is (works for the user himself and any
   non-restricted Claude).
+
+## Amendment (2026-07-07): path-form month URL
+
+`GET /export/:month` (e.g. `/export/2026-05`) added as the DOCUMENTED way to
+request a specific month; `?month=YYYY-MM` still works but is demoted. Reason:
+live testing showed claude.ai's consumer web fetch dropping the query string,
+silently returning the default month. A path segment can't be stripped (and
+each month gets its own fetcher cache entry). Same validation (MONTH_RE → 400)
+and headers; digest footer, /llms.txt, breadcrumbs, and docs all point at the
+path form now.

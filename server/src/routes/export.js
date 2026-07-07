@@ -14,23 +14,28 @@ Self-hosted board-game-night leaderboard app for a private group of friends.
 Data for AI agents (read-only, no auth):
 - https://gamenight.trevorwithdata.com/export — monthly digest in markdown:
   leaderboards, play-by-play log, records, streaks. Defaults to last month;
-  add ?month=YYYY-MM for any other month. Start here.
+  for any other month use /export/YYYY-MM (e.g. /export/2026-05). Start here.
 - https://gamenight.trevorwithdata.com/api/state — full raw dataset (JSON).
 - POST https://gamenight.trevorwithdata.com/mcp — MCP endpoint (Streamable
   HTTP) with query tools, if your client supports connectors.
 `;
 
 export async function exportRoutes(app) {
-  app.get('/export', async (req, reply) => {
-    const { month } = req.query;
+  // Month can arrive as a PATH segment (/export/2026-05) or a query param
+  // (/export?month=2026-05). The path form is the documented one: consumer AI
+  // web-fetch tools (claude.ai) have been seen dropping query strings, which
+  // silently returned the default month — a path segment can't be stripped.
+  const sendDigest = (reply, month) => {
     if (month !== undefined && !MONTH_RE.test(month)) {
       return reply.code(400).type('text/plain; charset=utf-8')
-        .send('Invalid month. Use ?month=YYYY-MM, e.g. ?month=2026-06.\n');
+        .send('Invalid month. Use /export/YYYY-MM, e.g. /export/2026-06.\n');
     }
     return reply.type('text/markdown; charset=utf-8')
       .header('cache-control', 'no-store')
       .send(renderDigest(readState(app.db), { month }));
-  });
+  };
+  app.get('/export', async (req, reply) => sendDigest(reply, req.query.month));
+  app.get('/export/:month', async (req, reply) => sendDigest(reply, req.params.month));
   app.get('/llms.txt', async (_req, reply) =>
     reply.type('text/plain; charset=utf-8').send(LLMS_TXT));
 }

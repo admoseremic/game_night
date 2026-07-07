@@ -112,9 +112,10 @@ test('UTC-stored evening play buckets into its LOCAL month, like the app', () =>
   assert.match(may, /\| Sam \| 2 \| 1 \| 1\.0 \| 50% \| 1 \|/);
 });
 
-test('footer documents ?month and /api/state for the LLM', () => {
+test('footer documents the path-form month URL and /api/state for the LLM', () => {
   const md = renderDigest(data, { month: '2026-06' });
-  assert.match(md, /\/export\?month=YYYY-MM/);
+  // Path form, NOT ?month= — some AI fetchers drop query strings.
+  assert.match(md, /\/export\/YYYY-MM/);
   assert.match(md, /\/api\/state/);
 });
 

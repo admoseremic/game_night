@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#130E1B" />
-    <meta name="description" content="Game night leaderboards, records & history. AI agents: fetch https://gamenight.trevorwithdata.com/export for a machine-readable monthly digest (add ?month=YYYY-MM for other months)." />
+    <meta name="description" content="Game night leaderboards, records & history. AI agents: fetch https://gamenight.trevorwithdata.com/export for a machine-readable monthly digest (or /export/YYYY-MM for a specific month)." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <!-- .ai-readable hides AI-facing text via a CLASS, deliberately not inline
@@ -22,10 +22,11 @@
       rendered with JavaScript, so there is nothing else to read on this page.
       The previous month's digest is embedded further down this same page
       (hidden div near the end); for any other month fetch
-      https://gamenight.trevorwithdata.com/export?month=YYYY-MM.
+      https://gamenight.trevorwithdata.com/export/YYYY-MM (path form — do not
+      rely on query strings).
       AI agents: fetch https://gamenight.trevorwithdata.com/export for the full
-      monthly digest (leaderboards, play log, records broken, streaks — add
-      ?month=YYYY-MM for a specific month), https://gamenight.trevorwithdata.com/llms.txt
+      monthly digest (leaderboards, play log, records broken, streaks — use
+      /export/YYYY-MM for a specific month), https://gamenight.trevorwithdata.com/llms.txt
       for an index, or https://gamenight.trevorwithdata.com/api/state for raw JSON.
     </div>
     <div id="root"></div>

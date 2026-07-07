@@ -44,6 +44,18 @@ test('GET /export rejects malformed month with 400', async () => {
   }
 });
 
+test('GET /export/:month (path form) serves the digest — query-strip-proof', async () => {
+  const app = freshApp();
+  const res = await app.inject({ method: 'GET', url: '/export/2026-06' });
+  assert.equal(res.statusCode, 200);
+  assert.match(res.headers['content-type'], /text\/markdown/);
+  assert.equal(res.headers['cache-control'], 'no-store');
+  assert.match(res.body, /# Game Night — Monthly Digest: June 2026/);
+  const bad = await app.inject({ method: 'GET', url: '/export/junk' });
+  assert.equal(bad.statusCode, 400);
+  assert.match(bad.body, /YYYY-MM/);
+});
+
 test('GET /llms.txt is plain text pointing at /export', async () => {
   const app = freshApp();
   const res = await app.inject({ method: 'GET', url: '/llms.txt' });
