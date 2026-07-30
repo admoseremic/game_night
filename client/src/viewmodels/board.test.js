@@ -16,6 +16,20 @@ it('builds ranked rows with the active sort cell and a champ', () => {
   expect(vm.champ.pid).toBe('p1');
 });
 
+it('promotes all tied rank-1 players to champs (hero cards), one otherwise', () => {
+  // p1 and p2 each win one game → tied for first → both are champs
+  const d = { ...data, plays: [
+    { id: 'x1', g: 'g1', d: '2026-06-10T20:00', parts: [['p1', 1, 10], ['p2', 2, 5]] },
+    { id: 'x2', g: 'g1', d: '2026-06-11T20:00', parts: [['p2', 1, 10], ['p1', 2, 5]] },
+  ] };
+  const vm = buildBoard(d, ui, new Date('2026-06-24T20:00:00'));
+  expect(vm.champs.length).toBe(2);
+  expect(vm.champs.every(c => c.rank === 1)).toBe(true);
+  // no tie → a single champ
+  const vm1 = buildBoard(data, ui, new Date('2026-06-24T20:00:00'));
+  expect(vm1.champs.map(c => c.pid)).toEqual(['p1']);
+});
+
 it('empty when no plays in period', () => {
   const vm = buildBoard(data, { ...ui, period: 'lastYear' }, new Date('2026-06-24T20:00:00'));
   expect(vm.empty).toBe(true);

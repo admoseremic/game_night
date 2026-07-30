@@ -73,6 +73,10 @@ export function buildBoard(data, ui, now) {
 
   return {
     champ: rows[0] || null,          // top-ranked player (or null if empty)
+    // ALL rank-1 players — ties for first each get the full hero-card treatment.
+    // Tied leaders are contiguous at the top (they share the comparator), so the
+    // screen renders champs as heroes and rows.slice(champs.length) as the list.
+    champs: rows.filter(r => r.rank === 1),
     rows,
     empty: rows.length === 0,
     periodLabel,

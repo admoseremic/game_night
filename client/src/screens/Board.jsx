@@ -383,18 +383,19 @@ export default function Board() {
         </div>
       </div>
 
-      {/* ─── Champion hero (rank 1 player, shown above the list) ─── */}
-      {!vm.empty && (
+      {/* ─── Champion heroes (every rank-1 player — ties for first all get the big card) ─── */}
+      {!vm.empty && vm.champs.map(c => (
         <ChampHero
-          champ={vm.champ}
-          onClick={() => setUi({ screen: 'playerDetail', playerId: vm.champ.pid, profileFrom: 'board' })}
+          key={c.pid}
+          champ={c}
+          onClick={() => setUi({ screen: 'playerDetail', playerId: c.pid, profileFrom: 'board' })}
         />
-      )}
+      ))}
 
-      {/* ─── Leaderboard rows (rank 2+) ─── */}
+      {/* ─── Leaderboard rows (everyone below the champs) ─── */}
       {!vm.empty && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-          {vm.rows.slice(1).map(row => (
+          {vm.rows.slice(vm.champs.length).map(row => (
             <BoardRow
               key={row.pid}
               row={row}
