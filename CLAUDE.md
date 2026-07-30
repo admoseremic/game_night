@@ -12,7 +12,7 @@ Self-hosted PWA for board-game-night leaderboards, records, player stats, and a 
 ## Critical: stat math
 - `client/src/lib/stats.js` is the correctness-critical core: PURE functions ported verbatim from the prototype `designs/design_handoff_game_night/Game Night.dc.html` (`class Component`). Changes here must match the prototype exactly. `client/src/viewmodels/*` compose these; `client/src/screens/*` are presentation only.
 - Invariants: lower rank = better (rank 1 wins); tier weights Light 0.5 / Medium 1.0 / Heavy 1.5; record direction per-game (`dir:'high'`=max wins, `'low'`=min); scores optional (null allowed), ranks required; no duplicate player in a play.
-- Data model: `players(id,name,regular,c1,c2)`, `games(id,name,tier,dir,icon)`, `plays(id,game_id,played_at,parts)` where `parts` is JSON `[[playerId,rank,scoreOrNull],…]`. API returns plays as `{id,g,d,parts}` and `regular` as a boolean. **Player model has NO `initials` field — derive `name[0].toUpperCase()`.**
+- Data model: `players(id,name,regular,c1,c2)`, `games(id,name,tier,dir,icon)`, `plays(id,game_id,played_at,parts)` where `parts` is JSON `[[playerId,rank,scoreOrNull],…]`. API returns plays as `{id,g,d,seq,parts}` (`seq` = chronological position, tiebreaks same-minute `d` sorts — see `newestFirst` in stats.js) and `regular` as a boolean. **Player model has NO `initials` field — derive `name[0].toUpperCase()`.**
 
 ## Commands
 - Client: `cd client && npm run dev` (Vite :5173, proxies `/api`→:3000) · `npm test` (vitest) · `npm run build`.

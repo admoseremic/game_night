@@ -44,7 +44,7 @@ export function getPlays(data, { since, until, game, player, limit } = {}) {
   if (player) { const pl = findPlayer(data, player); plays = plays.filter(p => p.parts.some(x => x[0] === pl.id)); }
   if (since) plays = plays.filter(p => p.d.slice(0, 10) >= since);
   if (until) plays = plays.filter(p => p.d.slice(0, 10) <= until);
-  const newestFirst = [...plays].reverse(); // readState orders ASC by played_at
+  const newestFirst = [...plays].reverse(); // readState orders ASC by played_at (ties by insertion order)
   const capped = newestFirst.slice(0, Math.min(limit ?? 50, 200));
   return {
     count: plays.length,

@@ -2,7 +2,7 @@
 // Ported from prototype playerDetail (lines 1268-1318).
 // All stat math comes from stats.js and format.js — no re-computation here.
 
-import { weight, currentStreak, recordFor } from '../lib/stats.js';
+import { weight, currentStreak, recordFor, newestFirst } from '../lib/stats.js';
 import { fmtDate, ordinal, durationSince } from '../lib/format.js';
 
 // Common helpers for this module
@@ -38,7 +38,7 @@ export function buildPlayerDetail(data, pid, now, from, period) {
   const careerCount = data.plays.filter(x => x.parts.some(pt => pt[0] === pid)).length;
   const plays = data.plays
     .filter(x => x.parts.some(pt => pt[0] === pid) && inWindow(x.d))
-    .sort((a, b) => new Date(b.d) - new Date(a.d));
+    .sort(newestFirst); // seq tiebreak — same-minute plays order by logged order
 
   // Label for the back button based on where user navigated from
   const backLabel = from === 'board' ? 'Leaderboard' : 'Players';

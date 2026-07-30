@@ -3,6 +3,7 @@
 // Pure function — no side effects, no React imports.
 
 import { fmtDateY, rel } from '../lib/format.js';
+import { newestFirst } from '../lib/stats.js';
 
 /**
  * buildHistory(data, now) → DayGroup[]
@@ -24,7 +25,7 @@ export function buildHistory(data, now) {
   // Group plays by calendar day (using toDateString as the key)
   const byDay = {};
   [...data.plays]
-    .sort((a, b) => new Date(b.d) - new Date(a.d))
+    .sort(newestFirst) // seq tiebreak — same-minute plays list in reverse logged order
     .forEach(pl => {
       const key = new Date(pl.d).toDateString();
       (byDay[key] || (byDay[key] = [])).push(pl);

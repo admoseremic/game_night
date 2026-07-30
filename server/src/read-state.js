@@ -5,7 +5,10 @@ export function readState(db) {
   const players = db.prepare('SELECT id,name,regular,c1,c2 FROM players ORDER BY name')
     .all().map(p => ({ ...p, regular: !!p.regular }));
   const games = db.prepare('SELECT id,name,tier,dir,icon FROM games').all();
-  const plays = db.prepare('SELECT id,game_id,played_at,parts FROM plays ORDER BY played_at')
-    .all().map(r => ({ id: r.id, g: r.game_id, d: r.played_at, parts: JSON.parse(r.parts) }));
+  // played_at has minute resolution and back-to-back logged plays often share a minute,
+  // so ties break by rowid (insertion order = the order the games were actually logged).
+  // seq is the play's chronological position; clients use it to tiebreak date sorts.
+  const plays = db.prepare('SELECT id,game_id,played_at,parts FROM plays ORDER BY played_at, rowid')
+    .all().map((r, i) => ({ id: r.id, g: r.game_id, d: r.played_at, seq: i, parts: JSON.parse(r.parts) }));
   return { players, games, plays };
 }

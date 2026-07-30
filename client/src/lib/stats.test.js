@@ -37,6 +37,45 @@ it('leaderboard aggregates wins, plays, beat, wwins, winPct', () => {
   expect(lb[0].rank).toBe(1);
 });
 
+// ─── Tie ranks + same-minute play ordering (bug fixes 2026-07-29) ───
+
+it('leaderboard gives tied players the same rank (competition ranking)', () => {
+  // p1 and p2 both have 1 win → both rank 1; p3 (0 wins) is rank 3, not 2
+  const lb = leaderboard(data, data.plays, 'wins');
+  const byId = Object.fromEntries(lb.map(e => [e.pid, e]));
+  expect(byId.p1.rank).toBe(1);
+  expect(byId.p2.rank).toBe(1);
+  expect(byId.p3.rank).toBe(3);
+});
+
+it('leaderboard secondary sort splits a primary-key tie into distinct ranks', () => {
+  // p1/p2 tied on wins; wwins differ (p2 1.5 vs p1 0.5) → secondary sort breaks the tie
+  const lb = leaderboard(data, data.plays, 'wins', 'wwins');
+  expect(lb[0].pid).toBe('p2');
+  expect(lb[0].rank).toBe(1);
+  expect(lb[1].pid).toBe('p1');
+  expect(lb[1].rank).toBe(2);
+});
+
+it('computePick treats the higher-seq play as most recent when timestamps tie', () => {
+  // Plays logged back-to-back share a minute-resolution timestamp; seq breaks the tie
+  const plays = [
+    { id: 'a', g: 'g1', d: '2026-07-28T23:01', seq: 1, parts: [['p1', 1, null], ['p2', 2, null]] },
+    { id: 'b', g: 'g2', d: '2026-07-28T23:01', seq: 2, parts: [['p2', 1, null], ['p3', 2, null]] },
+  ];
+  const pick = computePick(data, plays, {});
+  expect(pick.game.id).toBe('g2');     // logged second → the actual most recent play
+  expect(pick.pickPart[0]).toBe('p3'); // its loser holds the pick
+});
+
+it('currentStreak walks same-timestamp plays in seq order', () => {
+  const plays = [
+    { id: 'a', g: 'g1', d: '2026-07-28T23:01', seq: 1, parts: [['p1', 1, null], ['p2', 2, null]] }, // p1 win (earlier)
+    { id: 'b', g: 'g1', d: '2026-07-28T23:01', seq: 2, parts: [['p2', 1, null], ['p1', 2, null]] }, // p1 loss (latest)
+  ];
+  expect(currentStreak(plays, 'p1')).toBe(0); // latest play is a loss → no streak
+});
+
 it('leaderboard losses = last-place finishes (solo games excluded)', () => {
   const d = {
     players: [{ id: 'a', name: 'A', c1: '#1', c2: '#2', regular: true }, { id: 'b', name: 'B', c1: '#3', c2: '#4', regular: true }],

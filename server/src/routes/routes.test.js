@@ -47,6 +47,20 @@ test('create + fetch play round-trips parts and uses g/d keys', async () => {
   assert.deepEqual(state.plays[0].parts, [['x', 1, 42], ['y', 2, null]]);
 });
 
+test('state plays carry seq and same-timestamp plays keep insertion order', async () => {
+  const { app } = freshApp();
+  await app.inject({ method: 'POST', url: '/api/games', payload: { name: 'G', tier: 'Light', dir: 'high', icon: '🎲' } });
+  const game = (await app.inject({ method: 'GET', url: '/api/state' })).json().games[0];
+  // Two plays logged back-to-back share a minute timestamp; a third is backdated earlier
+  await app.inject({ method: 'POST', url: '/api/plays', payload: { g: game.id, d: '2026-07-28T23:01', parts: [['a', 1, null]] } });
+  await app.inject({ method: 'POST', url: '/api/plays', payload: { g: game.id, d: '2026-07-28T23:01', parts: [['b', 1, null]] } });
+  await app.inject({ method: 'POST', url: '/api/plays', payload: { g: game.id, d: '2026-07-28T22:40', parts: [['c', 1, null]] } });
+  const plays = (await app.inject({ method: 'GET', url: '/api/state' })).json().plays;
+  assert.deepEqual(plays.map(p => p.d), ['2026-07-28T22:40', '2026-07-28T23:01', '2026-07-28T23:01']);
+  assert.deepEqual(plays.map(p => p.seq), [0, 1, 2]);      // chronological position, ties by insertion
+  assert.equal(plays[1].parts[0][0], 'a');                 // first-logged 23:01 play sorts before second
+});
+
 test('delete play removes it', async () => {
   const { app } = freshApp();
   await app.inject({ method: 'POST', url: '/api/games', payload: { name: 'G', tier: 'Light', dir: 'high', icon: '🎲' } });

@@ -6,6 +6,13 @@ const initials = (p) => (p.name || '?').slice(0, 1).toUpperCase();
 
 export function weight(t) { return t === 'Heavy' ? 1.5 : t === 'Light' ? 0.5 : 1.0; }
 
+// Newest-first play comparator. play.d has minute resolution and plays logged back-to-back
+// share the same minute, so ties break by seq (chronological position from the server —
+// see server/src/read-state.js). Optimistic plays have no seq yet and count as newest.
+// Deviation from the prototype (which sorted on date alone) — tie order was unspecified.
+const seqOf = (p) => p.seq ?? Number.MAX_SAFE_INTEGER;
+export const newestFirst = (a, b) => (new Date(b.d) - new Date(a.d)) || (seqOf(b) - seqOf(a));
+
 export function inPeriod(play, period, now, custom) {
   const d = new Date(play.d), n = now;
   if (period === 'all') return true;
@@ -39,7 +46,14 @@ export function leaderboard(data, plays, sort, sort2) {
   const keyVal = (e, key) => key === 'wins' ? e.wins : key === 'losses' ? e.losses : key === 'plays' ? e.plays : key === 'winPct' ? e.winPct : key === 'beat' ? e.beat : key === 'beatPer' ? e.beatPer : e.wwins;
   const key = sort || 'wins';
   arr.sort((a, b) => (keyVal(b, key) - keyVal(a, key)) || (sort2 ? (keyVal(b, sort2) - keyVal(a, sort2)) : 0));
-  arr.forEach((e, i) => e.rank = i + 1);
+  // Competition ranking: players tied on the sort key(s) share a rank (1,1,3 — two golds,
+  // no silver). Deviation from the prototype, which numbered ties sequentially.
+  arr.forEach((e, i) => {
+    const prev = arr[i - 1];
+    const tied = prev && keyVal(e, key) === keyVal(prev, key)
+      && (!sort2 || keyVal(e, sort2) === keyVal(prev, sort2));
+    e.rank = tied ? prev.rank : i + 1;
+  });
   return arr;
 }
 
@@ -60,12 +74,12 @@ export function recordFor(data, gameId) {
 }
 
 export function currentStreak(plays, pid) {
-  const ps = plays.filter(p => p.parts.some(x => x[0] === pid)).sort((a, b) => new Date(b.d) - new Date(a.d));
+  const ps = plays.filter(p => p.parts.some(x => x[0] === pid)).sort(newestFirst);
   let s = 0; for (const p of ps) { const me = p.parts.find(x => x[0] === pid); if (me[1] === 1) s++; else break; } return s;
 }
 
 export function computePick(data, plays, absent = {}) {
-  const sorted = [...plays].sort((a, b) => new Date(b.d) - new Date(a.d));
+  const sorted = [...plays].sort(newestFirst);
   if (!sorted.length) return null;
   // Walk back through games, newest first. Within a game the worst finisher picks; if they're
   // absent, cascade to the next-worst. If an ENTIRE game's roster is absent, fall back to the

@@ -37,7 +37,7 @@ function makeConfetti() {
 }
 
 export default function LogPlay() {
-  const { data, ui, setUi, now, actions } = useStore();
+  const { data, ui, setUi, actions } = useStore();
 
   // Determine edit vs new mode from ui flags (captured once on mount via useState initializers)
   const isEdit = !!ui.editPlayId;
@@ -52,7 +52,10 @@ export default function LogPlay() {
   const [gameId, setGameId] = useState(isEdit && editPlay ? editPlay.g : null);
   const [order, setOrder] = useState(isEdit && editPlay ? editSorted.map(x => x[0]) : []);
   const [scores, setScores] = useState(initScores);
-  const [date, setDate] = useState(isEdit && editPlay ? editPlay.d : toLocalDT(now));
+  // New plays default to the ACTUAL current time — not store `now`, which is frozen at app
+  // mount and goes stale in a long-lived PWA session (it gave every play logged in one
+  // sitting the same timestamp, scrambling history order).
+  const [date, setDate] = useState(isEdit && editPlay ? editPlay.d : toLocalDT(new Date()));
   const [search, setSearch] = useState('');
 
   // Close and clear ui flags

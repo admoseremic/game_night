@@ -29,6 +29,15 @@ it('player detail aggregates wins/plays/beat/wwins', () => {
   expect(vm.games.every(g => g.id)).toBe(true); // each per-game row carries its game id (for detail linking)
 });
 
+it('recent results order same-timestamp plays by seq, newest-logged first', () => {
+  const d2 = { ...data, plays: [
+    { id: 'y1', g: 'g1', d: '2026-06-12T23:01', seq: 1, parts: [['p1', 1, null], ['p2', 2, null]] },
+    { id: 'y2', g: 'g2', d: '2026-06-12T23:01', seq: 2, parts: [['p1', 2, null], ['p2', 1, null]] },
+  ] };
+  const vm = buildPlayerDetail(d2, 'p1', now, 'players');
+  expect(vm.recent.map(r => r.game)).toEqual(['Heavy Low', 'Light Game']); // y2 logged last → listed first
+});
+
 it('new player with no plays returns isNew/empty', () => {
   const d = { ...data, players: [...data.players, { id: 'pNew', name: 'Zoe', c1: '#7', c2: '#8', regular: true }] };
   const vm = buildPlayerDetail(d, 'pNew', now, 'players');

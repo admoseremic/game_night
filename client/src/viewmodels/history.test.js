@@ -31,3 +31,14 @@ it('groups plays by night, reverse-chron, with winner/loser/score', () => {
   expect(days[0].games[0].lScoreStr).toBe(' 20'); // loser score next to loser
   expect(days[1].games[0].winner).toBe('Ann');   // 2026-06-10
 });
+
+it('orders same-timestamp plays in a night by seq, newest-logged first', () => {
+  // Back-to-back logged plays share a minute-resolution timestamp; the one logged
+  // last (higher seq) was played later and must be listed first.
+  const d2 = { ...data, plays: [
+    { id: 'y1', g: 'g1', d: '2026-06-12T23:01', seq: 1, parts: [['p1', 1, null], ['p2', 2, null]] },
+    { id: 'y2', g: 'g2', d: '2026-06-12T23:01', seq: 2, parts: [['p2', 1, null], ['p1', 2, null]] },
+  ] };
+  const days = buildHistory(d2, now);
+  expect(days[0].games.map(g => g.game)).toEqual(['Heavy Low', 'Light Game']);
+});
