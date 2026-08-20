@@ -65,5 +65,5 @@ it('h2h: respects the hall period window', () => {
     ],
   };
   expect(buildHeadToHead(pdata, 'all', now, { a: 'p1', b: 'p2', slot: 'a' }).meetings).toBe(2);
-  expect(buildHeadToHead(pdata, 'thisYear', now, { a: 'p1', b: 'p2', slot: 'a' }).meetings).toBe(1);
+  expect(buildHeadToHead(pdata, 'ytd', now, { a: 'p1', b: 'p2', slot: 'a' }).meetings).toBe(1);
 });

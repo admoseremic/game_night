@@ -22,9 +22,9 @@ export function StoreProvider({ children }) {
   const [ui, setUiState] = useState({ screen: 'board', period: 'month', sorts: ['wins'],
     // Games tab view: 'summary' (period-scoped activity report, default) | 'all' (full catalog/shelf).
     gamesMode: 'summary',
-    gameId: null, playerId: null, custom: { start: '2026-01-01', end: '2026-06-25' }, absent: {}, hallPeriod: 'thisYear',
-    // Player Profile time-window filter (This Year / Last 2 Years / All Time). Session-only.
-    profilePeriod: 'thisYear',
+    gameId: null, playerId: null, custom: { start: '2026-01-01', end: '2026-06-25' }, absent: {}, hallPeriod: 'ytd',
+    // Player Profile time-window filter (This Month / Last Month / This Year / All Time). Session-only.
+    profilePeriod: 'ytd',
     // Head-to-Head picker (Hall): selected player ids + which slot the next roster tap fills. Session-only.
     h2hA: null, h2hB: null, h2hSlot: 'a' });
   const now = useRef(new Date()).current;

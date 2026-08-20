@@ -43,8 +43,8 @@ function Slot({ card, ring, placeholder, onClick }) {
 
 export default function HeadToHead() {
   const { data, ui, setUi, now } = useStore();
-  // Same window as the rest of Hall (default 'thisYear', matching Hall.jsx)
-  const period = ui.hallPeriod || 'thisYear';
+  // Same window as the rest of Hall (default 'ytd', matching Hall.jsx)
+  const period = ui.hallPeriod || 'ytd';
   const vm = buildHeadToHead(data, period, now, { a: ui.h2hA, b: ui.h2hB, slot: ui.h2hSlot });
 
   // Collapse the per-game breakdown to GAMES_CAP rows; reset when the matchup or window changes.

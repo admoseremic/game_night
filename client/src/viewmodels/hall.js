@@ -1,9 +1,9 @@
 // hall.js — view-model for the Hall of Fame screen.
 // Ported EXACTLY from prototype hallData() lines 1413–1486 in Game Night.dc.html.
-// Adds period filter (hallPeriod: 'all'|'last2'|'thisYear'), Best Win % prize card,
-// trophy cap/expander, and rival MINM=3 in thisYear mode.
+// Adds period filter (hallPeriod: 'month'|'prevMonth'|'ytd'|'all'), Best Win % prize card,
+// trophy cap/expander, and a lower rival MINM in the narrower windows.
 
-import { leaderboard, recordFromPlays } from '../lib/stats.js';
+import { leaderboard, recordFromPlays, inPeriod } from '../lib/stats.js';
 
 // --- helpers ---
 const player = (data, id) => data.players.find(x => x.id === id);
@@ -14,7 +14,7 @@ const initialsOf = (p) => (p && (p.name || '?')[0].toUpperCase()) || '?';
 /**
  * buildHall(data, hallPeriod, now, recordsExpanded) → hall view-model
  *
- * hallPeriod: 'all' | 'last2' | 'thisYear'  (undefined → 'all')
+ * hallPeriod: 'month' | 'prevMonth' | 'ytd' | 'all'  (undefined → 'all')
  * recordsExpanded: boolean (undefined → false)
  *
  * Returns { hasData:false, ... } when the period has no plays.
@@ -24,13 +24,8 @@ export function buildHall(data, hallPeriod, now, recordsExpanded) {
   // Normalize optional args
   const hp = hallPeriod || 'all';
 
-  // --- Period filter ---
-  const all = data.plays.filter(p => {
-    const y = new Date(p.d).getFullYear();
-    if (hp === 'thisYear') return y === now.getFullYear();
-    if (hp === 'last2') return y >= now.getFullYear() - 1;
-    return true; // 'all'
-  });
+  // --- Period filter (chip keys are stats.js period keys — see components/PeriodChips.jsx) ---
+  const all = data.plays.filter(p => inPeriod(p, hp, now));
 
   // Empty state returned when no plays exist in the selected window
   if (!all.length) return {
@@ -108,8 +103,8 @@ export function buildHall(data, hallPeriod, now, recordsExpanded) {
   // --- Rivalries: pairs of players who've met ≥ MINM times, top 3 by most meetings ---
   const ids = data.players.map(p => p.id);
   const pairs = [];
-  // Threshold: lower (3) for thisYear to account for fewer plays available
-  const MINM = hp === 'thisYear' ? 3 : 5;
+  // Threshold: lower (3) for any narrowed window to account for fewer plays available
+  const MINM = hp === 'all' ? 5 : 3;
   for (let i = 0; i < ids.length; i++) {
     for (let j = i + 1; j < ids.length; j++) {
       const a = ids[i], b = ids[j];

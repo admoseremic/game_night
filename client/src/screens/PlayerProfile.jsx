@@ -303,7 +303,7 @@ export default function PlayerProfile() {
   }
 
   // Time-window filter (defaults to This Year, like the Hall). Scopes all performance stats.
-  const period = ui.profilePeriod || 'thisYear';
+  const period = ui.profilePeriod || 'ytd';
   const vm = buildPlayerDetail(data, ui.playerId, now, ui.profileFrom, period);
 
   // Open a game's detail page from one of this profile's game lists. `gameFrom: 'playerDetail'`
@@ -445,7 +445,7 @@ export default function PlayerProfile() {
         </div>
       </div>
 
-      {/* ─── Period filter (This Year / Last 2 Years / All Time) — below the manage row.
+      {/* ─── Period filter (This Month / Last Month / This Year / All Time) — below the manage row.
             Hidden for a brand-new player (no career data in any window); shown for an
             empty-window so they can widen the period. ─── */}
       {!vm.isNew && (

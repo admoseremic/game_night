@@ -2,7 +2,7 @@
 // Ported from prototype template lines 620–740 in Game Night.dc.html.
 // Shows: period chips, Most Wins + Best Win% prize cards, milestone cards,
 //        Rivalries (head-to-head split bars), Trophy case (grid + expander).
-// Reads ui.hallPeriod ('all'|'last2'|'thisYear') and ui.recordsExpanded from store.
+// Reads ui.hallPeriod ('month'|'prevMonth'|'ytd'|'all') and ui.recordsExpanded from store.
 
 import { useStore } from '../store/store.jsx';
 import { buildHall } from '../viewmodels/hall.js';
@@ -197,8 +197,8 @@ function TrophyCard({ g }) {
 export default function Hall() {
   const { data, ui, setUi, now } = useStore();
 
-  // Defaults: hallPeriod → 'thisYear', recordsExpanded → false
-  const period = ui.hallPeriod || 'thisYear';
+  // Defaults: hallPeriod → 'ytd', recordsExpanded → false
+  const period = ui.hallPeriod || 'ytd';
   const expanded = ui.recordsExpanded || false;
 
   const vm = buildHall(data, period, now, expanded);

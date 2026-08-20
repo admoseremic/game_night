@@ -4,6 +4,7 @@
 // and a per-game W–L breakdown. Pure function — the screen owns the click handlers and passes
 // the current selection ({ a, b, slot }) in; we never mutate or hold UI state here.
 
+import { inPeriod } from '../lib/stats.js';
 import { fmtDate } from '../lib/format.js';
 
 const player = (data, id) => data.players.find(x => x.id === id);
@@ -14,7 +15,7 @@ const initialsOf = (p) => (p && (p.name || '?')[0].toUpperCase()) || '?';
 /**
  * buildHeadToHead(data, hallPeriod, now, h2h) → head-to-head view-model
  *
- * hallPeriod: 'all' | 'last2' | 'thisYear'  (undefined → 'all') — same window as the rest of Hall.
+ * hallPeriod: 'month' | 'prevMonth' | 'ytd' | 'all'  (undefined → 'all') — same window as the rest of Hall.
  * h2h: { a, b, slot } — selected player ids (or null) and the active slot ('a'|'b').
  *
  * When nothing is picked yet (a and b both null) we default to the MOST-CONTESTED pair in the
@@ -27,12 +28,7 @@ export function buildHeadToHead(data, hallPeriod, now, h2h) {
   const slot = (h2h && h2h.slot) || 'a';
 
   // Same period filter as buildHall
-  const all = data.plays.filter(p => {
-    const y = new Date(p.d).getFullYear();
-    if (hp === 'thisYear') return y === now.getFullYear();
-    if (hp === 'last2') return y >= now.getFullYear() - 1;
-    return true; // 'all'
-  });
+  const all = data.plays.filter(p => inPeriod(p, hp, now));
 
   // Resolve the selected pair, defaulting to the most-contested pair when nothing is picked.
   let aId = (h2h && h2h.a) || null;

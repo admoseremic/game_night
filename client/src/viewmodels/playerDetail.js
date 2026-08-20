@@ -2,7 +2,7 @@
 // Ported from prototype playerDetail (lines 1268-1318).
 // All stat math comes from stats.js and format.js — no re-computation here.
 
-import { weight, currentStreak, recordFor, newestFirst } from '../lib/stats.js';
+import { weight, currentStreak, recordFor, newestFirst, inPeriod } from '../lib/stats.js';
 import { fmtDate, ordinal, durationSince } from '../lib/format.js';
 
 // Common helpers for this module
@@ -17,27 +17,22 @@ const initialsOf = (p) => (p.name || '?')[0].toUpperCase();
  * @param {string} pid    - player id to profile
  * @param {Date}   now    - current date
  * @param {string} from   - navigation source: 'players' | 'board'
- * @param {string} period - 'all' | 'last2' | 'thisYear' (undefined → 'all'). Scopes performance
+ * @param {string} period - 'month' | 'prevMonth' | 'ytd' | 'all' (undefined → 'all'). Scopes performance
  *                          stats to a time window, exactly like the Hall of Fame filter. NOTE:
  *                          "Records held" stays all-time (career trophies) regardless of period.
  */
 export function buildPlayerDetail(data, pid, now, from, period) {
   const p = player(data, pid);
 
-  // Period window (same year-based logic as buildHall / buildHeadToHead)
+  // Period window (same filter as buildHall / buildHeadToHead — stats.js period keys)
   const hp = period || 'all';
-  const inWindow = (d) => {
-    const y = new Date(d).getFullYear();
-    if (hp === 'thisYear') return y === now.getFullYear();
-    if (hp === 'last2') return y >= now.getFullYear() - 1;
-    return true; // 'all'
-  };
+  const inWindow = (x) => inPeriod(x, hp, now);
 
   // Career play count (all-time) is what distinguishes a brand-new player from one who simply
   // has no plays in the selected window. `plays` below is the windowed subset, most recent first.
   const careerCount = data.plays.filter(x => x.parts.some(pt => pt[0] === pid)).length;
   const plays = data.plays
-    .filter(x => x.parts.some(pt => pt[0] === pid) && inWindow(x.d))
+    .filter(x => x.parts.some(pt => pt[0] === pid) && inWindow(x))
     .sort(newestFirst); // seq tiebreak — same-minute plays order by logged order
 
   // Label for the back button based on where user navigated from
