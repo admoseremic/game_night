@@ -62,3 +62,13 @@ it('hall: blowout handles low-direction games', () => {
   expect(vm.milestones[0].value).toMatch(/Ann won by 60 points/); // absolute gap, winner is low scorer
   expect(vm.milestones[0].sub).toMatch(/20 to 80/);
 });
+
+it('hall: a rivalry meeting where both players tie counts for neither side', () => {
+  const tied = { ...data, plays: [
+    ...data.plays,
+    { id:'t', g:'g1', d:'2026-05-06T20:00', parts:[['p1',1,50],['p2',1,50]] }, // tie → skipped
+  ] };
+  const vm = buildHall(tied, 'all', now, false);
+  expect(vm.rivalries.length).toBe(1);
+  expect(vm.rivalries[0]).toMatchObject({ meetings: 5, aWins: 4, bWins: 1 }); // unchanged by the tied play
+});

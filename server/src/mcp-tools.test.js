@@ -96,3 +96,13 @@ test('getHeadToHead rejects identical players', () => {
   assert.throws(() => tools.getHeadToHead(data, { playerA: 'Jo', playerB: 'jo' }),
     (e) => e instanceof tools.ToolError);
 });
+
+test('getHeadToHead skips a meeting where both players share a rank', () => {
+  const tied = { ...data, plays: [...data.plays,
+    { id: 'x5', g: 'g1', d: '2026-06-29', parts: [['p1', 1, 90], ['p2', 1, 90]] }] };
+  const r = tools.getHeadToHead(tied, { playerA: 'Trevor', playerB: 'Sam' });
+  assert.equal(r.meetings, 3);
+  assert.equal(r.aWins, 2);
+  assert.equal(r.bWins, 1);
+  assert.equal(r.lastMeeting.game, 'Golf'); // the tied play is not a "last meeting"
+});

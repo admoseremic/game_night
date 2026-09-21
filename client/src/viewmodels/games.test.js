@@ -97,3 +97,16 @@ it('summary respects the shared period (month excludes the May play)', () => {
   const rows = buildGamesSummary(summaryData, { period: 'month', custom: allUi.custom }, NOW);
   expect(rows.map(r => r.id)).toEqual(['g1']); // Golf's only play was in May → excluded this month
 });
+
+it('summary counts every rank-1 player as a winner when a play is tied for first', () => {
+  const tieData = {
+    players: summaryData.players,
+    games: [{ id: 'g1', name: 'Catan', tier: 'Heavy', dir: 'high', icon: '🌾' }],
+    plays: [
+      { id: 't1', g: 'g1', d: '2026-06-01T20:00:00', parts: [['p1', 1, 5], ['p2', 1, 5]] }, // Ann & Bob tie for 1st
+    ],
+  };
+  const winners = buildGamesSummary(tieData, allUi, NOW)[0].winners;
+  expect(winners.map(w => w.name).sort()).toEqual(['Ann', 'Bob']);
+  expect(winners.every(w => w.wins === 1)).toBe(true);
+});

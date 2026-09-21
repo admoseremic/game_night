@@ -2,8 +2,8 @@
 // data is the readState(db) shape — identical to GET /api/state — and all stat
 // math comes from the client's own stats.js so MCP answers ALWAYS match the app
 // (tier weights, rank direction, streaks). Wired to the protocol in routes/mcp.js.
-// Head-to-head re-implements the viewmodel's core rule (shared play, lower rank
-// wins) WITHOUT importing headToHead.js — that file is UI-flavored (colors etc.).
+// Head-to-head re-implements the viewmodel's core rule (shared play, lower rank wins, ties skipped)
+// WITHOUT importing headToHead.js — that file is UI-flavored (colors etc.).
 import { weight, periodPlays, leaderboard, recordFor, currentStreak } from '../../client/src/lib/stats.js';
 
 export class ToolError extends Error {}
@@ -114,9 +114,9 @@ export function getHeadToHead(data, { playerA, playerB, period = 'all' } = {}) {
   const perGame = {};
   for (const play of periodPlays(data.plays, period, new Date())) {
     const pa = play.parts.find(x => x[0] === A.id), pb = play.parts.find(x => x[0] === B.id);
-    if (!pa || !pb) continue;
+    if (!pa || !pb || pa[1] === pb[1]) continue; // a tied meeting is skipped entirely — matches headToHead.js
     meetings++;
-    const aWon = pa[1] < pb[1]; // lower rank wins (rank tie counts for B — matches headToHead.js)
+    const aWon = pa[1] < pb[1]; // lower rank wins
     if (aWon) aWins++; else bWins++;
     const g = byId(data.games, play.g);
     const e = perGame[play.g] || (perGame[play.g] = { game: g.name, meetings: 0, aWins: 0, bWins: 0 });

@@ -1,9 +1,10 @@
 // Celebration.jsx — Full-screen overlay shown after logging a new play.
-// Shows confetti, a 🥇 "WINNER!" or 🏆 "NEW RECORD!" hero, winner avatar,
+// Shows confetti, a 🥇 "WINNER!" (or "TIED WIN!" when several players share 1st) or
+// 🏆 "NEW RECORD!" hero, winner avatar,
 // game info, optional score, and a "Keep playing" dismiss button.
 //
 // ui.celebrate = {
-//   type: 'win'|'record', name, initials, c1, c2,
+//   type: 'win'|'record', tied (bool — more than one rank-1 player), name, initials, c1, c2,
 //   gameName, icon, scoreStr, beaten,
 //   confetti: [{ left, delay, dur, color, size, shape }, ...]
 // }
@@ -19,7 +20,7 @@ export default function Celebration() {
 
   const isRecord = cel.type === 'record';
   const emoji = isRecord ? '🏆' : '🥇';
-  const title = isRecord ? 'NEW RECORD!' : 'WINNER!';
+  const title = isRecord ? 'NEW RECORD!' : (cel.tied ? 'TIED WIN!' : 'WINNER!');
   const titleColor = isRecord ? '#FFC24B' : '#FF8A3D';
 
   return (

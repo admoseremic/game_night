@@ -1,10 +1,10 @@
 // MedalChip.jsx — Small rounded chip for leaderboard ranks 1-3 (gold/silver/bronze).
 // Uses medalBg / medalTx from format.js for consistent gradient/color tokens.
-// Usage: <MedalChip rank={1} />
+// Usage: <MedalChip rank={1} />  ·  <MedalChip rank={1} label="T1" /> (tied — colour follows rank)
 
 import { medalBg, medalTx } from '../lib/format.js';
 
-export default function MedalChip({ rank }) {
+export default function MedalChip({ rank, label }) {
   const bg = medalBg(rank);
   const color = medalTx(rank);
 
@@ -26,7 +26,7 @@ export default function MedalChip({ rank }) {
       flexShrink: 0,
       userSelect: 'none',
     }}>
-      {rank}
+      {label ?? rank}
     </div>
   );
 }

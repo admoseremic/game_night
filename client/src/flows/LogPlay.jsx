@@ -1,6 +1,9 @@
 // LogPlay.jsx — Two-step full-screen overlay for logging a play session.
 // Step 0: pick a game (searchable list + "New game" affordance).
 // Step 1: set finish order by tapping players, optional scores, datetime.
+//         Ties: every row after the first has a ＝ button that marks it "tied with the row
+//         above" (flags live in `ties`, separate from `order`; ranks are derived on render
+//         and on save via lib/ties.js — competition ranking, 1-2-2-4).
 //
 // Uses LOCAL React state so in-progress data never touches the global store until save.
 // On open: reads ui.editPlayId → edit mode (pre-fills from existing play, step=1).
@@ -15,6 +18,7 @@ import Avatar from '../components/Avatar.jsx';
 import MedalChip from '../components/MedalChip.jsx';
 import TierBadge from '../components/TierBadge.jsx';
 import { recordFor } from '../lib/stats.js';
+import { deriveRanks, tiesFromParts, moveUpWithTies, removeWithTies, winnersOf } from '../lib/ties.js';
 
 // Convert a Date to "YYYY-MM-DDTHH:MM" for datetime-local input value
 function toLocalDT(date) {
@@ -51,6 +55,9 @@ export default function LogPlay() {
   const [step, setStep] = useState(isEdit && editPlay ? 1 : 0);
   const [gameId, setGameId] = useState(isEdit && editPlay ? editPlay.g : null);
   const [order, setOrder] = useState(isEdit && editPlay ? editSorted.map(x => x[0]) : []);
+  // { [playerId]: true } = tied with the row directly above. Edit mode rebuilds flags from the
+  // saved ranks (equal adjacent ranks in rank order); a new log starts with none.
+  const [ties, setTies] = useState(isEdit && editPlay ? tiesFromParts(editPlay.parts) : {});
   const [scores, setScores] = useState(initScores);
   // New plays default to the ACTUAL current time — not store `now`, which is frozen at app
   // mount and goes stale in a long-lived PWA session (it gave every play logged in one
@@ -61,40 +68,47 @@ export default function LogPlay() {
   // Close and clear ui flags
   const close = () => setUi({ logOpen: false, editPlayId: null });
 
-  // Toggle a player in/out of the finish order; removes their score on removal
+  // Toggle a player in/out of the finish order; removes their score (and tie flags that
+  // depended on their position — see removeWithTies) on removal
   const toggleLogPlayer = (id) => {
-    const idx = order.indexOf(id);
-    if (idx >= 0) {
-      const next = [...order];
-      next.splice(idx, 1);
-      setOrder(next);
+    if (order.includes(id)) {
+      const r = removeWithTies(order, ties, id);
+      setOrder(r.order);
+      setTies(r.ties);
       setScores(prev => { const s = { ...prev }; delete s[id]; return s; });
     } else {
       setOrder([...order, id]);
     }
   };
 
+  // Toggle "tied with the row above" for a player (first row has nothing above → no-op)
+  const toggleTie = (pid) => {
+    if (order.indexOf(pid) <= 0) return;
+    setTies(prev => { const t = { ...prev }; if (t[pid]) delete t[pid]; else t[pid] = true; return t; });
+  };
+
   // Update score text for a player
   const setScoreFor = (id, value) => setScores(s => ({ ...s, [id]: value }));
 
-  // Move a player up one slot in the finish order (swaps with the player above)
+  // Move a player up one slot in the finish order (swaps with the player above). Tie flags
+  // are a relation to the row above, so the swap clears the affected flags (moveUpWithTies).
   const moveUp = (pid) => {
-    const i = order.indexOf(pid);
-    if (i <= 0) return;
-    const next = [...order];
-    next[i - 1] = order[i];
-    next[i] = order[i - 1];
-    setOrder(next);
+    const r = moveUpWithTies(order, ties, pid);
+    setOrder(r.order);
+    setTies(r.ties);
   };
+
+  // Ranks derived from order + tie flags (competition ranking) — used for the badges and on save
+  const ranks = deriveRanks(order, ties);
 
   // Save the play — ported from prototype saveLog (lines 1400-1412)
   const saveLog = () => {
     if (order.length < 1) return;
 
-    // Build parts array: [pid, rank(1-based), score|null]
+    // Build parts array: [pid, rank, score|null] — tied players share a rank (ranks[])
     const parts = order.map((pid, i) => {
       const v = scores[pid];
-      return [pid, i + 1, (v !== undefined && v !== '') ? Number(v) : null];
+      return [pid, ranks[i], (v !== undefined && v !== '') ? Number(v) : null];
     });
 
     if (isEdit) {
@@ -109,8 +123,11 @@ export default function LogPlay() {
     const g = data.games.find(x => x.id === gameId);
     const winScore = parts[0][2];
     const isRecord = winScore != null && (!prev || (g.dir === 'high' ? winScore > prev.score : winScore < prev.score));
-    const beaten = parts.length - 1;
-    const wp = data.players.find(x => x.id === order[0]);
+    // Winners = every rank-1 part (a tie for first has several). Celebration shows all names
+    // joined with " & ", uses the first winner's avatar colours, and "beaten" = players − winners.
+    const { pids: winnerIds, beaten } = winnersOf(parts);
+    const winners = winnerIds.map(id => data.players.find(x => x.id === id));
+    const wp = winners[0];
 
     actions.addPlay({ g: gameId, d: date, parts });
     setUi({
@@ -118,7 +135,8 @@ export default function LogPlay() {
       editPlayId: null,
       celebrate: {
         type: isRecord ? 'record' : 'win',
-        name: wp.name,
+        tied: winners.length > 1, // → "TIED WIN!" title (record still wins the title)
+        name: winners.map(w => w.name).join(' & '),
         initials: wp.name[0].toUpperCase(),
         c1: wp.c1,
         c2: wp.c2,
@@ -282,7 +300,7 @@ export default function LogPlay() {
             )}
 
             <div style={{ fontSize: 12, color: '#9D90B5', margin: '0 2px 14px', lineHeight: 1.4 }}>
-              Tap players in their finish order, then type each score — optional.
+              Tap players in their finish order. Hit ＝ on a row to tie it with the player above. Scores optional.
             </div>
 
             {/* Datetime input */}
@@ -310,20 +328,31 @@ export default function LogPlay() {
                 <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.6px', color: '#FFC24B', margin: '0 2px 9px' }}>
                   🏁 Finish order & scores
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 20 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 20 }}>
                   {order.map((pid, i) => {
                     const player = data.players.find(p => p.id === pid);
                     if (!player) return null;
+                    // Tie visuals (per UX spec): rows tied together snap flush (no gap, shared
+                    // edge squared off) and the whole group gets a gold border tint; every badge
+                    // in a shared-rank group reads "T{rank}" with the medal colour of that rank.
+                    const rank = ranks[i];
+                    const tiedAbove = i > 0 && !!ties[pid];
+                    const tiedBelow = !!(order[i + 1] && ties[order[i + 1]]);
+                    const inGroup = tiedAbove || tiedBelow;
                     return (
                       <div
                         key={pid}
                         style={{
                           display: 'flex', alignItems: 'center', gap: 10, padding: '9px 11px',
-                          borderRadius: 14, background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.08)',
+                          marginTop: i === 0 ? 0 : (tiedAbove ? 0 : 7),
+                          borderRadius: `${tiedAbove ? 0 : 14}px ${tiedAbove ? 0 : 14}px ${tiedBelow ? 0 : 14}px ${tiedBelow ? 0 : 14}px`,
+                          background: inGroup ? 'rgba(255,194,75,0.06)' : 'rgba(255,255,255,0.05)',
+                          border: `1px solid ${inGroup ? 'rgba(255,194,75,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                          // Collapse the doubled border on the shared edge
+                          borderTop: tiedAbove ? 'none' : undefined,
                         }}
                       >
-                        <MedalChip rank={i + 1} />
+                        <MedalChip rank={rank} label={inGroup ? `T${rank}` : rank} />
                         <Avatar player={player} size={34} />
                         <span style={{ flex: 1, minWidth: 0, fontWeight: 700, fontSize: 14.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {player.name}
@@ -338,6 +367,21 @@ export default function LogPlay() {
                               background: 'rgba(255,194,75,0.12)', color: '#FFC24B', fontSize: 15, cursor: 'pointer',
                             }}
                           >↑</div>
+                        )}
+                        {/* ＝ tie toggle: "tied with the row above" — never rendered on the first row.
+                            Active state fills with the 1st-place medal gradient + dark glyph. */}
+                        {i > 0 && (
+                          <div
+                            onClick={() => toggleTie(pid)}
+                            title={tiedAbove ? 'Untie from the player above' : 'Tie with the player above'}
+                            style={{
+                              width: 28, height: 28, flexShrink: 0, borderRadius: 9, display: 'flex',
+                              alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                              fontWeight: 800, fontSize: 15, fontFamily: 'var(--font-display)',
+                              background: tiedAbove ? 'linear-gradient(135deg,#FFE08A,#F0A92E)' : 'rgba(255,194,75,0.12)',
+                              color: tiedAbove ? '#2A1E08' : '#FFC24B',
+                            }}
+                          >＝</div>
                         )}
                         {/* Optional score input */}
                         <input

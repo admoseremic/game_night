@@ -148,6 +148,7 @@ export function buildPlayerDetail(data, pid, now, from, period) {
     const me = pl.parts.find(x => x[0] === pid);
     pl.parts.forEach(o => {
       if (o[0] === pid) return;
+      if (me[1] === o[1]) return; // tied with this opponent → the meeting counts for neither side
       const e = h2h[o[0]] || (h2h[o[0]] = { pid: o[0], met: 0, wins: 0, losses: 0 });
       e.met++;
       if (me[1] < o[1]) e.wins++;
@@ -181,20 +182,25 @@ export function buildPlayerDetail(data, pid, now, from, period) {
   const recent = plays.slice(0, 6).map(pl => {
     const me = pl.parts.find(x => x[0] === pid);
     const g = gameOf(data, pl.g);
+    // Ties share a rank (competition ranking, 1-2-2-4), so "last" means the WORST rank in the
+    // play rather than rank === player count, and a shared ordinal is prefixed "T-" (T-2nd).
+    const worst = Math.max(...pl.parts.map(x => x[1]));
+    const shared = pl.parts.filter(x => x[1] === me[1]).length > 1;
+    const isLast = me[1] !== 1 && me[1] === worst;
     return {
       game: g.name,
       icon: g.icon,
-      ord: ordinal(me[1]),
+      ord: (shared ? 'T-' : '') + ordinal(me[1]),
       total: pl.parts.length,
       dateLabel: fmtDate(pl.d),
       win: me[1] === 1,
       // Badge styling: gold for win, pink for last place, subtle for mid
       badgeBg: me[1] === 1
         ? 'linear-gradient(135deg,#FFE08A,#F0A92E)'
-        : (me[1] === pl.parts.length ? 'rgba(255,111,165,0.18)' : 'rgba(255,255,255,0.07)'),
+        : (isLast ? 'rgba(255,111,165,0.18)' : 'rgba(255,255,255,0.07)'),
       badgeTx: me[1] === 1
         ? '#2A1E08'
-        : (me[1] === pl.parts.length ? '#FF6FA5' : '#C9B8E8'),
+        : (isLast ? '#FF6FA5' : '#C9B8E8'),
     };
   });
 

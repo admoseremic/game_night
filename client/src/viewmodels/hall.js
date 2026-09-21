@@ -112,7 +112,7 @@ export function buildHall(data, hallPeriod, now, recordsExpanded) {
       all.forEach(p => {
         const pa = p.parts.find(x => x[0] === a);
         const pb = p.parts.find(x => x[0] === b);
-        if (pa && pb) {
+        if (pa && pb && pa[1] !== pb[1]) { // a tied meeting counts for neither side
           m++;
           if (pa[1] < pb[1]) aw++; else bw++;
         }

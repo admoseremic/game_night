@@ -21,8 +21,8 @@ export function buildGamesList(data, query, now) {
     // Win counts by player id
     const wc = {};
     ps.forEach(p => {
-      const w = p.parts.find(x => x[1] === 1);
-      if (w) wc[w[0]] = (wc[w[0]] || 0) + 1;
+      // Every rank-1 part wins (a play tied for first has several winners)
+      p.parts.filter(x => x[1] === 1).forEach(w => { wc[w[0]] = (wc[w[0]] || 0) + 1; });
     });
     // Player with the most wins for this game
     const topW = Object.entries(wc).sort((a, b) => b[1] - a[1])[0];
@@ -75,12 +75,13 @@ export function buildGamesSummary(data, ui, now) {
     // Win counts per player + each player's most-recent win date (for the tiebreak).
     const wc = {}; // pid -> { wins, lastWin: ISO }
     for (const play of gp) {
-      const w = play.parts.find(x => x[1] === 1); // rank 1 = winner
-      if (!w) continue;                            // guard: a play with no rank-1 contributes no chip
-      const pid = w[0];
-      const cur = wc[pid] || (wc[pid] = { wins: 0, lastWin: '' });
-      cur.wins += 1;
-      if (play.d > cur.lastWin) cur.lastWin = play.d; // ISO strings compare lexicographically
+      // rank 1 = winner; a play tied for first has several rank-1 parts and each gets the win
+      for (const w of play.parts.filter(x => x[1] === 1)) {
+        const pid = w[0];
+        const cur = wc[pid] || (wc[pid] = { wins: 0, lastWin: '' });
+        cur.wins += 1;
+        if (play.d > cur.lastWin) cur.lastWin = play.d; // ISO strings compare lexicographically
+      }
     }
     // ALL winners (no truncation), most wins first; ties broken by most-recent win.
     const winners = Object.entries(wc)

@@ -67,3 +67,14 @@ it('h2h: respects the hall period window', () => {
   expect(buildHeadToHead(pdata, 'all', now, { a: 'p1', b: 'p2', slot: 'a' }).meetings).toBe(2);
   expect(buildHeadToHead(pdata, 'ytd', now, { a: 'p1', b: 'p2', slot: 'a' }).meetings).toBe(1);
 });
+
+it('h2h: a meeting where both players tie is skipped entirely', () => {
+  const tied = { ...data, plays: [
+    ...data.plays,
+    { id: 't', g: 'g1', d: '2026-05-05T20:00', parts: [['p1', 1, 50], ['p2', 1, 50]] }, // Ann & Bob tie
+  ] };
+  const vm = buildHeadToHead(tied, 'all', now, { a: 'p1', b: 'p2', slot: 'a' });
+  expect(vm.meetings).toBe(3);
+  expect(vm.aWins).toBe(2);
+  expect(vm.bWins).toBe(1);
+});

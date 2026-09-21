@@ -75,7 +75,7 @@ export function buildHeadToHead(data, hallPeriod, now, h2h) {
     all.forEach(p => {
       const pa = p.parts.find(x => x[0] === aId);
       const pb = p.parts.find(x => x[0] === bId);
-      if (pa && pb) {
+      if (pa && pb && pa[1] !== pb[1]) { // a tied meeting is skipped entirely (neither met nor won)
         m++;
         const aWon = pa[1] < pb[1]; // lower rank wins
         if (aWon) aw++; else bw++;

@@ -123,3 +123,30 @@ it('player detail: career plays but none in window → emptyWindow (not isNew)',
   expect(vm.isNew).toBe(false);    // they have career plays, just none this year
   expect(vm.emptyWindow).toBe(true);
 });
+
+// ─── Ties (competition ranking: tied players share a rank) ───
+const tieData = { ...data, plays: [
+  { id: 't1', g: 'g1', d: '2026-06-01T20:00', parts: [['p1', 1, 50], ['p2', 1, 50], ['p3', 3, 30]] }, // Ann & Bob tie for 1st
+  { id: 't2', g: 'g1', d: '2026-06-02T20:00', parts: [['p3', 1, 50], ['p1', 2, 40], ['p2', 2, 40]] }, // Ann & Bob tie for last
+  { id: 't3', g: 'g1', d: '2026-06-03T20:00', parts: [['p1', 1, 50], ['p2', 2, 40]] },
+  { id: 't4', g: 'g1', d: '2026-06-04T20:00', parts: [['p1', 1, 50], ['p2', 2, 40]] },
+  { id: 't5', g: 'g1', d: '2026-06-05T20:00', parts: [['p1', 1, 50], ['p2', 2, 40]] },
+] };
+
+it('ties: a meeting where both players share a rank counts for neither side in head-to-head', () => {
+  const vm = buildPlayerDetail(tieData, 'p1', now, 'players');
+  // Ann vs Bob: t3 + t4 + t5 are Ann wins; t1 + t2 are ties and are skipped entirely
+  // (rivalry cards need ≥3 meetings, so the tied plays must NOT count toward `met`)
+  expect(vm.victim).toMatchObject({ name: 'Bob', met: 3, wins: 3, losses: 0 });
+});
+
+it('ties: recent badge marks last place by worst rank, not by player count, and prefixes shared ordinals with T-', () => {
+  const vm = buildPlayerDetail(tieData, 'p1', now, 'players');
+  const t1 = vm.recent.find(r => r.ord === 'T-1st');
+  expect(t1).toBeTruthy();
+  expect(t1.win).toBe(true);
+  expect(t1.badgeTx).toBe('#2A1E08'); // gold win badge, never styled as last
+  const t2 = vm.recent.find(r => r.ord === 'T-2nd');
+  expect(t2).toBeTruthy();
+  expect(t2.badgeTx).toBe('#FF6FA5'); // rank 2 of 3 players but it IS the worst rank → last-place pink
+});
