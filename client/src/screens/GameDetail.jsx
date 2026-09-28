@@ -455,7 +455,12 @@ export default function GameDetail() {
       </div>
 
       {/* ─── Game title header ─── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 18 }}>
+      {/* Tapping anywhere on the header opens the edit sheet (AddGame in edit mode via ui.editGameId)
+          so a misspelled name / wrong icon / wrong weight can be fixed after the fact. */}
+      <div
+        onClick={() => setUi({ editGameId: ui.gameId })}
+        style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 18, cursor: 'pointer', userSelect: 'none' }}
+      >
         {/* Icon tile */}
         <div style={{
           width: 56,
@@ -499,6 +504,22 @@ export default function GameDetail() {
               {vm.dirLabel}
             </span>
           </div>
+        </div>
+
+        {/* Edit hint — pencil chip on the right of the header so the tap target is discoverable */}
+        <div style={{
+          flexShrink: 0,
+          fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: '0.4px',
+          textTransform: 'uppercase',
+          padding: '6px 10px',
+          borderRadius: 10,
+          color: '#C9B8E8',
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          ✎ Edit
         </div>
       </div>
 

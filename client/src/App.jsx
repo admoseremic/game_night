@@ -70,7 +70,7 @@ function Shell() {
   // Hide the bottom nav whenever any sheet or overlay is open so it can't overlap sheet options
   const overlayOpen = ui.logOpen || ui.celebrate || ui.pickerOpen || ui.addGameOpen || ui.addPlayerOpen ||
     ui.deletePlayId || ui.pickSheetOpen || ui.periodSheetOpen || ui.sortSheetOpen || ui.explainOpen || ui.customOpen ||
-    ui.colorSheetOpen;
+    ui.colorSheetOpen || ui.editGameId;
 
   return (
     // Relative container so the absolutely-positioned BottomNav stays inside the 480px max-width column
@@ -98,7 +98,8 @@ function Shell() {
       {ui.celebrate && <Celebration />}
 
       {/* Bottom sheet overlays — use fixed positioning via BottomSheet component */}
-      {ui.addGameOpen && <AddGame />}
+      {/* AddGame doubles as the edit sheet: ui.editGameId opens it prefilled for that game */}
+      {(ui.addGameOpen || ui.editGameId) && <AddGame />}
       {ui.addPlayerOpen && <AddPlayer />}
       {ui.deletePlayId && <DeleteConfirm />}
       {ui.pickSheetOpen && <Pick />}

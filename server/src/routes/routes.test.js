@@ -134,3 +134,18 @@ test('rejects PATCH play with duplicate player', async () => {
     payload: { parts: [['x', 1, 1], ['x', 2, 2]] } });
   assert.equal(res.statusCode, 400);
 });
+test('PATCH game updates name/icon/tier/dir (partial patch keeps the rest) and broadcasts', async () => {
+  const { app, getBroadcasts } = freshApp();
+  await app.inject({ method: 'POST', url: '/api/games', payload: { name: 'Catn', tier: 'Light', dir: 'high', icon: '🎲' } });
+  const game = (await app.inject({ method: 'GET', url: '/api/state' })).json().games[0];
+  const before = getBroadcasts();
+  // Fix a misspelled name + icon only; tier/dir must survive untouched.
+  const res = await app.inject({ method: 'PATCH', url: `/api/games/${game.id}`, payload: { name: 'Catan', icon: '🌾' } });
+  assert.equal(res.statusCode, 200);
+  const g = (await app.inject({ method: 'GET', url: '/api/state' })).json().games.find(x => x.id === game.id);
+  assert.equal(g.name, 'Catan'); assert.equal(g.icon, '🌾'); assert.equal(g.tier, 'Light'); assert.equal(g.dir, 'high');
+  assert.equal(getBroadcasts(), before + 1);
+  // Unknown id → 404
+  const nf = await app.inject({ method: 'PATCH', url: '/api/games/nope', payload: { name: 'X' } });
+  assert.equal(nf.statusCode, 404);
+});

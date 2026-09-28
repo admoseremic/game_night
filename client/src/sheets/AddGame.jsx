@@ -1,5 +1,10 @@
-// AddGame.jsx — Bottom sheet for adding a new game to the library.
+// AddGame.jsx — Bottom sheet for adding a new game to the library, OR editing an existing one.
 // Ported from prototype openAddGame/saveGame (lines 1195-1198) and template (~884-913).
+//
+// Two modes, chosen by the store's ui state:
+//   ui.addGameOpen === true  → "New game": blank form, saves via actions.addGame
+//   ui.editGameId  = <id>    → "Edit game": form prefilled from that game, saves via actions.updateGame
+// (Opened from GameDetail's header. Lets us fix a misspelled name / wrong icon / wrong weight.)
 //
 // Fields:
 //   name      — text input, required
@@ -20,29 +25,29 @@ const TIERS = ['Light', 'Medium', 'Heavy'];
 const DIRS  = [['high', 'High wins'], ['low', 'Low wins']];
 
 export default function AddGame() {
-  const { ui, setUi, actions } = useStore();
-  const [name, setName] = useState('');
-  const [tier, setTier] = useState('');      // empty string = none selected (required)
-  const [dir,  setDir]  = useState('high');
-  const [icon, setIcon] = useState('🎲');
+  const { ui, setUi, actions, data } = useStore();
+  // Edit mode: the game being edited (App only mounts this sheet while addGameOpen or editGameId is set,
+  // so useState initialisers below run fresh on every open — no reset-on-close dance needed).
+  const editing = ui.editGameId ? data.games.find(g => g.id === ui.editGameId) : null;
+  const [name, setName] = useState(editing?.name ?? '');
+  const [tier, setTier] = useState(editing?.tier ?? '');      // empty string = none selected (required)
+  const [dir,  setDir]  = useState(editing?.dir ?? 'high');
+  const [icon, setIcon] = useState(editing?.icon ?? '🎲');
 
   const canSave = name.trim().length > 0 && tier !== '';
 
+  const handleClose = () => setUi({ addGameOpen: false, editGameId: null });
+
   const handleSave = () => {
     if (!canSave) return;
-    actions.addGame({ name: name.trim(), tier, dir, icon });
-    setUi({ addGameOpen: false });
-    // Reset form for next open
-    setName(''); setTier(''); setDir('high'); setIcon('🎲');
-  };
-
-  const handleClose = () => {
-    setUi({ addGameOpen: false });
-    setName(''); setTier(''); setDir('high'); setIcon('🎲');
+    const g = { name: name.trim(), tier, dir, icon: icon.trim() || '🎲' };
+    if (editing) actions.updateGame(editing.id, g);
+    else actions.addGame(g);
+    handleClose();
   };
 
   return (
-    <BottomSheet open={ui.addGameOpen} onClose={handleClose} title="New game">
+    <BottomSheet open={!!(ui.addGameOpen || ui.editGameId)} onClose={handleClose} title={editing ? 'Edit game' : 'New game'}>
 
       {/* Name */}
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.5px', color: '#6E6483', marginBottom: 7 }}>
@@ -144,7 +149,7 @@ export default function AddGame() {
           opacity: canSave ? 1 : 0.5,
           cursor: canSave ? 'pointer' : 'default',
         }}
-      >Save game</div>
+      >{editing ? 'Save changes' : 'Save game'}</div>
 
     </BottomSheet>
   );

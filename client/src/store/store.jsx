@@ -75,6 +75,11 @@ export function StoreProvider({ children }) {
     updatePlayer: (id, patch) => optimistic(
       d => ({ ...d, players: d.players.map(p => p.id === id ? { ...p, ...patch } : p) }),
       () => api.updatePlayer(id, patch)),
+    // Edit a game's name/tier/dir/icon in place (fix typos, wrong emoji, wrong weight).
+    // Nothing derived is stored, so tier/dir changes simply recompute on the next render.
+    updateGame: (id, patch) => optimistic(
+      d => ({ ...d, games: d.games.map(g => g.id === id ? { ...g, ...patch } : g) }),
+      () => api.updateGame(id, patch)),
   };
 
   return <Ctx.Provider value={{ data, ui, setUi, now, refetch, actions, loading }}>{children}</Ctx.Provider>;
