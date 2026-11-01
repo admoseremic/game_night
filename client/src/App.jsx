@@ -81,8 +81,9 @@ function Shell() {
       height: '100%',
       overflow: 'hidden',
     }}>
-      {/* Scrollable content area — bottom padding clears the floating nav (64px nav + 18px gap + buffer) */}
-      <div ref={scrollRef} style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 104px)' }}>
+      {/* Scrollable content area — top padding is --top-inset (clears the iOS 26 status-bar scrim, see theme.css);
+          bottom padding clears the floating nav (64px nav + 18px gap + buffer) */}
+      <div ref={scrollRef} style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', padding: 'var(--top-inset) 18px calc(env(safe-area-inset-bottom, 0px) + 104px)' }}>
         {loading ? <Loading /> : Screen ? <Screen /> : <Placeholder name={ui.screen || 'board'} />}
       </div>
 

@@ -25,6 +25,14 @@
   /* Typography */
   --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
   --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* Top clearance for every top-anchored header (main scroll container, Log Play, Who-goes-first).
+     Since iOS 26.1 the installed home-screen app gets a SYSTEM blur/gradient scrim painted over
+     the status-bar area (black-translucent mode; it cannot be disabled from the page) and that
+     scrim fades out BELOW env(safe-area-inset-top), so a 14px gap left titles / the back link
+     partially blurred. 30px keeps them clear of the scrim's tail. Never hardcode 58px (the old
+     prototype value) — it sits inside the 59px Dynamic Island inset. */
+  --top-inset: calc(env(safe-area-inset-top, 0px) + 30px);
 }
 
 * { box-sizing: border-box; }

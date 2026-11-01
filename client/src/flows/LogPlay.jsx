@@ -191,8 +191,9 @@ export default function LogPlay() {
       flexDirection: 'column',
       background: 'radial-gradient(120% 60% at 50% 0%, #2A1B3D 0%, #130E1B 60%)',
     }}>
-      {/* Top bar — back (step 1 new only) + kicker/title + close */}
-      <div style={{ padding: '58px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* Top bar — back (step 1 new only) + kicker/title + close.
+          Top padding uses --top-inset (safe-area + clearance for the iOS 26 status-bar scrim, see theme.css). */}
+      <div style={{ padding: 'var(--top-inset) 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div
           onClick={step === 1 && !isEdit ? () => setStep(0) : undefined}
           style={{

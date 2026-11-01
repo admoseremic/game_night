@@ -135,8 +135,9 @@ export default function Picker() {
       `}</style>
 
       {/* ─── Header ─── */}
+      {/* Top padding uses --top-inset (safe-area + clearance for the iOS 26 status-bar scrim, see theme.css) */}
       <div style={{
-        padding: '58px 18px 6px',
+        padding: 'var(--top-inset) 18px 6px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
