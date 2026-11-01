@@ -17,6 +17,9 @@ export default function Avatar({ player, size = 40 }) {
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
+      // Faint inner hairline so very dark gradients (the black swatch) keep a visible edge
+      // against dark cards; invisible on the bright gradients.
+      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
       // Ensure the text is readable on any gradient
       fontFamily: 'var(--font-display)',
       fontWeight: 800,

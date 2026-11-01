@@ -28,7 +28,7 @@ export default function ColorPicker() {
         Tap a swatch to make it yours.
       </div>
 
-      {/* 6-column swatch grid — circles matching design lines 1005–1012 */}
+      {/* 6-column swatch grid (3 rows with the 18-color palette) — circles matching design lines 1005–1012 */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(6, 1fr)',
@@ -46,9 +46,10 @@ export default function ColorPicker() {
                 aspectRatio: '1',
                 borderRadius: '50%',
                 background: `linear-gradient(135deg, ${c1}, ${c2})`,
+                // Unselected: drop shadow + hairline ring so the black swatch stays visible on the dark sheet
                 boxShadow: selected
                   ? '0 0 0 3px rgba(244,238,248,0.95)'
-                  : '0 2px 6px rgba(0,0,0,0.35)',
+                  : '0 2px 6px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.1)',
                 cursor: 'pointer',
               }}
             >
